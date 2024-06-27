@@ -6,10 +6,10 @@ import (
 )
 
 //go:embed testdata/hand-fruit.mbt
-var wantFruit string
+var wantFruitMbt string
 
 //go:embed testdata/hand-fruit_test.mbt
-var wantFruitTest string
+var wantFruitTestMbt string
 
 func TestGenMbtCustomTypes(t *testing.T) {
 	t.Parallel()

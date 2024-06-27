@@ -1,3 +1,4 @@
+// Package fruit represents the custom datatypes for an XTP Extension Plugin.
 package fruit
 
 // Fruit represents a set of available fruits you can consume.

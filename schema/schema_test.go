@@ -8,13 +8,13 @@ import (
 )
 
 //go:embed testdata/fruit.yaml
-var fruitStr string
+var fruitYaml string
 
 //go:embed testdata/user.yaml
-var userStr string
+var userYaml string
 
 //go:embed testdata/v0.yaml
-var v0Str string
+var v0Yaml string
 
 func floatPtr(f float64) *float64 { return &f }
 
@@ -27,7 +27,7 @@ func TestParseStr(t *testing.T) {
 	}{
 		{
 			name:    "fruit",
-			yamlStr: fruitStr,
+			yamlStr: fruitYaml,
 			want: &Plugin{
 				Version: "v1-draft",
 				Exports: []*Export{
@@ -120,7 +120,7 @@ func TestParseStr(t *testing.T) {
 		},
 		{
 			name:    "user",
-			yamlStr: userStr,
+			yamlStr: userYaml,
 			want: &Plugin{
 				Version: "v1-draft",
 				Exports: []*Export{
@@ -179,7 +179,7 @@ func TestParseStr(t *testing.T) {
 		},
 		{
 			name:    "v0",
-			yamlStr: v0Str,
+			yamlStr: v0Yaml,
 			want: &Plugin{
 				Version: "v0",
 				Exports: []*Export{
@@ -211,11 +211,11 @@ func TestToYaml(t *testing.T) {
 	}{
 		{
 			name:    "fruit",
-			yamlStr: fruitStr,
+			yamlStr: fruitYaml,
 		},
 		{
 			name:    "user",
-			yamlStr: userStr,
+			yamlStr: userYaml,
 		},
 	}
 
