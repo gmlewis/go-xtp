@@ -16,9 +16,7 @@ var userStr string
 //go:embed testdata/v0.yaml
 var v0Str string
 
-func FloatPtr(f float64) *float64 {
-	return &f
-}
+func floatPtr(f float64) *float64 { return &f }
 
 func TestParseStr(t *testing.T) {
 	tests := []struct {
@@ -161,8 +159,8 @@ func TestParseStr(t *testing.T) {
 								Description: "The user's age, naturally",
 								Type:        "integer",
 								Format:      "int32",
-								Maximum:     FloatPtr(200),
-								Minimum:     FloatPtr(0),
+								Maximum:     floatPtr(200),
+								Minimum:     floatPtr(0),
 							},
 							{
 								Name:        "email",
