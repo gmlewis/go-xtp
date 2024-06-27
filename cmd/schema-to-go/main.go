@@ -9,10 +9,15 @@ package main
 import (
 	"flag"
 	"log"
+	"os"
+	"strings"
+
+	"github.com/gmlewis/go-xtp/schema"
 )
 
 var (
-	outDir = flag.String("outdir", ".", "Directory to write the resulting Go files into.")
+	genMain = flag.Bool("main", false, "Generate main example to call functions")
+	outDir  = flag.String("outdir", ".", "Directory to write the resulting Go files into.")
 )
 
 func main() {
@@ -28,4 +33,29 @@ func main() {
 }
 
 func processFile(yamlFilename string) error {
+	buf, err := os.ReadFile(yamlFilename)
+	if err != nil {
+		return err
+	}
+
+	plugin, err := schema.ParseStr(string(buf))
+	if err != nil {
+		return err
+	}
+
+	structs, err := plugin.GenStructs()
+	if err != nil {
+		return err
+	}
+
+	if *genMain {
+		mainStr, err := plugin.GenMain(structs)
+		if err != nil {
+			return err
+		}
+		return os.WriteFile("main.go", []byte(mainStr), 0644)
+	}
+
+	outFilename := strings.Replace(yamlFilename, ".yaml", ".go", 1)
+	return os.WriteFile(outFilename, []byte(structs.String()), 0644)
 }
