@@ -17,6 +17,9 @@ type Plugin struct {
 	Exports     []*Export     `yaml:"exports"`
 	Imports     []*Import     `yaml:"imports,omitempty"`
 	CustomTypes []*CustomType `yaml:"schemas,omitempty"`
+
+	// the following fields are only used by the code generator:
+	Lang string `yaml:"-"`
 }
 
 // Export represents an exported function by the XTP Extension Plugin.

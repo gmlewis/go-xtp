@@ -1,5 +1,5 @@
 // xtp2code converts an XTP Extension Plugin to Go or MoonBit source code
-// for use with XTP's APIs. It can generate simple structs and/or Host SDK code
+// for use with XTP's APIs. It can generate simple custom data types and/or Host SDK code
 // and/or Plugin PDK code. For input, it can process either a schema.yaml file
 // or it can query the XTP API directly for a given app ID (for the authenticated
 // user) and process all extensions.
@@ -14,7 +14,7 @@
 //	     [-appid=<id>] \
 //	     [-host=<filename>] \
 //	     [-plugin=<filename>] \
-//	     [-structs=<filename>] \
+//	     [-types=<filename>] \
 //	     [-yaml=<filename>]
 package main
 
@@ -32,7 +32,7 @@ var (
 	lang       = flag.String("lang", "", "Target language for generated code ('go' or 'mbt').")
 	hostFile   = flag.String("host", "", "Output filename to generate Host SDK code.")
 	pluginFile = flag.String("plugin", "", "Output filename to generate Plugin PDK code.")
-	structFile = flag.String("structs", "", "Output filename to generate simple structs code.")
+	typesFile  = flag.String("types", "", "Output filename to generate simple types code.")
 	yamlFile   = flag.String("yaml", "", "Input schema.yaml file to generate code from.")
 )
 
@@ -43,8 +43,8 @@ func main() {
 		log.Fatalf("Must specify either '-appid=<id>' or '-yaml=<filename>' but not both.")
 	}
 
-	if *hostFile == "" && *pluginFile == "" && *structFile == "" {
-		log.Fatalf("Must specify at least one of: -host=<filename>, -plugin=<filename>, or -structs=<filename>")
+	if *hostFile == "" && *pluginFile == "" && *typesFile == "" {
+		log.Fatalf("Must specify at least one of: -host=<filename>, -plugin=<filename>, or -types=<filename>")
 	}
 
 	switch *lang {
@@ -93,6 +93,38 @@ func main() {
 	log.Printf("Done.")
 }
 
-func processFile(plugin *schema.Plugin) error {
+func processPlugin(plugin *schema.Plugin) error {
+	plugin.Lang = *lang
+	custTypes, err := plugin.GenCustomTypes()
+	if err != nil {
+		return err
+	}
+
+	if *typesFile != "" {
+		if err := os.WriteFile(*typesFile, []byte(custTypes), 0644); err != nil {
+			return err
+		}
+	}
+
+	if *hostFile != "" {
+		hostSrc, err := plugin.GenHostSDK(custTypes)
+		if err != nil {
+			return err
+		}
+		if err := os.WriteFile(*hostFile, []byte(hostSrc), 0644); err != nil {
+			return err
+		}
+	}
+
+	if *pluginFile != "" {
+		pluginSrc, err := plugin.GenPluginPDK(custTypes)
+		if err != nil {
+			return err
+		}
+		if err := os.WriteFile(*pluginFile, []byte(pluginSrc), 0644); err != nil {
+			return err
+		}
+	}
+
 	return nil
 }
