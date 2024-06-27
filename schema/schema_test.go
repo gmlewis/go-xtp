@@ -19,6 +19,7 @@ var v0Str string
 func floatPtr(f float64) *float64 { return &f }
 
 func TestParseStr(t *testing.T) {
+	t.Parallel()
 	tests := []struct {
 		name    string
 		yamlStr string

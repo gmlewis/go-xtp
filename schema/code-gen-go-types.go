@@ -1,6 +1,9 @@
 package schema
 
-// genGoCustomTypes generates custom types for the plugin in Go.
-func (p *Plugin) genGoCustomTypes() (string, error) {
-	return "", nil
+import "strings"
+
+// genGoCustomTypes generates custom types with tests for the plugin in Go.
+func (p *Plugin) genGoCustomTypes() (srcFile, testFile string, err error) {
+	var srcBlocks, testBlocks []string
+	return strings.Join(srcBlocks, "\n\n"), strings.Join(testBlocks, "\n\n"), nil
 }

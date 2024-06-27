@@ -97,22 +97,31 @@ func main() {
 }
 
 func genPkgName(filename string) string {
-	baseName := strings.Replace(filepath.Base(filename), ".go", "", 1)
+	baseName := strings.Replace(filepath.Base(filename), "."+*lang, "", 1)
 	return strings.ToLower(strings.Replace(baseName, "-", "_", -1))
 }
 
 func processPlugin(plugin *schema.Plugin) error {
 	plugin.Lang = *lang
-	custTypes, err := plugin.GenCustomTypes()
+
+	custTypes, custTypesTests, err := plugin.GenCustomTypes()
 	if err != nil {
 		return err
 	}
 
 	if *typesFile != "" {
 		pkgName := genPkgName(*typesFile)
-		fullFile := fmt.Sprintf("// Package %v represents the custom data types for an XTP Extension Plugin\npackage %[1]v\n\n%v\n", pkgName, custTypes)
-		if err := os.WriteFile(*typesFile, []byte(fullFile), 0644); err != nil {
+		fullSrc := fmt.Sprintf("// Package %v represents the custom data types for an XTP Extension Plugin\npackage %[1]v\n\n%v\n", pkgName, custTypes)
+		if err := os.WriteFile(*typesFile, []byte(fullSrc), 0644); err != nil {
 			return err
+		}
+
+		if custTypesTests != "" {
+			testFilename := strings.Replace(*typesFile, "."+*lang, "_test."+*lang, 1)
+			testSrc := fmt.Sprintf("package %v\n\n%v\n", pkgName, custTypesTests)
+			if err := os.WriteFile(testFilename, []byte(testSrc), 0644); err != nil {
+				return err
+			}
 		}
 	}
 

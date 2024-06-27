@@ -9,10 +9,10 @@ var (
 	ErrNoCodeGeneration = errors.New("code generation not supported for version v0")
 )
 
-// GenCustomTypes generates custom types for the plugin.
-func (p *Plugin) GenCustomTypes() (string, error) {
+// GenCustomTypes generates custom types with tests for the plugin.
+func (p *Plugin) GenCustomTypes() (srcFile, testFile string, err error) {
 	if p.Version == "v0" {
-		return "", ErrNoCodeGeneration
+		return "", "", ErrNoCodeGeneration
 	}
 
 	switch p.Lang {
@@ -21,7 +21,7 @@ func (p *Plugin) GenCustomTypes() (string, error) {
 	case "mbt":
 		return p.genMbtCustomTypes()
 	default:
-		return "", fmt.Errorf("unsupported programming language: %q", p.Lang)
+		return "", "", fmt.Errorf("unsupported programming language: %q", p.Lang)
 	}
 }
 
