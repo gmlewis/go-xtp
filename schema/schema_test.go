@@ -1,0 +1,175 @@
+package schema
+
+import (
+	_ "embed"
+	"testing"
+
+	"github.com/google/go-cmp/cmp"
+)
+
+//go:embed testdata/fruit.yaml
+var fruitStr string
+
+//go:embed testdata/user.yaml
+var userStr string
+
+//go:embed testdata/v0.yaml
+var v0Str string
+
+func FloatPtr(f float64) *float64 {
+	return &f
+}
+
+func TestParseStr(t *testing.T) {
+	tests := []struct {
+		name    string
+		yamlStr string
+		want    *Plugin
+	}{
+		{
+			name:    "fruit",
+			yamlStr: fruitStr,
+			want: &Plugin{
+				Version: "v1-draft",
+				Exports: []*Export{
+					{
+						Name:        "voidFunc",
+						Description: "This demonstrates how you can create an export with\nno inputs or outputs.\n",
+					},
+					{
+						Name:        "primitiveTypeFunc",
+						Description: "This demonstrates how you can accept or return primtive types.\nThis function takes a utf8 string and returns a json encoded boolean\n",
+						Input: &Input{
+							Type:        "string",
+							Description: "A string passed into plugin input",
+							ContentType: "text/plain; charset=UTF-8",
+						},
+						Output: &Output{
+							Type:        "boolean",
+							Description: "A boolean encoded as json",
+							ContentType: "application/json",
+						},
+						CodeSamples: []*CodeSample{
+							{
+								Lang:  "typescript",
+								Label: "Test if a string has more than one character.\nCode samples show up in documentation and inline in docstrings\n",
+								Source: `function primitiveTypeFunc(input: string): boolean {
+  return input.length > 1
+}
+`,
+							},
+						},
+					},
+					{
+						Name:        "referenceTypeFunc",
+						Description: "This demonstrates how you can accept or return references to schema types.\nAnd it shows how you can define an enum to be used as a property or input/output.\n",
+						Input: &Input{
+							Ref: "#/schemas/Fruit",
+						},
+						Output: &Output{
+							Ref: "#/schemas/ComplexObject",
+						},
+					},
+				},
+				Schemas: []*Func{
+					{Name: "Fruit", Description: "A set of available fruits you can consume"},
+					{Name: "GhostGang", Description: "A set of all the enemies of pac-man"},
+					{
+						Name:        "ComplexObject",
+						Description: "A complex json object",
+						Properties: []*Property{
+							{Name: "ghost", Description: "I can override the description for the property here"},
+							{Name: "aBoolean", Description: "A boolean prop", Type: "boolean"},
+							{Name: "aString", Description: "An string prop", Type: "string"},
+							{Name: "anInt", Description: "An int prop", Type: "integer", Format: "int32"},
+							{
+								Name:        "anOptionalDate",
+								Description: "A datetime object, we will automatically serialize and deserialize\nthis for you.\n",
+								Type:        "string",
+								Format:      "date-time",
+							},
+						},
+						ContentType: "application/json",
+					},
+				},
+			},
+		},
+		{
+			name:    "user",
+			yamlStr: userStr,
+			want: &Plugin{
+				Version: "v1-draft",
+				Exports: []*Export{
+					{
+						Name:        "processUser",
+						Description: "The second export function",
+						Input:       &Input{Ref: "#/schemas/User"},
+						Output:      &Output{Ref: "#/schemas/User"},
+						CodeSamples: []*CodeSample{
+							{
+								Lang:  "typescript",
+								Label: "Process a user by email",
+								Source: `function processUser(user: User): User {
+  if (user.email.endsWith('@aol.com')) user.age += 10
+  return user
+}
+`,
+							},
+						},
+					},
+				},
+				Schemas: []*Func{
+					{
+						Name:        "Address",
+						Description: "A users address",
+						Properties: []*Property{
+							{Name: "street", Description: "Street address", Type: "string"},
+						},
+						ContentType: "application/json",
+					},
+					{
+						Name:        "User",
+						Description: "A user object in our system.",
+						Properties: []*Property{
+							{
+								Name:        "age",
+								Description: "The user's age, naturally",
+								Type:        "integer",
+								Format:      "int32",
+								Maximum:     FloatPtr(200),
+								Minimum:     FloatPtr(0),
+							},
+							{Name: "email", Description: "The user's email, of course", Type: "string"},
+							{Name: "address"},
+						},
+						ContentType: "application/json",
+					},
+				},
+			},
+		},
+		{
+			name:    "v0",
+			yamlStr: v0Str,
+			want: &Plugin{
+				Version: "v0",
+				Exports: []*Export{
+					{Name: "myExport"},
+					{Name: "processUser"},
+				},
+			},
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			got, err := ParseStr(tt.yamlStr)
+			if err != nil {
+				t.Fatal(err)
+			}
+
+			if diff := cmp.Diff(tt.want, got); diff != "" {
+				t.Errorf("ParseStr mismatch (-want +got):\n%v", diff)
+			}
+		})
+	}
+}

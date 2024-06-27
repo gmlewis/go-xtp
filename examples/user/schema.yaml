@@ -1,0 +1,40 @@
+# Copied from: https://discord.com/channels/1011124058408112148/1220464672784908358/1255858892634587197
+exports:
+  - name: processUser
+    input:
+      $ref: "#/schemas/User"
+    output:
+      $ref: "#/schemas/User"
+    codeSamples:
+      - lang: typescript
+        label: Process a user by email
+        source: |
+          function processUser(user: User): User {
+            if (user.email.endsWith('@aol.com')) user.age += 10
+            return user
+          }
+    description: The second export function
+schemas:
+  - name: Address
+    properties:
+      - name: street
+        type: string
+        description: Street address
+    contentType: application/json
+    description: A users address
+  - name: User
+    properties:
+      - name: age
+        type: integer
+        format: int32
+        maximum: 200
+        minimum: 0
+        description: The user's age, naturally
+      - name: email
+        type: string
+        description: The user's email, of course
+      - $ref: "#/schemas/Address"
+        name: address
+    contentType: application/json
+    description: A user object in our system.
+version: v1-draft
