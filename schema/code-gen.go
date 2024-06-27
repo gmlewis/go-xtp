@@ -3,6 +3,7 @@ package schema
 import (
 	"errors"
 	"fmt"
+	"strings"
 )
 
 var (
@@ -55,4 +56,58 @@ func (p *Plugin) GenPluginPDK(customTypes, pkgName string) (string, error) {
 	default:
 		return "", fmt.Errorf("unsupported programming language: %q", p.Lang)
 	}
+}
+
+var funcMap = map[string]any{
+	"addOmitIfNeeded":  addOmitIfNeeded,
+	"downcaseFirst":    downcaseFirst,
+	"getGoType":        getGoType,
+	"multilineComment": multilineComment,
+	"uppercaseFirst":   uppercaseFirst,
+}
+
+func addOmitIfNeeded(prop *Property) string {
+	if prop.IsRequired {
+		return ""
+	}
+	return ",omitempty"
+}
+
+func downcaseFirst(s string) string {
+	if len(s) < 2 {
+		return strings.ToLower(s)
+	}
+	return strings.ToLower(s[0:1]) + s[1:]
+}
+
+func getGoType(prop *Property) string {
+	if prop.Ref != "" {
+		parts := strings.Split(prop.Ref, "/")
+		return "*" + parts[len(parts)-1]
+	}
+
+	var asterisk string
+	if !prop.IsRequired {
+		asterisk = "*"
+	}
+
+	switch prop.Type {
+	case "boolean":
+		return asterisk + "bool"
+	case "integer":
+		return asterisk + "int"
+	default:
+		return asterisk + prop.Type
+	}
+}
+
+func multilineComment(s string) string {
+	return strings.ReplaceAll(strings.TrimSpace(s), "\n", "\n// ")
+}
+
+func uppercaseFirst(s string) string {
+	if len(s) < 2 {
+		return strings.ToUpper(s)
+	}
+	return strings.ToUpper(s[0:1]) + s[1:]
 }

@@ -1,5 +1,4 @@
-// Package fruit represents the custom datatypes for an XTP Extension Plugin.
-package fruit
+package fruit // this line will be stripped in the unit test
 
 // Fruit represents a set of available fruits you can consume.
 type Fruit string
@@ -24,7 +23,7 @@ const (
 // ComplexObject represents a complex json object.
 type ComplexObject struct {
 	// I can override the description for the property here
-	Ghost GhostGang `json:"ghost"`
+	Ghost *GhostGang `json:"ghost"`
 	// A boolean prop
 	ABoolean bool `json:"aBoolean"`
 	// An string prop

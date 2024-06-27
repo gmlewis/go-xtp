@@ -63,7 +63,7 @@ type Import struct {
 	Output      *Output `yaml:"output,omitempty"`
 }
 
-// CustomType represents an XTP Extension Plugin custom data type.
+// CustomType represents an XTP Extension Plugin custom datatype.
 type CustomType struct {
 	Name        string      `yaml:"name"`
 	ContentType string      `yaml:"contentType,omitempty"`
@@ -82,6 +82,9 @@ type Property struct {
 	Description string   `yaml:"description,omitempty"`
 	Maximum     *float64 `yaml:"maximum,omitempty"`
 	Minimum     *float64 `yaml:"minimum,omitempty"`
+
+	// the following fields are only used by the code generator:
+	IsRequired bool `yaml:"-"`
 }
 
 // ParseStr parses an XTP Extension Plugin schema yaml string and returns it.

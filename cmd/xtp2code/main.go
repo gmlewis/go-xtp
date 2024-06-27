@@ -1,5 +1,5 @@
 // xtp2code converts an XTP Extension Plugin to Go or MoonBit source code
-// for use with XTP's APIs. It can generate simple custom data types and/or Host SDK code
+// for use with XTP's APIs. It can generate simple custom datatypes and/or Host SDK code
 // and/or Plugin PDK code. For input, it can process either a schema.yaml file
 // or it can query the XTP API directly for a given app ID (for the authenticated
 // user) and process all extensions.
@@ -111,7 +111,7 @@ func processPlugin(plugin *schema.Plugin) error {
 
 	if *typesFile != "" {
 		pkgName := genPkgName(*typesFile)
-		fullSrc := fmt.Sprintf("// Package %v represents the custom data types for an XTP Extension Plugin\npackage %[1]v\n\n%v\n", pkgName, custTypes)
+		fullSrc := fmt.Sprintf("// Package %v represents the custom datatypes for an XTP Extension Plugin.\npackage %[1]v\n\n%v\n", pkgName, custTypes)
 		if err := os.WriteFile(*typesFile, []byte(fullSrc), 0644); err != nil {
 			return err
 		}

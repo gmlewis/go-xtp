@@ -1,4 +1,4 @@
-package fruit
+package fruit // this line will be stripped in the unit test
 
 import (
 	"testing"
