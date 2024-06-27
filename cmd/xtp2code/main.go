@@ -20,8 +20,11 @@ package main
 
 import (
 	"flag"
+	"fmt"
 	"log"
 	"os"
+	"path/filepath"
+	"strings"
 
 	"github.com/gmlewis/go-xtp/api"
 	"github.com/gmlewis/go-xtp/schema"
@@ -93,6 +96,11 @@ func main() {
 	log.Printf("Done.")
 }
 
+func genPkgName(filename string) string {
+	baseName := strings.Replace(filepath.Base(filename), ".go", "", 1)
+	return strings.ToLower(strings.Replace(baseName, "-", "_", -1))
+}
+
 func processPlugin(plugin *schema.Plugin) error {
 	plugin.Lang = *lang
 	custTypes, err := plugin.GenCustomTypes()
@@ -101,13 +109,16 @@ func processPlugin(plugin *schema.Plugin) error {
 	}
 
 	if *typesFile != "" {
-		if err := os.WriteFile(*typesFile, []byte(custTypes), 0644); err != nil {
+		pkgName := genPkgName(*typesFile)
+		fullFile := fmt.Sprintf("// Package %v represents the custom data types for an XTP Extension Plugin\npackage %[1]v\n\n%v\n", pkgName, custTypes)
+		if err := os.WriteFile(*typesFile, []byte(fullFile), 0644); err != nil {
 			return err
 		}
 	}
 
 	if *hostFile != "" {
-		hostSrc, err := plugin.GenHostSDK(custTypes)
+		pkgName := genPkgName(*hostFile)
+		hostSrc, err := plugin.GenHostSDK(custTypes, pkgName)
 		if err != nil {
 			return err
 		}
@@ -117,7 +128,8 @@ func processPlugin(plugin *schema.Plugin) error {
 	}
 
 	if *pluginFile != "" {
-		pluginSrc, err := plugin.GenPluginPDK(custTypes)
+		pkgName := genPkgName(*pluginFile)
+		pluginSrc, err := plugin.GenPluginPDK(custTypes, pkgName)
 		if err != nil {
 			return err
 		}

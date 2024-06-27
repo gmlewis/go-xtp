@@ -26,32 +26,32 @@ func (p *Plugin) GenCustomTypes() (string, error) {
 }
 
 // GenHostSDK generates Host SDK code to call the extension plugin.
-func (p *Plugin) GenHostSDK(customTypes string) (string, error) {
+func (p *Plugin) GenHostSDK(customTypes, pkgName string) (string, error) {
 	if p.Version == "v0" {
 		return "", ErrNoCodeGeneration
 	}
 
 	switch p.Lang {
 	case "go":
-		return p.genGoHostSDK(customTypes)
+		return p.genGoHostSDK(customTypes, pkgName)
 	case "mbt":
-		return p.genMbtHostSDK(customTypes)
+		return p.genMbtHostSDK(customTypes, pkgName)
 	default:
 		return "", fmt.Errorf("unsupported programming language: %q", p.Lang)
 	}
 }
 
 // GenPluginPDK generates Plugin PDK code to process plugin calls.
-func (p *Plugin) GenPluginPDK(customTypes string) (string, error) {
+func (p *Plugin) GenPluginPDK(customTypes, pkgName string) (string, error) {
 	if p.Version == "v0" {
 		return "", ErrNoCodeGeneration
 	}
 
 	switch p.Lang {
 	case "go":
-		return p.genGoPluginPDK(customTypes)
+		return p.genGoPluginPDK(customTypes, pkgName)
 	case "mbt":
-		return p.genMbtPluginPDK(customTypes)
+		return p.genMbtPluginPDK(customTypes, pkgName)
 	default:
 		return "", fmt.Errorf("unsupported programming language: %q", p.Lang)
 	}
