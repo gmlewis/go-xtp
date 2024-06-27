@@ -71,14 +71,39 @@ func TestParseStr(t *testing.T) {
 						},
 					},
 				},
-				Schemas: []*Func{
-					{Name: "Fruit", Description: "A set of available fruits you can consume"},
-					{Name: "GhostGang", Description: "A set of all the enemies of pac-man"},
+				Imports: []*Import{
+					{
+						Name:        "eatAFruit",
+						Description: "This is a host function. Right now host functions can only be the type (i64) -> i64.\nWe will support more in the future. Much of the same rules as exports apply.\n",
+						Input:       &Input{Ref: "#/schemas/Fruit"},
+						Output: &Output{
+							Type:        "boolean",
+							Description: "boolean encoded as json",
+							ContentType: "application/json",
+						},
+					},
+				},
+				CustomTypes: []*CustomType{
+					{
+						Name:        "Fruit",
+						Description: "A set of available fruits you can consume",
+						Enum:        []string{"apple", "orange", "banana", "strawberry"},
+					},
+					{
+						Name:        "GhostGang",
+						Description: "A set of all the enemies of pac-man",
+						Enum:        []string{"blinky", "pinky", "inky", "clyde"},
+					},
 					{
 						Name:        "ComplexObject",
 						Description: "A complex json object",
+						Required:    []string{"ghost", "aBoolean", "aString", "anInt"},
 						Properties: []*Property{
-							{Name: "ghost", Description: "I can override the description for the property here"},
+							{
+								Name:        "ghost",
+								Ref:         "#/schemas/GhostGang",
+								Description: "I can override the description for the property here",
+							},
 							{Name: "aBoolean", Description: "A boolean prop", Type: "boolean"},
 							{Name: "aString", Description: "An string prop", Type: "string"},
 							{Name: "anInt", Description: "An int prop", Type: "integer", Format: "int32"},
@@ -118,7 +143,7 @@ func TestParseStr(t *testing.T) {
 						},
 					},
 				},
-				Schemas: []*Func{
+				CustomTypes: []*CustomType{
 					{
 						Name:        "Address",
 						Description: "A users address",
@@ -139,8 +164,14 @@ func TestParseStr(t *testing.T) {
 								Maximum:     FloatPtr(200),
 								Minimum:     FloatPtr(0),
 							},
-							{Name: "email", Description: "The user's email, of course", Type: "string"},
-							{Name: "address"},
+							{
+								Name:        "email",
+								Description: "The user's email, of course", Type: "string",
+							},
+							{
+								Name: "address",
+								Ref:  "#/schemas/Address",
+							},
 						},
 						ContentType: "application/json",
 					},
@@ -168,6 +199,40 @@ func TestParseStr(t *testing.T) {
 			}
 
 			if diff := cmp.Diff(tt.want, got); diff != "" {
+				t.Errorf("ParseStr mismatch (-want +got):\n%v", diff)
+			}
+		})
+	}
+}
+
+func TestToYaml(t *testing.T) {
+	tests := []struct {
+		name    string
+		yamlStr string
+	}{
+		{
+			name:    "fruit",
+			yamlStr: fruitStr,
+		},
+		{
+			name:    "user",
+			yamlStr: userStr,
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			plugin, err := ParseStr(tt.yamlStr)
+			if err != nil {
+				t.Fatal(err)
+			}
+
+			got, err := plugin.ToYaml()
+			if err != nil {
+				t.Fatal(err)
+			}
+
+			if diff := cmp.Diff(tt.yamlStr, got); diff != "" {
 				t.Errorf("ParseStr mismatch (-want +got):\n%v", diff)
 			}
 		})

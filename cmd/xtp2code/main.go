@@ -24,6 +24,7 @@ import (
 	"os"
 
 	"github.com/gmlewis/go-xtp/api"
+	"github.com/gmlewis/go-xtp/schema"
 )
 
 var (
@@ -55,30 +56,43 @@ func main() {
 		log.Fatalf("Must specify either -lang=go or -lang=mbt")
 	}
 
-	var schemaYaml string
+	var plugins []*schema.Plugin
+
 	switch {
 	case *yamlFile != "":
 		buf, err := os.ReadFile(*yamlFile)
 		if err != nil {
 			log.Fatal(err)
 		}
-		schemaYaml = string(buf)
+		p, err := schema.ParseStr(string(buf))
+		if err != nil {
+			log.Fatalf("schema.Parse: %v", err)
+		}
+		plugins = append(plugins, p)
 	case *appID != "":
 		c := api.New()
 		resp, err := c.GetAppsExtensionPoints(*appID)
 		if err != nil {
 			log.Fatal(err)
 		}
-		schemaYaml = resp.SchemaYaml
+		for _, ep := range resp.ExtensionPoints {
+			p, err := schema.ParseStr(ep.SchemaYaml)
+			if err != nil {
+				log.Fatalf("schema.Parse: %v", err)
+			}
+			plugins = append(plugins, p)
+		}
 	}
 
-	if err := processFile(schemaYaml); err != nil {
-		log.Fatalf("Error processing yaml file %q: %v", schemaYaml, err)
+	for _, plugin := range plugins {
+		if err := processPlugin(plugin); err != nil {
+			log.Fatalf("processPlugin: %v", err)
+		}
 	}
 
 	log.Printf("Done.")
 }
 
-func processFile(yamlFilename string) error {
+func processFile(plugin *schema.Plugin) error {
 	return nil
 }

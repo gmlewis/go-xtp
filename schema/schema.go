@@ -13,9 +13,10 @@ var (
 
 // Plugin represents an XTP Extension Plugin Schema.
 type Plugin struct {
-	Version string    `yaml:"version"`
-	Exports []*Export `yaml:"exports"`
-	Schemas []*Func   `yaml:"schemas,omitempty"`
+	Version     string        `yaml:"version"`
+	Exports     []*Export     `yaml:"exports"`
+	Imports     []*Import     `yaml:"imports,omitempty"`
+	CustomTypes []*CustomType `yaml:"schemas,omitempty"`
 }
 
 // Export represents an exported function by the XTP Extension Plugin.
@@ -30,16 +31,16 @@ type Export struct {
 // Input represents an input to the exported function.
 type Input struct {
 	Ref         string `yaml:"$ref,omitempty"`
-	Description string `yaml:"description,omitempty"`
 	Type        string `yaml:"type,omitempty"`
+	Description string `yaml:"description,omitempty"`
 	ContentType string `yaml:"contentType,omitempty"`
 }
 
 // Output represents an output from the exported function.
 type Output struct {
 	Ref         string `yaml:"$ref,omitempty"`
-	Description string `yaml:"description,omitempty"`
 	Type        string `yaml:"type,omitempty"`
+	Description string `yaml:"description,omitempty"`
 	ContentType string `yaml:"contentType,omitempty"`
 }
 
@@ -51,20 +52,31 @@ type CodeSample struct {
 	Source string `yaml:"source"`
 }
 
-// Func represents an XTP Extension Plugin function.
-type Func struct {
+// Import represents an imported function into the XTP Extension Plugin from the host.
+type Import struct {
+	Name        string  `yaml:"name"`
+	Description string  `yaml:"description,omitempty"`
+	Input       *Input  `yaml:"input,omitempty"`
+	Output      *Output `yaml:"output,omitempty"`
+}
+
+// CustomType represents an XTP Extension Plugin custom data type.
+type CustomType struct {
 	Name        string      `yaml:"name"`
-	Description string      `yaml:"description,omitempty"`
-	Properties  []*Property `yaml:"properties,omitempty"`
 	ContentType string      `yaml:"contentType,omitempty"`
+	Description string      `yaml:"description,omitempty"`
+	Enum        []string    `yaml:"enum,omitempty"`
+	Required    []string    `yaml:"required,omitempty"`
+	Properties  []*Property `yaml:"properties,omitempty"`
 }
 
 // Property represents an argument to a plugin function.
 type Property struct {
 	Name        string   `yaml:"name"`
-	Description string   `yaml:"description,omitempty"`
+	Ref         string   `yaml:"$ref,omitempty"`
 	Type        string   `yaml:"type,omitempty"`
 	Format      string   `yaml:"format,omitempty"`
+	Description string   `yaml:"description,omitempty"`
 	Maximum     *float64 `yaml:"maximum,omitempty"`
 	Minimum     *float64 `yaml:"minimum,omitempty"`
 }

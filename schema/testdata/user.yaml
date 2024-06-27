@@ -1,10 +1,11 @@
-# Copied from: https://discord.com/channels/1011124058408112148/1220464672784908358/1255858892634587197
+version: v1-draft
 exports:
   - name: processUser
+    description: The second export function
     input:
-      $ref: "#/schemas/User"
+      $ref: '#/schemas/User'
     output:
-      $ref: "#/schemas/User"
+      $ref: '#/schemas/User'
     codeSamples:
       - lang: typescript
         label: Process a user by email
@@ -13,28 +14,26 @@ exports:
             if (user.email.endsWith('@aol.com')) user.age += 10
             return user
           }
-    description: The second export function
 schemas:
   - name: Address
+    contentType: application/json
+    description: A users address
     properties:
       - name: street
         type: string
         description: Street address
-    contentType: application/json
-    description: A users address
   - name: User
+    contentType: application/json
+    description: A user object in our system.
     properties:
       - name: age
         type: integer
         format: int32
+        description: The user's age, naturally
         maximum: 200
         minimum: 0
-        description: The user's age, naturally
       - name: email
         type: string
         description: The user's email, of course
-      - $ref: "#/schemas/Address"
-        name: address
-    contentType: application/json
-    description: A user object in our system.
-version: v1-draft
+      - name: address
+        $ref: '#/schemas/Address'
