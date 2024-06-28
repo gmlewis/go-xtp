@@ -136,10 +136,10 @@ var structTestGoTemplateStr = `{{ $name := .Name }}{{ $top := . }}func Test{{ $n
 		{
 			name: "required fields",
 			obj: &{{ .Name }}{
-{{range $index, $prop := .Properties}}{{if .IsRequired}}  {{ .Name | uppercaseFirst }}: {{ requiredValue . }},
+{{range $index, $prop := .Properties}}{{if .IsRequired}}  {{ .Name | uppercaseFirst }}: {{ requiredGoValue . }},
 {{ end }}{{ end }}
 			},
-			want: ` + "`" + `{{"{"}}{{range $index, $prop := .Properties}}{{if .IsRequired}}"{{ .Name }}":{{ requiredJSONValue . }}{{ showJSONCommaForRequired $index $top }}{{ end }}{{ end }}{{"}"}}` + "`" + `,
+			want: ` + "`" + `{{"{"}}{{range $index, $prop := .Properties}}{{if .IsRequired}}"{{ .Name }}":{{ requiredGoJSONValue . }}{{ showJSONCommaForRequired $index $top }}{{ end }}{{ end }}{{"}"}}` + "`" + `,
 		},
 		{
 			name: "optional fields",

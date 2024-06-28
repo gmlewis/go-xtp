@@ -29,7 +29,9 @@ func (p *Plugin) genMbtCustomTypes() (srcOut, testSrcOut string, err error) {
 		if err != nil {
 			return "", "", err
 		}
-		testBlocks = append(testBlocks, testBlock)
+		if testBlock != "" {
+			testBlocks = append(testBlocks, testBlock)
+		}
 	}
 
 	src := strings.Join(srcBlocks, "\n")
@@ -142,43 +144,30 @@ pub impl @jsonutil.ToJson for {{ $name }} with to_json(self) {
 }
 `
 
-var structTestMbtTemplateStr = `{{ $name := .Name }}{{ $top := . }}func Test{{ $name }}Marshal(t *testing.T) {
-  t.Parallel()
-	tests := []struct {
-		name string
-		obj  *{{ .Name }}
-		want string
-	}{
-		{
-			name: "required fields",
-			obj: &{{ .Name }}{
-{{range $index, $prop := .Properties}}{{if .IsRequired}}  {{ .Name | uppercaseFirst }}: {{ requiredValue . }},
-{{ end }}{{ end }}
-			},
-			want: ` + "`" + `{{"{"}}{{range $index, $prop := .Properties}}{{if .IsRequired}}"{{ .Name }}":{{ requiredJSONValue . }}{{ showJSONCommaForRequired $index $top }}{{ end }}{{ end }}{{"}"}}` + "`" + `,
-		},
-		{
-			name: "optional fields",
-			obj: &{{ .Name }}{
-{{range $index, $prop := .Properties}}{{ if .IsRequired | not }}  {{ .Name | uppercaseFirst }}: {{ defaultMbtValue . }},
-{{ end }}{{ end }}
-			},
-			want: ` + "`" + `{{"{"}}{{range $index, $prop := .Properties}}"{{ .Name }}":{{ defaultMbtJSONValue . $top }}{{ showJSONCommaForOptional $index $top }}{{ end }}{{"}"}}` + "`" + `,
-		},
-	}
-
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			got, err := jsoncomp.Marshal(tt.obj)
-			if err != nil {
-				t.Fatal(err)
-			}
-
-			if diff := cmp.Diff(tt.want, string(got)); diff != "" {
-				t.Logf("got:\n%v", string(got))
-				t.Errorf("Marshal mismatch (-want +got):\n%v", diff)
-			}
-		})
-	}
+var structTestMbtTemplateStr = `{{ $name := .Name }}{{ $top := . }}test "{{ $name }}" {
+  let default_object = {{ $name }}::new()
+  let got = default_object.to_json()
+  let want =
+{{ "    #|{" }}{{range $index, $prop := .Properties}}{{ if .IsRequired }}"{{ .Name }}":{{ defaultMbtJSONValue . $top }}{{ showJSONCommaForRequired $index $top }}{{ end }}{{ end -}}{{ "}" }}
+  @assertion.assert_eq(got, want)?
+  //
+  let required_fields : {{ $name }} = {
+{{range .Properties}}    {{ .Name | lowerSnakeCase }}: {{ requiredMbtValue . }},
+{{ end -}}
+{{ "  }" }}
+  let got = required_fields.to_json()
+  let want =
+{{ "    #|{" }}{{range $index, $prop := .Properties}}{{ if .IsRequired }}"{{ .Name }}":{{ requiredMbtJSONValue . }}{{ showJSONCommaForRequired $index $top }}{{ end }}{{ end -}}{{ "}" }}
+  @assertion.assert_eq(got, want)?
+  //
+  let optional_fields : {{ $name }} = {
+    ..required_fields,
+{{range $index, $prop := .Properties}}{{ if .IsRequired | not}}    {{ .Name | lowerSnakeCase }}: Some("{{ .Name }}"),
+{{ end }}{{ end -}}
+{{ "  }" }}
+  let got = optional_fields.to_json()
+  let want =
+{{ "    #|{" }}{{range $index, $prop := .Properties}}"{{ .Name }}":{{ requiredMbtJSONValue . }}{{ showJSONCommaForOptional $index $top }}{{ end -}}{{ "}" }}
+  @assertion.assert_eq(got, want)?
 }
 `

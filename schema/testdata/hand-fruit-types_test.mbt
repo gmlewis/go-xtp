@@ -2,7 +2,7 @@ test "ComplexObject" {
   let default_object = ComplexObject::new()
   let got = default_object.to_json()
   let want =
-    #|{"ghost":"blinky","aBoolean":false,"aString":"","anInt":0}`
+    #|{"ghost":"blinky","aBoolean":false,"aString":"","anInt":0}
   @assertion.assert_eq(got, want)?
   //
   let required_fields : ComplexObject = {
@@ -14,7 +14,7 @@ test "ComplexObject" {
   }
   let got = required_fields.to_json()
   let want =
-    #|{"ghost":"blinky","aBoolean":true,"aString":"aString","anInt":0}`
+    #|{"ghost":"blinky","aBoolean":true,"aString":"aString","anInt":0}
   @assertion.assert_eq(got, want)?
   //
   let optional_fields : ComplexObject = {
@@ -23,6 +23,6 @@ test "ComplexObject" {
   }
   let got = optional_fields.to_json()
   let want =
-    #|{"ghost":"blinky","aBoolean":true,"aString":"aString","anInt":0,"anOptionalDate":"anOptionalDate"}`
+    #|{"ghost":"blinky","aBoolean":true,"aString":"aString","anInt":0,"anOptionalDate":"anOptionalDate"}
   @assertion.assert_eq(got, want)?
 }

@@ -71,8 +71,10 @@ var funcMap = map[string]any{
 	"multilineComment":            multilineComment,
 	"optionalGoMultilineComment":  optionalGoMultilineComment,
 	"optionalMbtMultilineComment": optionalMbtMultilineComment,
-	"requiredJSONValue":           requiredJSONValue,
-	"requiredValue":               requiredValue,
+	"requiredGoJSONValue":         requiredGoJSONValue,
+	"requiredGoValue":             requiredGoValue,
+	"requiredMbtJSONValue":        requiredMbtJSONValue,
+	"requiredMbtValue":            requiredMbtValue,
 	"showJSONCommaForOptional":    showJSONCommaForOptional,
 	"showJSONCommaForRequired":    showJSONCommaForRequired,
 	"uppercaseFirst":              uppercaseFirst,
@@ -152,11 +154,11 @@ func defaultMbtJSONValue(prop *Property, ct *CustomType) string {
 			requiredProps := prop.RefCustomType.GetRequiredProps()
 			fields := make([]string, 0, len(requiredProps))
 			for _, p2 := range requiredProps {
-				fields = append(fields, fmt.Sprintf("%q:%v", p2.Name, defaultGoJSONValue(p2, prop.RefCustomType)))
+				fields = append(fields, fmt.Sprintf("%q:%v", p2.Name, defaultMbtJSONValue(p2, prop.RefCustomType)))
 			}
 			return fmt.Sprintf("{%v}", strings.Join(fields, ","))
 		}
-		return `""`
+		return fmt.Sprintf("%q", prop.FirstEnumValue)
 	}
 
 	switch prop.Type {
@@ -291,7 +293,7 @@ func optionalMbtMultilineComment(s string) string {
 	return "/// " + strings.ReplaceAll(strings.TrimSpace(s), "\n", "\n  /// ") + "\n  "
 }
 
-func requiredJSONValue(prop *Property) string {
+func requiredGoJSONValue(prop *Property) string {
 	if prop.Ref != "" {
 		parts := strings.Split(prop.Ref, "/")
 		if prop.RefCustomType != nil {
@@ -312,7 +314,7 @@ func requiredJSONValue(prop *Property) string {
 	}
 }
 
-func requiredValue(prop *Property) string {
+func requiredGoValue(prop *Property) string {
 	if prop.Ref != "" {
 		parts := strings.Split(prop.Ref, "/")
 		refName := parts[len(parts)-1]
@@ -320,6 +322,53 @@ func requiredValue(prop *Property) string {
 			return "&" + refName + "{}"
 		}
 		return fmt.Sprintf("%vEnum%v", uppercaseFirst(refName), uppercaseFirst(prop.FirstEnumValue))
+	}
+
+	switch prop.Type {
+	case "boolean":
+		return "true"
+	case "integer":
+		return "0"
+	case "string":
+		return fmt.Sprintf("%q", prop.Name)
+	default:
+		return `""`
+	}
+}
+
+func requiredMbtJSONValue(prop *Property) string {
+	if prop.Ref != "" {
+		parts := strings.Split(prop.Ref, "/")
+		if prop.RefCustomType != nil {
+			return "Some(" + parts[len(parts)-1] + "::new())"
+		}
+		return fmt.Sprintf("%q", prop.FirstEnumValue)
+	}
+
+	switch prop.Type {
+	case "boolean":
+		return "true"
+	case "integer":
+		return "0"
+	case "string":
+		return fmt.Sprintf("%q", prop.Name)
+	default:
+		return `""`
+	}
+}
+
+func requiredMbtValue(prop *Property) string {
+	if !prop.IsRequired {
+		return "None"
+	}
+
+	if prop.Ref != "" {
+		parts := strings.Split(prop.Ref, "/")
+		refName := parts[len(parts)-1]
+		if prop.RefCustomType != nil {
+			return "Some(" + refName + "::new())"
+		}
+		return uppercaseFirst(prop.FirstEnumValue)
 	}
 
 	switch prop.Type {
