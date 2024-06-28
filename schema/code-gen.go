@@ -59,11 +59,15 @@ func (p *Plugin) GenPluginPDK(customTypes, pkgName string) (string, error) {
 }
 
 var funcMap = map[string]any{
-	"addOmitIfNeeded":  addOmitIfNeeded,
-	"downcaseFirst":    downcaseFirst,
-	"getGoType":        getGoType,
-	"multilineComment": multilineComment,
-	"uppercaseFirst":   uppercaseFirst,
+	"addOmitIfNeeded":          addOmitIfNeeded,
+	"defaultJSONValue":         defaultJSONValue,
+	"downcaseFirst":            downcaseFirst,
+	"getGoType":                getGoType,
+	"multilineComment":         multilineComment,
+	"requiredJSONValue":        requiredJSONValue,
+	"showJSONCommaForOptional": showJSONCommaForOptional,
+	"showJSONCommaForRequired": showJSONCommaForRequired,
+	"uppercaseFirst":           uppercaseFirst,
 }
 
 func addOmitIfNeeded(prop *Property) string {
@@ -71,6 +75,22 @@ func addOmitIfNeeded(prop *Property) string {
 		return ""
 	}
 	return ",omitempty"
+}
+
+func defaultJSONValue(prop *Property) string {
+	switch prop.Type {
+	case "boolean":
+		return "false"
+	case "integer":
+		return "0"
+	case "string":
+		if !prop.IsRequired {
+			return fmt.Sprintf("%q", prop.Name)
+		}
+		return `""`
+	default:
+		return `""`
+	}
 }
 
 func downcaseFirst(s string) string {
@@ -106,6 +126,44 @@ func getGoType(prop *Property) string {
 
 func multilineComment(s string) string {
 	return strings.ReplaceAll(strings.TrimSpace(s), "\n", "\n// ")
+}
+
+func requiredJSONValue(prop *Property, ct *CustomType) string {
+	if prop.Ref != "" {
+		parts := strings.Split(prop.Ref, "/")
+		if prop.IsStruct {
+			return "&" + parts[len(parts)-1] + "{}"
+		}
+		return fmt.Sprintf("%q", prop.FirstEnumValue)
+	}
+
+	switch prop.Type {
+	case "boolean":
+		return "true"
+	case "integer":
+		return "0"
+	case "string":
+		return fmt.Sprintf("%q", prop.Name)
+	default:
+		return `""`
+	}
+}
+
+func showJSONCommaForOptional(index int, ct *CustomType) string {
+	if index < len(ct.Properties)-1 {
+		return ",\n"
+	}
+	return ""
+}
+
+func showJSONCommaForRequired(index int, ct *CustomType) string {
+	for index++; index < len(ct.Properties); index++ {
+		prop := ct.Properties[index]
+		if prop.IsRequired {
+			return ",\n"
+		}
+	}
+	return ""
 }
 
 func uppercaseFirst(s string) string {

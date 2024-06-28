@@ -15,9 +15,13 @@ func ParseV1(yamlStr string) (*Plugin, error) {
 	// run through all the Properties and populate the "IsRequired"
 	// and "IsStruct" fields as needed.
 	isStruct := map[string]bool{}
+	firstEnumValue := map[string]string{}
 	for _, ct := range result.CustomTypes {
 		if len(ct.Enum) == 0 && len(ct.Properties) > 0 {
 			isStruct[ct.Name] = true
+		}
+		if len(ct.Enum) > 0 {
+			firstEnumValue[ct.Name] = ct.Enum[0]
 		}
 	}
 
@@ -35,6 +39,9 @@ func ParseV1(yamlStr string) (*Plugin, error) {
 				refName := parts[len(parts)-1]
 				if isStruct[refName] {
 					prop.IsStruct = true
+				}
+				if v := firstEnumValue[refName]; v != "" {
+					prop.FirstEnumValue = v
 				}
 			}
 		}

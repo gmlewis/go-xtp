@@ -99,10 +99,11 @@ func TestParseStr(t *testing.T) {
 						Required:    []string{"ghost", "aBoolean", "aString", "anInt"},
 						Properties: []*Property{
 							{
-								Name:        "ghost",
-								Ref:         "#/schemas/GhostGang",
-								Description: "I can override the description for the property here",
-								IsRequired:  true,
+								Name:           "ghost",
+								Ref:            "#/schemas/GhostGang",
+								Description:    "I can override the description for the property here",
+								IsRequired:     true,
+								FirstEnumValue: "blinky",
 							},
 							{Name: "aBoolean", Description: "A boolean prop", Type: "boolean", IsRequired: true},
 							{Name: "aString", Description: "An string prop", Type: "string", IsRequired: true},

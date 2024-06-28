@@ -142,20 +142,24 @@ var structTestGoTemplateStr = `{{ $name := .Name }}{{ $top := . }}func Test{{ $n
 				AString:  "aString",
 				AnInt:    0,
 			},
-			want: ` + "`" + `{"ghost":"blinky","aBoolean":true,"aString":"aString","anInt":0}` + "`" + `,
+			want: ` + "`" + `{
+{{range $index, $prop := .Properties}}{{if .IsRequired}}  "{{ .Name }}": {{ requiredJSONValue . $top }}{{ showJSONCommaForRequired $index $top }}{{ end }}{{ end }}
+}` + "`" + `,
 		},
 		{
 			name: "optional fields",
 			obj: &{{ .Name }}{
 				AnOptionalDate: stringPtr("anOptionalDate"),
 			},
-			want: ` + "`" + `{"ghost":"","aBoolean":false,"aString":"","anInt":0,"anOptionalDate":"anOptionalDate"}` + "`" + `,
+			want: ` + "`" + `{
+{{range $index, $prop := .Properties}}  "{{ .Name }}": {{ defaultJSONValue . }}{{ showJSONCommaForOptional $index $top }}{{ end }}
+}` + "`" + `,
 		},
 	}
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			got, err := jsoncomp.Marshal(tt.obj)
+			got, err := jsoncomp.MarshalIndent(tt.obj, "", "  ")
 			if err != nil {
 				t.Fatal(err)
 			}

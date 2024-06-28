@@ -84,8 +84,9 @@ type Property struct {
 	Minimum     *float64 `yaml:"minimum,omitempty"`
 
 	// the following fields are only used by the code generator:
-	IsRequired bool `yaml:"-"`
-	IsStruct   bool `yaml:"-"`
+	FirstEnumValue string `yaml:"-"`
+	IsRequired     bool   `yaml:"-"`
+	IsStruct       bool   `yaml:"-"`
 }
 
 // ParseStr parses an XTP Extension Plugin schema yaml string and returns it.
