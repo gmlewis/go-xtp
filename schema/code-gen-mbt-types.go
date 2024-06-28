@@ -162,7 +162,7 @@ var structTestMbtTemplateStr = `{{ $name := .Name }}{{ $top := . }}test "{{ $nam
 {{ if hasOptionalFields .}}  //
   let optional_fields : {{ $name }} = {
     ..required_fields,
-{{range $index, $prop := .Properties}}{{ if .IsRequired | not}}    {{ .Name | lowerSnakeCase }}: Some("{{ .Name }}"),
+{{range $index, $prop := .Properties}}{{ if .IsRequired | not}}    {{ .Name | lowerSnakeCase }}: {{ defaultMbtJSONValue . $top }},
 {{ end }}{{ end -}}
 {{ "  }" }}
   let got = optional_fields.to_json()
