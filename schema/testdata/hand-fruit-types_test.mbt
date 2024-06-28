@@ -1,28 +1,28 @@
-fn assert_eq[T : Show + Eq](lhs : T, rhs : T) -> Unit {
-  if lhs != rhs {
-    abort("assert_eq failed.\n    lhs: \(lhs)\n    rhs: \(rhs)")
-  }
-}
-
-test {
-  let requiredFields = {
+test "ComplexObject" {
+  let default_object = ComplexObject::new()
+  let got = default_object.to_json()
+  let want =
+    #|{"ghost":"blinky","aBoolean":false,"aString":"","anInt":0}`
+  @assertion.assert_eq(got, want)?
+  //
+  let required_fields : ComplexObject = {
     ghost: Blinky,
-    aBoolean: true,
-    aString: "aString",
-    anInt: 0,
-    anOptionalDate: None,
+    a_boolean: true,
+    a_string: "aString",
+    an_int: 0,
+    an_optional_date: None,
   }
-  let got = requiredFields.to_json()
+  let got = required_fields.to_json()
   let want =
     #|{"ghost":"blinky","aBoolean":true,"aString":"aString","anInt":0}`
-  assert_eq(got, want)
+  @assertion.assert_eq(got, want)?
   //
-  let optionalFields = {
-    ..requiredFields,
-    anOptionalDate: Some("anOptionalDate"),
+  let optional_fields : ComplexObject = {
+    ..required_fields,
+    an_optional_date: Some("anOptionalDate"),
   }
-  let got = optionalFields.to_json()
+  let got = optional_fields.to_json()
   let want =
     #|{"ghost":"blinky","aBoolean":true,"aString":"aString","anInt":0,"anOptionalDate":"anOptionalDate"}`
-  assert_eq(got, want)
+  @assertion.assert_eq(got, want)?
 }

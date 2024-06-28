@@ -39,7 +39,7 @@ func (p *Plugin) genGoCustomTypes() (srcOut, testSrcOut string, err error) {
 		return "", "", fmt.Errorf("gofmt error: %v\npre-formatted source:\n%v", err, srcToFmt)
 	}
 
-	testSrcToFmt := testPrelude + strings.Join(testBlocks, "\n")
+	testSrcToFmt := testGoPrelude + strings.Join(testBlocks, "\n")
 	testSrc, err := format.Source([]byte(testSrcToFmt))
 	if err != nil {
 		return "", "", fmt.Errorf("gofmt error: %v\npre-formatted test source:\n%v", err, testSrcToFmt)
@@ -94,8 +94,8 @@ var enumGoTemplateStr = `{{ $name := .Name }}// {{ $name }} represents {{ .Descr
 type {{ $name }} string
 
 const (
-  {{range .Enum}}{{ $name }}Enum{{ . | uppercaseFirst }} {{ $name }} = "{{ . }}"
-  {{ end }}
+{{range .Enum}}  {{ $name }}Enum{{ . | uppercaseFirst }} {{ $name }} = "{{ . }}"
+{{ end -}}
 )
 `
 
@@ -121,8 +121,8 @@ func (p *Plugin) genTestGoStruct(ct *CustomType) (string, error) {
 
 var structGoTemplateStr = `{{ $name := .Name }}{{ $top := . }}// {{ $name }} represents {{ .Description | downcaseFirst }}.
 type {{ $name }} struct {
-  {{range .Properties}}{{ .Description | optionalMultilineComment }}{{ .Name | uppercaseFirst }} {{ getGoType . }} ` + "`" + `json:"{{ .Name }}{{ addOmitIfNeeded . }}"` + "`" + `
-  {{ end }}
+{{range .Properties}}  {{ .Description | optionalGoMultilineComment }}{{ .Name | uppercaseFirst }} {{ getGoType . }} ` + "`" + `json:"{{ .Name }}{{ addOmitIfNeeded . }}"` + "`" + `
+{{ end -}}
 }
 `
 
@@ -144,10 +144,10 @@ var structTestGoTemplateStr = `{{ $name := .Name }}{{ $top := . }}func Test{{ $n
 		{
 			name: "optional fields",
 			obj: &{{ .Name }}{
-{{range $index, $prop := .Properties}}{{ if .IsRequired | not }}  {{ .Name | uppercaseFirst }}: {{ defaultValue . }},
+{{range $index, $prop := .Properties}}{{ if .IsRequired | not }}  {{ .Name | uppercaseFirst }}: {{ defaultGoValue . }},
 {{ end }}{{ end }}
 			},
-			want: ` + "`" + `{{"{"}}{{range $index, $prop := .Properties}}"{{ .Name }}":{{ defaultJSONValue . $top }}{{ showJSONCommaForOptional $index $top }}{{ end }}{{"}"}}` + "`" + `,
+			want: ` + "`" + `{{"{"}}{{range $index, $prop := .Properties}}"{{ .Name }}":{{ defaultGoJSONValue . $top }}{{ showJSONCommaForOptional $index $top }}{{ end }}{{"}"}}` + "`" + `,
 		},
 	}
 
@@ -167,7 +167,7 @@ var structTestGoTemplateStr = `{{ $name := .Name }}{{ $top := . }}func Test{{ $n
 }
 `
 
-var testPrelude = `import (
+var testGoPrelude = `import (
   "testing"
 
 	"github.com/google/go-cmp/cmp"

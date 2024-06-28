@@ -59,18 +59,23 @@ func (p *Plugin) GenPluginPDK(customTypes, pkgName string) (string, error) {
 }
 
 var funcMap = map[string]any{
-	"addOmitIfNeeded":          addOmitIfNeeded,
-	"defaultJSONValue":         defaultJSONValue,
-	"defaultValue":             defaultValue,
-	"downcaseFirst":            downcaseFirst,
-	"getGoType":                getGoType,
-	"multilineComment":         multilineComment,
-	"optionalMultilineComment": optionalMultilineComment,
-	"requiredJSONValue":        requiredJSONValue,
-	"requiredValue":            requiredValue,
-	"showJSONCommaForOptional": showJSONCommaForOptional,
-	"showJSONCommaForRequired": showJSONCommaForRequired,
-	"uppercaseFirst":           uppercaseFirst,
+	"addOmitIfNeeded":             addOmitIfNeeded,
+	"defaultGoJSONValue":          defaultGoJSONValue,
+	"defaultGoValue":              defaultGoValue,
+	"defaultMbtJSONValue":         defaultMbtJSONValue,
+	"defaultMbtValue":             defaultMbtValue,
+	"downcaseFirst":               downcaseFirst,
+	"getGoType":                   getGoType,
+	"getMbtType":                  getMbtType,
+	"lowerSnakeCase":              lowerSnakeCase,
+	"multilineComment":            multilineComment,
+	"optionalGoMultilineComment":  optionalGoMultilineComment,
+	"optionalMbtMultilineComment": optionalMbtMultilineComment,
+	"requiredJSONValue":           requiredJSONValue,
+	"requiredValue":               requiredValue,
+	"showJSONCommaForOptional":    showJSONCommaForOptional,
+	"showJSONCommaForRequired":    showJSONCommaForRequired,
+	"uppercaseFirst":              uppercaseFirst,
 }
 
 func addOmitIfNeeded(prop *Property) string {
@@ -80,14 +85,14 @@ func addOmitIfNeeded(prop *Property) string {
 	return ",omitempty"
 }
 
-func defaultJSONValue(prop *Property, ct *CustomType) string {
+func defaultGoJSONValue(prop *Property, ct *CustomType) string {
 	if prop.Ref != "" {
 		if !prop.IsRequired && prop.RefCustomType != nil {
 			// populate all the required fields recursively:
 			requiredProps := prop.RefCustomType.GetRequiredProps()
 			fields := make([]string, 0, len(requiredProps))
 			for _, p2 := range requiredProps {
-				fields = append(fields, fmt.Sprintf("%q:%v", p2.Name, defaultJSONValue(p2, prop.RefCustomType)))
+				fields = append(fields, fmt.Sprintf("%q:%v", p2.Name, defaultGoJSONValue(p2, prop.RefCustomType)))
 			}
 			return fmt.Sprintf("{%v}", strings.Join(fields, ","))
 		}
@@ -109,7 +114,7 @@ func defaultJSONValue(prop *Property, ct *CustomType) string {
 	}
 }
 
-func defaultValue(prop *Property) string {
+func defaultGoValue(prop *Property) string {
 	if prop.Ref != "" {
 		parts := strings.Split(prop.Ref, "/")
 		refName := parts[len(parts)-1]
@@ -135,6 +140,59 @@ func defaultValue(prop *Property) string {
 			return fmt.Sprintf("stringPtr(%q)", prop.Name)
 		}
 		return `""`
+	default:
+		return `""`
+	}
+}
+
+func defaultMbtJSONValue(prop *Property, ct *CustomType) string {
+	if prop.Ref != "" {
+		if !prop.IsRequired && prop.RefCustomType != nil {
+			// populate all the required fields recursively:
+			requiredProps := prop.RefCustomType.GetRequiredProps()
+			fields := make([]string, 0, len(requiredProps))
+			for _, p2 := range requiredProps {
+				fields = append(fields, fmt.Sprintf("%q:%v", p2.Name, defaultGoJSONValue(p2, prop.RefCustomType)))
+			}
+			return fmt.Sprintf("{%v}", strings.Join(fields, ","))
+		}
+		return `""`
+	}
+
+	switch prop.Type {
+	case "boolean":
+		return "false"
+	case "integer":
+		return "0"
+	case "string":
+		return `""`
+	default:
+		return `""`
+	}
+}
+
+func defaultMbtValue(prop *Property) string {
+	if prop.Ref != "" {
+		// parts := strings.Split(prop.Ref, "/")
+		// refName := parts[len(parts)-1]
+		if !prop.IsRequired && prop.RefCustomType != nil {
+			return "None"
+		}
+		if prop.FirstEnumValue != "" {
+			return uppercaseFirst(prop.FirstEnumValue)
+		}
+		return `""`
+	}
+
+	if !prop.IsRequired {
+		return "None"
+	}
+
+	switch prop.Type {
+	case "boolean":
+		return "false"
+	case "integer":
+		return "0"
 	default:
 		return `""`
 	}
@@ -171,16 +229,66 @@ func getGoType(prop *Property) string {
 	}
 }
 
+func getMbtType(prop *Property) string {
+	if prop.Ref != "" {
+		parts := strings.Split(prop.Ref, "/")
+		if prop.RefCustomType != nil {
+			return parts[len(parts)-1] + "?"
+		}
+		return parts[len(parts)-1]
+	}
+
+	var optional string
+	if !prop.IsRequired {
+		optional = "?"
+	}
+
+	switch prop.Type {
+	case "boolean":
+		return "Bool" + optional
+	case "integer":
+		return "Int" + optional
+	case "string":
+		return "String" + optional
+	default:
+		return prop.Type + optional
+	}
+}
+
+func lowerSnakeCase(s string) string {
+	if s == "" {
+		return s
+	}
+	result := strings.ToLower(s[0:1])
+	for _, r := range s[1:] {
+		rs := string(r)
+		if rs == strings.ToUpper(rs) {
+			result += "_" + strings.ToLower(rs)
+			continue
+		}
+		result += rs
+	}
+	return result
+}
+
 func multilineComment(s string) string {
 	return strings.ReplaceAll(strings.TrimSpace(s), "\n", "\n// ")
 }
 
-func optionalMultilineComment(s string) string {
+func optionalGoMultilineComment(s string) string {
 	s = strings.TrimSpace(s)
 	if s == "" {
 		return "" // Don't render comment at all
 	}
 	return "// " + strings.ReplaceAll(strings.TrimSpace(s), "\n", "\n  // ") + "\n  "
+}
+
+func optionalMbtMultilineComment(s string) string {
+	s = strings.TrimSpace(s)
+	if s == "" {
+		return "" // Don't render comment at all
+	}
+	return "/// " + strings.ReplaceAll(strings.TrimSpace(s), "\n", "\n  /// ") + "\n  "
 }
 
 func requiredJSONValue(prop *Property) string {
