@@ -85,6 +85,7 @@ type Property struct {
 
 	// the following fields are only used by the code generator:
 	IsRequired bool `yaml:"-"`
+	IsStruct   bool `yaml:"-"`
 }
 
 // ParseStr parses an XTP Extension Plugin schema yaml string and returns it.

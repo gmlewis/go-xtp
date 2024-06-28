@@ -83,7 +83,10 @@ func downcaseFirst(s string) string {
 func getGoType(prop *Property) string {
 	if prop.Ref != "" {
 		parts := strings.Split(prop.Ref, "/")
-		return "*" + parts[len(parts)-1]
+		if prop.IsStruct {
+			return "*" + parts[len(parts)-1]
+		}
+		return parts[len(parts)-1]
 	}
 
 	var asterisk string
