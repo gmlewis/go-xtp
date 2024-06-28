@@ -53,6 +53,8 @@ func defaultMbtValue(prop *Property) string {
 		return "false"
 	case "integer":
 		return "0"
+	case "string":
+		return `""`
 	default:
 		return `""`
 	}
@@ -115,12 +117,17 @@ func optionalMbtValue(prop *Property) string {
 	}
 }
 
-func requiredMbtJSONValue(prop *Property) string {
+func requiredMbtJSONValue(prop *Property, ct *CustomType) string {
 	if prop.Ref != "" {
-		parts := strings.Split(prop.Ref, "/")
-		refName := parts[len(parts)-1]
 		if prop.RefCustomType != nil {
-			return fmt.Sprintf("Some(%v::new())", refName) // FIX - not a JSON value
+			// populate all the required fields recursively:
+			requiredProps := prop.RefCustomType.GetRequiredProps()
+			fields := make([]string, 0, len(requiredProps))
+			for _, p2 := range requiredProps {
+				// NOTE: This calls `defaultMbtJSONValue` recursively, not _THIS_ function recursively!
+				fields = append(fields, fmt.Sprintf("%q:%v", p2.Name, defaultMbtJSONValue(p2, prop.RefCustomType)))
+			}
+			return fmt.Sprintf("{%v}", strings.Join(fields, ","))
 		}
 		return fmt.Sprintf("%q", prop.FirstEnumValue)
 	}

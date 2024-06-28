@@ -15,4 +15,3 @@ type User struct {
 	Email   *string  `json:"email,omitempty"`
 	Address *Address `json:"address,omitempty"`
 }
-

@@ -157,17 +157,17 @@ var structTestMbtTemplateStr = `{{ $name := .Name }}{{ $top := . }}test "{{ $nam
 {{ "  }" }}
   let got = required_fields.to_json()
   let want =
-{{ "    #|{" }}{{range $index, $prop := .Properties}}{{ if .IsRequired }}"{{ .Name }}":{{ requiredMbtJSONValue . }}{{ showJSONCommaForRequired $index $top }}{{ end }}{{ end -}}{{ "}" }}
+{{ "    #|{" }}{{range $index, $prop := .Properties}}{{ if .IsRequired }}"{{ .Name }}":{{ requiredMbtJSONValue . $top }}{{ showJSONCommaForRequired $index $top }}{{ end }}{{ end -}}{{ "}" }}
   @assertion.assert_eq(got, want)?
 {{ if hasOptionalFields .}}  //
   let optional_fields : {{ $name }} = {
     ..required_fields,
-{{range $index, $prop := .Properties}}{{ if .IsRequired | not}}    {{ .Name | lowerSnakeCase }}: {{ defaultMbtJSONValue . $top }},
+{{range $index, $prop := .Properties}}{{ if .IsRequired | not}}    {{ .Name | lowerSnakeCase }}: {{ optionalMbtValue . }},
 {{ end }}{{ end -}}
 {{ "  }" }}
   let got = optional_fields.to_json()
   let want =
-{{ "    #|{" }}{{range $index, $prop := .Properties}}"{{ .Name }}":{{ requiredMbtJSONValue . }}{{ showJSONCommaForOptional $index $top }}{{ end -}}{{ "}" }}
+{{ "    #|{" }}{{range $index, $prop := .Properties}}"{{ .Name }}":{{ requiredMbtJSONValue . $top }}{{ showJSONCommaForOptional $index $top }}{{ end -}}{{ "}" }}
   @assertion.assert_eq(got, want)?
 {{ end -}}
 }

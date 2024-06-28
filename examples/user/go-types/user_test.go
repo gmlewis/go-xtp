@@ -86,4 +86,3 @@ func TestUserMarshal(t *testing.T) {
 		})
 	}
 }
-

@@ -53,4 +53,3 @@ func TestComplexObjectMarshal(t *testing.T) {
 		})
 	}
 }
-

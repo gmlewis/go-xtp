@@ -126,6 +126,21 @@ type {{ $name }} struct {
 }
 `
 
+var testGoPrelude = `import (
+  "testing"
+
+	"github.com/google/go-cmp/cmp"
+	jsoniter "github.com/json-iterator/go"
+)
+
+var jsoncomp = jsoniter.ConfigCompatibleWithStandardLibrary
+
+func boolPtr(b bool) *bool { return &b }
+func intPtr(i int) *int { return &i }
+func stringPtr(s string) *string { return &s }
+
+`
+
 var structTestGoTemplateStr = `{{ $name := .Name }}{{ $top := . }}func Test{{ $name }}Marshal(t *testing.T) {
   t.Parallel()
 	tests := []struct {
@@ -165,19 +180,4 @@ var structTestGoTemplateStr = `{{ $name := .Name }}{{ $top := . }}func Test{{ $n
 		})
 	}
 }
-`
-
-var testGoPrelude = `import (
-  "testing"
-
-	"github.com/google/go-cmp/cmp"
-	jsoniter "github.com/json-iterator/go"
-)
-
-var jsoncomp = jsoniter.ConfigCompatibleWithStandardLibrary
-
-func boolPtr(b bool) *bool { return &b }
-func intPtr(i int) *int { return &i }
-func stringPtr(s string) *string { return &s }
-
 `

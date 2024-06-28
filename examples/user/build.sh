@@ -9,5 +9,5 @@ go run ../../cmd/xtp2code/main.go \
     -lang=mbt \
     -host=mbt-host/main.mbt \
     -plugin=mbt-plugin/main.mbt \
-    -types=mbt-types/fruit.mbt \
+    -types=mbt-types/user.mbt \
     -yaml=schema.yaml

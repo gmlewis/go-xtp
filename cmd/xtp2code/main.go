@@ -111,14 +111,20 @@ func processPlugin(plugin *schema.Plugin) error {
 
 	if *typesFile != "" {
 		pkgName := genPkgName(*typesFile)
-		fullSrc := fmt.Sprintf("// Package %v represents the custom datatypes for an XTP Extension Plugin.\npackage %[1]v\n\n%v\n", pkgName, custTypes)
+		fullSrc := custTypes
+		if *lang == "go" {
+			fullSrc = fmt.Sprintf("// Package %v represents the custom datatypes for an XTP Extension Plugin.\npackage %[1]v\n\n%v", pkgName, custTypes)
+		}
 		if err := os.WriteFile(*typesFile, []byte(fullSrc), 0644); err != nil {
 			return err
 		}
 
 		if custTypesTests != "" {
 			testFilename := strings.Replace(*typesFile, "."+*lang, "_test."+*lang, 1)
-			testSrc := fmt.Sprintf("package %v\n\n%v\n", pkgName, custTypesTests)
+			testSrc := custTypesTests
+			if *lang == "go" {
+				testSrc = fmt.Sprintf("package %v\n\n%v", pkgName, custTypesTests)
+			}
 			if err := os.WriteFile(testFilename, []byte(testSrc), 0644); err != nil {
 				return err
 			}

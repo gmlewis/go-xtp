@@ -35,4 +35,3 @@ type ComplexObject struct {
 	// this for you.
 	AnOptionalDate *string `json:"anOptionalDate,omitempty"`
 }
-
