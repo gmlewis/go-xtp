@@ -28,31 +28,20 @@ func TestComplexObjectMarshal(t *testing.T) {
 				AString:  "aString",
 				AnInt:    0,
 			},
-			want: `{
-  "ghost": "blinky",
-  "aBoolean": true,
-  "aString": "aString",
-  "anInt": 0
-}`,
+			want: `{"ghost":"blinky","aBoolean":true,"aString":"aString","anInt":0}`,
 		},
 		{
 			name: "optional fields",
 			obj: &ComplexObject{
 				AnOptionalDate: stringPtr("anOptionalDate"),
 			},
-			want: `{
-  "ghost": "",
-  "aBoolean": false,
-  "aString": "",
-  "anInt": 0,
-  "anOptionalDate": "anOptionalDate"
-}`,
+			want: `{"ghost":"","aBoolean":false,"aString":"","anInt":0,"anOptionalDate":"anOptionalDate"}`,
 		},
 	}
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			got, err := jsoncomp.MarshalIndent(tt.obj, "", "  ")
+			got, err := jsoncomp.Marshal(tt.obj)
 			if err != nil {
 				t.Fatal(err)
 			}

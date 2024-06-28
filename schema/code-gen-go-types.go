@@ -10,9 +10,9 @@ import (
 )
 
 var (
-	enumGoTemplate       = template.Must(template.New("enum.go").Funcs(funcMap).Parse(enumGoTemplateStr))
-	structGoTemplate     = template.Must(template.New("struct.go").Funcs(funcMap).Parse(structGoTemplateStr))
-	structTestGoTemplate = template.Must(template.New("struct_test.go").Funcs(funcMap).Parse(structTestGoTemplateStr))
+	enumGoTemplate       = template.Must(template.New("code-gen-go-types.go:enumGoTemplateStr").Funcs(funcMap).Parse(enumGoTemplateStr))
+	structGoTemplate     = template.Must(template.New("code-gen-go-types.go:structGoTemplateStr").Funcs(funcMap).Parse(structGoTemplateStr))
+	structTestGoTemplate = template.Must(template.New("code-gen-go-types.go:structTestGoTemplateStr").Funcs(funcMap).Parse(structTestGoTemplateStr))
 )
 
 // genGoCustomTypes generates custom types with tests for the plugin in Go.
@@ -139,9 +139,7 @@ var structTestGoTemplateStr = `{{ $name := .Name }}{{ $top := . }}func Test{{ $n
 {{range $index, $prop := .Properties}}{{if .IsRequired}}  {{ .Name | uppercaseFirst }}: {{ requiredValue . $top }},
 {{ end }}{{ end }}
 			},
-			want: ` + "`" + `{
-{{range $index, $prop := .Properties}}{{if .IsRequired}}  "{{ .Name }}": {{ requiredJSONValue . $top }}{{ showJSONCommaForRequired $index $top }}{{ end }}{{ end }}
-}` + "`" + `,
+			want: ` + "`" + `{{"{"}}{{range $index, $prop := .Properties}}{{if .IsRequired}}"{{ .Name }}":{{ requiredJSONValue . $top }}{{ showJSONCommaForRequired $index $top }}{{ end }}{{ end }}{{"}"}}` + "`" + `,
 		},
 		{
 			name: "optional fields",
@@ -149,15 +147,13 @@ var structTestGoTemplateStr = `{{ $name := .Name }}{{ $top := . }}func Test{{ $n
 {{range $index, $prop := .Properties}}{{ if .IsRequired | not }}  {{ .Name | uppercaseFirst }}: {{ defaultValue . }},
 {{ end }}{{ end }}
 			},
-			want: ` + "`" + `{
-{{range $index, $prop := .Properties}}  "{{ .Name }}": {{ defaultJSONValue . }}{{ showJSONCommaForOptional $index $top }}{{ end }}
-}` + "`" + `,
+			want: ` + "`" + `{{"{"}}{{range $index, $prop := .Properties}}"{{ .Name }}":{{ defaultJSONValue . }}{{ showJSONCommaForOptional $index $top }}{{ end }}{{"}"}}` + "`" + `,
 		},
 	}
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			got, err := jsoncomp.MarshalIndent(tt.obj, "", "  ")
+			got, err := jsoncomp.Marshal(tt.obj)
 			if err != nil {
 				t.Fatal(err)
 			}

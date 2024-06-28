@@ -23,24 +23,20 @@ func TestAddressMarshal(t *testing.T) {
 		{
 			name: "required fields",
 			obj:  &Address{},
-			want: `{
-
-}`,
+			want: `{}`,
 		},
 		{
 			name: "optional fields",
 			obj: &Address{
 				Street: stringPtr("street"),
 			},
-			want: `{
-  "street": "street"
-}`,
+			want: `{"street":"street"}`,
 		},
 	}
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			got, err := jsoncomp.MarshalIndent(tt.obj, "", "  ")
+			got, err := jsoncomp.Marshal(tt.obj)
 			if err != nil {
 				t.Fatal(err)
 			}
@@ -63,9 +59,7 @@ func TestUserMarshal(t *testing.T) {
 		{
 			name: "required fields",
 			obj:  &User{},
-			want: `{
-
-}`,
+			want: `{}`,
 		},
 		{
 			name: "optional fields",
@@ -74,19 +68,13 @@ func TestUserMarshal(t *testing.T) {
 				Email:   stringPtr("email"),
 				Address: &Address{},
 			},
-			want: `{
-  "age": 0,
-  "email": "email",
-  "address": {
-    
-  }
-}`,
+			want: `{"age":0,"email":"email","address":{}}`,
 		},
 	}
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			got, err := jsoncomp.MarshalIndent(tt.obj, "", "  ")
+			got, err := jsoncomp.Marshal(tt.obj)
 			if err != nil {
 				t.Fatal(err)
 			}

@@ -83,7 +83,7 @@ func addOmitIfNeeded(prop *Property) string {
 func defaultJSONValue(prop *Property) string {
 	if prop.Ref != "" {
 		if !prop.IsRequired && prop.IsStruct {
-			return "{\n    \n  }"
+			return "{}"
 		}
 		return `""`
 	}
@@ -222,7 +222,7 @@ func requiredValue(prop *Property, ct *CustomType) string {
 
 func showJSONCommaForOptional(index int, ct *CustomType) string {
 	if index < len(ct.Properties)-1 {
-		return ",\n"
+		return ","
 	}
 	return ""
 }
@@ -231,7 +231,7 @@ func showJSONCommaForRequired(index int, ct *CustomType) string {
 	for index++; index < len(ct.Properties); index++ {
 		prop := ct.Properties[index]
 		if prop.IsRequired {
-			return ",\n"
+			return ","
 		}
 	}
 	return ""
