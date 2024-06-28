@@ -159,7 +159,7 @@ var structTestMbtTemplateStr = `{{ $name := .Name }}{{ $top := . }}test "{{ $nam
   let want =
 {{ "    #|{" }}{{range $index, $prop := .Properties}}{{ if .IsRequired }}"{{ .Name }}":{{ requiredMbtJSONValue . }}{{ showJSONCommaForRequired $index $top }}{{ end }}{{ end -}}{{ "}" }}
   @assertion.assert_eq(got, want)?
-  //
+{{ if hasOptionalFields .}}  //
   let optional_fields : {{ $name }} = {
     ..required_fields,
 {{range $index, $prop := .Properties}}{{ if .IsRequired | not}}    {{ .Name | lowerSnakeCase }}: Some("{{ .Name }}"),
@@ -169,5 +169,6 @@ var structTestMbtTemplateStr = `{{ $name := .Name }}{{ $top := . }}test "{{ $nam
   let want =
 {{ "    #|{" }}{{range $index, $prop := .Properties}}"{{ .Name }}":{{ requiredMbtJSONValue . }}{{ showJSONCommaForOptional $index $top }}{{ end -}}{{ "}" }}
   @assertion.assert_eq(got, want)?
+{{ end -}}
 }
 `

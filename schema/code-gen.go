@@ -67,6 +67,7 @@ var funcMap = map[string]any{
 	"downcaseFirst":               downcaseFirst,
 	"getGoType":                   getGoType,
 	"getMbtType":                  getMbtType,
+	"hasOptionalFields":           hasOptionalFields,
 	"lowerSnakeCase":              lowerSnakeCase,
 	"multilineComment":            multilineComment,
 	"optionalGoMultilineComment":  optionalGoMultilineComment,
@@ -255,6 +256,10 @@ func getMbtType(prop *Property) string {
 	default:
 		return prop.Type + optional
 	}
+}
+
+func hasOptionalFields(ct *CustomType) bool {
+	return len(ct.Required) != len(ct.Properties)
 }
 
 func lowerSnakeCase(s string) string {
