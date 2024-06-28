@@ -1,4 +1,4 @@
-package fruit // this line will be stripped in the unit test
+package testdata // this line will be stripped in the unit test
 
 // Fruit represents a set of available fruits you can consume.
 type Fruit string

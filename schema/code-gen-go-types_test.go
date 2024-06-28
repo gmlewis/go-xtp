@@ -11,8 +11,14 @@ import (
 //go:embed testdata/hand-fruit.go
 var wantFruitGo string
 
-//go:embed testdata/hand-fruit_test.go
+//go:embed testdata/hand-fruit_test.go.txt
 var wantFruitTestGo string
+
+//go:embed testdata/hand-user.go
+var wantUserGo string
+
+//go:embed testdata/hand-user_test.go.txt
+var wantUserTestGo string
 
 func stripLeadingLines(s string, n int) string {
 	return strings.Join(strings.Split(s, "\n")[2:], "\n")
@@ -32,6 +38,12 @@ func TestGenGoCustomTypes(t *testing.T) {
 			wantSrc:  stripLeadingLines(wantFruitGo, 2),
 			wantTest: stripLeadingLines(wantFruitTestGo, 2),
 		},
+		{
+			name:     "user",
+			yamlStr:  userYaml,
+			wantSrc:  stripLeadingLines(wantUserGo, 2),
+			wantTest: stripLeadingLines(wantUserTestGo, 2),
+		},
 	}
 
 	for _, tt := range tests {
@@ -47,12 +59,12 @@ func TestGenGoCustomTypes(t *testing.T) {
 			}
 
 			if diff := cmp.Diff(tt.wantSrc, gotSrc); diff != "" {
-				t.Log(gotSrc)
+				t.Logf("got src:\n%v", gotSrc)
 				t.Errorf("genGoCustomTypes src mismatch (-want +got):\n%v", diff)
 			}
 
 			if diff := cmp.Diff(tt.wantTest, gotTest); diff != "" {
-				t.Log(gotTest)
+				t.Logf("got test:\n%v", gotTest)
 				t.Errorf("genGoCustomTypes test mismatch (-want +got):\n%v", diff)
 			}
 		})

@@ -9,7 +9,10 @@ import (
 
 var jsoncomp = jsoniter.ConfigCompatibleWithStandardLibrary
 
+func boolPtr(b bool) *bool       { return &b }
+func intPtr(i int) *int          { return &i }
 func stringPtr(s string) *string { return &s }
+
 func TestAddressMarshal(t *testing.T) {
 	t.Parallel()
 	tests := []struct {
@@ -43,7 +46,7 @@ func TestAddressMarshal(t *testing.T) {
 			}
 
 			if diff := cmp.Diff(tt.want, string(got)); diff != "" {
-				t.Log(string(got))
+				t.Logf("got:\n%v", string(got))
 				t.Errorf("Marshal mismatch (-want +got):\n%v", diff)
 			}
 		})
@@ -67,12 +70,16 @@ func TestUserMarshal(t *testing.T) {
 		{
 			name: "optional fields",
 			obj: &User{
-				Age: 0, Email: stringPtr("email"), Address: "",
+				Age:     intPtr(0),
+				Email:   stringPtr("email"),
+				Address: &Address{},
 			},
 			want: `{
   "age": 0,
   "email": "email",
-  "address": ""
+  "address": {
+    
+  }
 }`,
 		},
 	}
@@ -85,7 +92,7 @@ func TestUserMarshal(t *testing.T) {
 			}
 
 			if diff := cmp.Diff(tt.want, string(got)); diff != "" {
-				t.Log(string(got))
+				t.Logf("got:\n%v", string(got))
 				t.Errorf("Marshal mismatch (-want +got):\n%v", diff)
 			}
 		})

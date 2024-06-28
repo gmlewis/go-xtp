@@ -81,6 +81,13 @@ func addOmitIfNeeded(prop *Property) string {
 }
 
 func defaultJSONValue(prop *Property) string {
+	if prop.Ref != "" {
+		if !prop.IsRequired && prop.IsStruct {
+			return "{\n    \n  }"
+		}
+		return `""`
+	}
+
 	switch prop.Type {
 	case "boolean":
 		return "false"
@@ -97,10 +104,25 @@ func defaultJSONValue(prop *Property) string {
 }
 
 func defaultValue(prop *Property) string {
+	if prop.Ref != "" {
+		parts := strings.Split(prop.Ref, "/")
+		refName := parts[len(parts)-1]
+		if !prop.IsRequired && prop.IsStruct {
+			return "&" + refName + "{}"
+		}
+		return `""`
+	}
+
 	switch prop.Type {
 	case "boolean":
+		if !prop.IsRequired {
+			return "boolPtr(false)"
+		}
 		return "false"
 	case "integer":
+		if !prop.IsRequired {
+			return "intPtr(0)"
+		}
 		return "0"
 	case "string":
 		if !prop.IsRequired {

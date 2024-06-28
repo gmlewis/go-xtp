@@ -146,7 +146,8 @@ var structTestGoTemplateStr = `{{ $name := .Name }}{{ $top := . }}func Test{{ $n
 		{
 			name: "optional fields",
 			obj: &{{ .Name }}{
-{{range $index, $prop := .Properties}}{{ if .IsRequired | not }}  {{ .Name | uppercaseFirst }}: {{ defaultValue . }},{{ end }}{{ end }}
+{{range $index, $prop := .Properties}}{{ if .IsRequired | not }}  {{ .Name | uppercaseFirst }}: {{ defaultValue . }},
+{{ end }}{{ end }}
 			},
 			want: ` + "`" + `{
 {{range $index, $prop := .Properties}}  "{{ .Name }}": {{ defaultJSONValue . }}{{ showJSONCommaForOptional $index $top }}{{ end }}
@@ -162,7 +163,7 @@ var structTestGoTemplateStr = `{{ $name := .Name }}{{ $top := . }}func Test{{ $n
 			}
 
 			if diff := cmp.Diff(tt.want, string(got)); diff != "" {
-				t.Log(string(got))
+				t.Logf("got:\n%v", string(got))
 				t.Errorf("Marshal mismatch (-want +got):\n%v", diff)
 			}
 		})
@@ -179,5 +180,8 @@ var testPrelude = `import (
 
 var jsoncomp = jsoniter.ConfigCompatibleWithStandardLibrary
 
+func boolPtr(b bool) *bool { return &b }
+func intPtr(i int) *int { return &i }
 func stringPtr(s string) *string { return &s }
+
 `
