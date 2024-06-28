@@ -1,0 +1,94 @@
+package user
+
+import (
+	"testing"
+
+	"github.com/google/go-cmp/cmp"
+	jsoniter "github.com/json-iterator/go"
+)
+
+var jsoncomp = jsoniter.ConfigCompatibleWithStandardLibrary
+
+func stringPtr(s string) *string { return &s }
+func TestAddressMarshal(t *testing.T) {
+	t.Parallel()
+	tests := []struct {
+		name string
+		obj  *Address
+		want string
+	}{
+		{
+			name: "required fields",
+			obj:  &Address{},
+			want: `{
+
+}`,
+		},
+		{
+			name: "optional fields",
+			obj: &Address{
+				Street: stringPtr("street"),
+			},
+			want: `{
+  "street": "street"
+}`,
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			got, err := jsoncomp.MarshalIndent(tt.obj, "", "  ")
+			if err != nil {
+				t.Fatal(err)
+			}
+
+			if diff := cmp.Diff(tt.want, string(got)); diff != "" {
+				t.Log(string(got))
+				t.Errorf("Marshal mismatch (-want +got):\n%v", diff)
+			}
+		})
+	}
+}
+
+func TestUserMarshal(t *testing.T) {
+	t.Parallel()
+	tests := []struct {
+		name string
+		obj  *User
+		want string
+	}{
+		{
+			name: "required fields",
+			obj:  &User{},
+			want: `{
+
+}`,
+		},
+		{
+			name: "optional fields",
+			obj: &User{
+				Age: 0, Email: stringPtr("email"), Address: "",
+			},
+			want: `{
+  "age": 0,
+  "email": "email",
+  "address": ""
+}`,
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			got, err := jsoncomp.MarshalIndent(tt.obj, "", "  ")
+			if err != nil {
+				t.Fatal(err)
+			}
+
+			if diff := cmp.Diff(tt.want, string(got)); diff != "" {
+				t.Log(string(got))
+				t.Errorf("Marshal mismatch (-want +got):\n%v", diff)
+			}
+		})
+	}
+}
+

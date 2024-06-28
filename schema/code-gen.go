@@ -61,10 +61,13 @@ func (p *Plugin) GenPluginPDK(customTypes, pkgName string) (string, error) {
 var funcMap = map[string]any{
 	"addOmitIfNeeded":          addOmitIfNeeded,
 	"defaultJSONValue":         defaultJSONValue,
+	"defaultValue":             defaultValue,
 	"downcaseFirst":            downcaseFirst,
 	"getGoType":                getGoType,
 	"multilineComment":         multilineComment,
+	"optionalMultilineComment": optionalMultilineComment,
 	"requiredJSONValue":        requiredJSONValue,
+	"requiredValue":            requiredValue,
 	"showJSONCommaForOptional": showJSONCommaForOptional,
 	"showJSONCommaForRequired": showJSONCommaForRequired,
 	"uppercaseFirst":           uppercaseFirst,
@@ -86,6 +89,22 @@ func defaultJSONValue(prop *Property) string {
 	case "string":
 		if !prop.IsRequired {
 			return fmt.Sprintf("%q", prop.Name)
+		}
+		return `""`
+	default:
+		return `""`
+	}
+}
+
+func defaultValue(prop *Property) string {
+	switch prop.Type {
+	case "boolean":
+		return "false"
+	case "integer":
+		return "0"
+	case "string":
+		if !prop.IsRequired {
+			return fmt.Sprintf("stringPtr(%q)", prop.Name)
 		}
 		return `""`
 	default:
@@ -128,6 +147,14 @@ func multilineComment(s string) string {
 	return strings.ReplaceAll(strings.TrimSpace(s), "\n", "\n// ")
 }
 
+func optionalMultilineComment(s string) string {
+	s = strings.TrimSpace(s)
+	if s == "" {
+		return "" // Don't render comment at all
+	}
+	return "// " + strings.ReplaceAll(strings.TrimSpace(s), "\n", "\n  // ") + "\n  "
+}
+
 func requiredJSONValue(prop *Property, ct *CustomType) string {
 	if prop.Ref != "" {
 		parts := strings.Split(prop.Ref, "/")
@@ -135,6 +162,28 @@ func requiredJSONValue(prop *Property, ct *CustomType) string {
 			return "&" + parts[len(parts)-1] + "{}"
 		}
 		return fmt.Sprintf("%q", prop.FirstEnumValue)
+	}
+
+	switch prop.Type {
+	case "boolean":
+		return "true"
+	case "integer":
+		return "0"
+	case "string":
+		return fmt.Sprintf("%q", prop.Name)
+	default:
+		return `""`
+	}
+}
+
+func requiredValue(prop *Property, ct *CustomType) string {
+	if prop.Ref != "" {
+		parts := strings.Split(prop.Ref, "/")
+		refName := parts[len(parts)-1]
+		if prop.IsStruct {
+			return "&" + refName + "{}"
+		}
+		return fmt.Sprintf("%vEnum%v", uppercaseFirst(refName), uppercaseFirst(prop.FirstEnumValue))
 	}
 
 	switch prop.Type {

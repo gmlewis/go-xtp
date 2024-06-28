@@ -121,8 +121,7 @@ func (p *Plugin) genTestGoStruct(ct *CustomType) (string, error) {
 
 var structGoTemplateStr = `{{ $name := .Name }}{{ $top := . }}// {{ $name }} represents {{ .Description | downcaseFirst }}.
 type {{ $name }} struct {
-  {{range .Properties}}// {{ .Description | multilineComment }}
-  {{ .Name | uppercaseFirst }} {{ getGoType . }} ` + "`" + `json:"{{ .Name }}{{ addOmitIfNeeded . }}"` + "`" + `
+  {{range .Properties}}{{ .Description | optionalMultilineComment }}{{ .Name | uppercaseFirst }} {{ getGoType . }} ` + "`" + `json:"{{ .Name }}{{ addOmitIfNeeded . }}"` + "`" + `
   {{ end }}
 }
 `
@@ -137,10 +136,8 @@ var structTestGoTemplateStr = `{{ $name := .Name }}{{ $top := . }}func Test{{ $n
 		{
 			name: "required fields",
 			obj: &{{ .Name }}{
-				Ghost:    GhostGangEnumBlinky,
-				ABoolean: true,
-				AString:  "aString",
-				AnInt:    0,
+{{range $index, $prop := .Properties}}{{if .IsRequired}}  {{ .Name | uppercaseFirst }}: {{ requiredValue . $top }},
+{{ end }}{{ end }}
 			},
 			want: ` + "`" + `{
 {{range $index, $prop := .Properties}}{{if .IsRequired}}  "{{ .Name }}": {{ requiredJSONValue . $top }}{{ showJSONCommaForRequired $index $top }}{{ end }}{{ end }}
@@ -149,7 +146,7 @@ var structTestGoTemplateStr = `{{ $name := .Name }}{{ $top := . }}func Test{{ $n
 		{
 			name: "optional fields",
 			obj: &{{ .Name }}{
-				AnOptionalDate: stringPtr("anOptionalDate"),
+{{range $index, $prop := .Properties}}{{ if .IsRequired | not }}  {{ .Name | uppercaseFirst }}: {{ defaultValue . }},{{ end }}{{ end }}
 			},
 			want: ` + "`" + `{
 {{range $index, $prop := .Properties}}  "{{ .Name }}": {{ defaultJSONValue . }}{{ showJSONCommaForOptional $index $top }}{{ end }}
