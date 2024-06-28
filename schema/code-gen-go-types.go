@@ -9,8 +9,14 @@ import (
 	"text/template"
 )
 
+var (
+	enumGoTemplate       = template.Must(template.New("enum.go").Funcs(funcMap).Parse(enumGoTemplateStr))
+	structGoTemplate     = template.Must(template.New("struct.go").Funcs(funcMap).Parse(structGoTemplateStr))
+	structTestGoTemplate = template.Must(template.New("struct_test.go").Funcs(funcMap).Parse(structTestGoTemplateStr))
+)
+
 // genGoCustomTypes generates custom types with tests for the plugin in Go.
-func (p *Plugin) genGoCustomTypes() (srcFile, testFile string, err error) {
+func (p *Plugin) genGoCustomTypes() (srcOut, testSrcOut string, err error) {
 	srcBlocks, testBlocks := make([]string, 0, len(p.CustomTypes)), make([]string, 0, len(p.CustomTypes))
 
 	for _, ct := range p.CustomTypes {
@@ -27,7 +33,19 @@ func (p *Plugin) genGoCustomTypes() (srcFile, testFile string, err error) {
 		testBlocks = append(testBlocks, testBlock)
 	}
 
-	return strings.Join(srcBlocks, "\n"), strings.Join(testBlocks, "\n"), nil
+	srcToFmt := strings.Join(srcBlocks, "\n")
+	src, err := format.Source([]byte(srcToFmt))
+	if err != nil {
+		return "", "", fmt.Errorf("gofmt error: %v\npre-formatted source:\n%v", err, srcToFmt)
+	}
+
+	testSrcToFmt := testPrelude + strings.Join(testBlocks, "\n")
+	testSrc, err := format.Source([]byte(testSrcToFmt))
+	if err != nil {
+		return "", "", fmt.Errorf("gofmt error: %v\npre-formatted test source:\n%v", err, testSrcToFmt)
+	}
+
+	return string(src), string(testSrc), nil
 }
 
 // genGoCustomType generates Go source code for a single custom datatype.
@@ -54,7 +72,7 @@ func (p *Plugin) genTestGoCustomType(ct *CustomType) (string, error) {
 
 	switch {
 	case len(ct.Enum) > 0:
-		return p.genTestGoEnum(ct)
+		return "", nil // no enum tests written yet... possibly not necessary.
 	case len(ct.Properties) > 0:
 		return p.genTestGoStruct(ct)
 	default:
@@ -64,44 +82,15 @@ func (p *Plugin) genTestGoCustomType(ct *CustomType) (string, error) {
 
 // getGoEnum generates Go source code for a single enum custom datatype.
 func (p *Plugin) genGoEnum(ct *CustomType) (string, error) {
-	t := template.Must(template.New("enum.go").Funcs(funcMap).Parse(enumGoTemplate))
 	var buf bytes.Buffer
-	if err := t.Execute(&buf, ct); err != nil {
-		return "", err
-	}
-	src, err := format.Source(buf.Bytes())
-	if err != nil {
+	if err := enumGoTemplate.Execute(&buf, ct); err != nil {
 		return "", err
 	}
 
-	return string(src), nil
+	return buf.String(), nil
 }
 
-// getTestGoEnum generates Go source code for a single enum custom datatype.
-func (p *Plugin) genTestGoEnum(ct *CustomType) (string, error) {
-	t := template.Must(template.New("enum_test.go").Funcs(funcMap).Parse(enumTestGoTemplate))
-	var buf bytes.Buffer
-	if err := t.Execute(&buf, ct); err != nil {
-		return "", err
-	}
-	src, err := format.Source(buf.Bytes())
-	if err != nil {
-		return "", err
-	}
-
-	return string(src), nil
-}
-
-var enumGoTemplate = `{{ $name := .Name }}// {{ $name }} represents {{ .Description | downcaseFirst | multilineComment }}.
-type {{ $name }} string
-
-const (
-  {{range .Enum}}{{ $name }}Enum{{ . | uppercaseFirst }} {{ $name }} = "{{ . }}"
-  {{ end }}
-)
-`
-
-var enumTestGoTemplate = `{{ $name := .Name }}// {{ $name }} represents {{ .Description | downcaseFirst | multilineComment }}.
+var enumGoTemplateStr = `{{ $name := .Name }}// {{ $name }} represents {{ .Description | downcaseFirst | multilineComment }}.
 type {{ $name }} string
 
 const (
@@ -112,37 +101,25 @@ const (
 
 // getGoStruct generates Go source code for a single struct custom datatype.
 func (p *Plugin) genGoStruct(ct *CustomType) (string, error) {
-	t := template.Must(template.New("struct.go").Funcs(funcMap).Parse(structGoTemplate))
 	var buf bytes.Buffer
-	if err := t.Execute(&buf, ct); err != nil {
+	if err := structGoTemplate.Execute(&buf, ct); err != nil {
 		return "", err
 	}
 
-	out, err := format.Source(buf.Bytes())
-	if err != nil {
-		return "", fmt.Errorf("gofmt error: %v\npre-formatted source:\n%v", err, buf.String())
-	}
-
-	return string(out), nil
+	return buf.String(), nil
 }
 
 // getTestGoStruct generates Go source code for a single struct custom datatype.
 func (p *Plugin) genTestGoStruct(ct *CustomType) (string, error) {
-	t := template.Must(template.New("struct_test.go").Funcs(funcMap).Parse(structTestGoTemplate))
 	var buf bytes.Buffer
-	if err := t.Execute(&buf, ct); err != nil {
+	if err := structTestGoTemplate.Execute(&buf, ct); err != nil {
 		return "", err
 	}
 
-	out, err := format.Source(buf.Bytes())
-	if err != nil {
-		return "", fmt.Errorf("gofmt error: %v\npre-formatted source:\n%v", err, buf.String())
-	}
-
-	return string(out), nil
+	return buf.String(), nil
 }
 
-var structGoTemplate = `{{ $name := .Name }}{{ $top := . }}// {{ $name }} represents {{ .Description | downcaseFirst }}.
+var structGoTemplateStr = `{{ $name := .Name }}{{ $top := . }}// {{ $name }} represents {{ .Description | downcaseFirst }}.
 type {{ $name }} struct {
   {{range .Properties}}// {{ .Description | multilineComment }}
   {{ .Name | uppercaseFirst }} {{ getGoType . }} ` + "`" + `json:"{{ .Name }}{{ addOmitIfNeeded . }}"` + "`" + `
@@ -150,18 +127,7 @@ type {{ $name }} struct {
 }
 `
 
-var structTestGoTemplate = `{{ $name := .Name }}{{ $top := . }}import (
-  "testing"
-
-	"github.com/google/go-cmp/cmp"
-	jsoniter "github.com/json-iterator/go"
-)
-
-var jsoncomp = jsoniter.ConfigCompatibleWithStandardLibrary
-
-func stringPtr(s string) *string { return &s }
-
-func Test{{ $name }}Marshal(t *testing.T) {
+var structTestGoTemplateStr = `{{ $name := .Name }}{{ $top := . }}func Test{{ $name }}Marshal(t *testing.T) {
   t.Parallel()
 	tests := []struct {
 		name string
@@ -201,4 +167,16 @@ func Test{{ $name }}Marshal(t *testing.T) {
 		})
 	}
 }
+`
+
+var testPrelude = `import (
+  "testing"
+
+	"github.com/google/go-cmp/cmp"
+	jsoniter "github.com/json-iterator/go"
+)
+
+var jsoncomp = jsoniter.ConfigCompatibleWithStandardLibrary
+
+func stringPtr(s string) *string { return &s }
 `
