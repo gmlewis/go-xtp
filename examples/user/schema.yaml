@@ -16,6 +16,8 @@ exports:
     description: The second export function
 schemas:
   - name: Address
+    required:
+      - street
     properties:
       - name: street
         type: string

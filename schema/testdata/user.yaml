@@ -18,6 +18,8 @@ schemas:
   - name: Address
     contentType: application/json
     description: A users address
+    required:
+      - street
     properties:
       - name: street
         type: string

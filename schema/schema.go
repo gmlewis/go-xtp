@@ -73,6 +73,21 @@ type CustomType struct {
 	Properties  []*Property `yaml:"properties,omitempty"`
 }
 
+// GetRequiredProps returns the required properties for this CustomType.
+func (ct *CustomType) GetRequiredProps() []*Property {
+	reqFields := map[string]bool{}
+	for _, req := range ct.Required {
+		reqFields[req] = true
+	}
+	reqProps := make([]*Property, 0, len(reqFields))
+	for _, prop := range ct.Properties {
+		if reqFields[prop.Name] {
+			reqProps = append(reqProps, prop)
+		}
+	}
+	return reqProps
+}
+
 // Property represents an argument to a plugin function.
 type Property struct {
 	Name        string   `yaml:"name"`
@@ -84,9 +99,9 @@ type Property struct {
 	Minimum     *float64 `yaml:"minimum,omitempty"`
 
 	// the following fields are only used by the code generator:
-	FirstEnumValue string `yaml:"-"`
-	IsRequired     bool   `yaml:"-"`
-	IsStruct       bool   `yaml:"-"`
+	FirstEnumValue string      `yaml:"-"`
+	IsRequired     bool        `yaml:"-"`
+	RefCustomType  *CustomType `yaml:"-"`
 }
 
 // ParseStr parses an XTP Extension Plugin schema yaml string and returns it.

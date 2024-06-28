@@ -12,13 +12,13 @@ func ParseV1(yamlStr string) (*Plugin, error) {
 		return nil, err
 	}
 
-	// run through all the Properties and populate the "IsRequired"
-	// and "IsStruct" fields as needed.
-	isStruct := map[string]bool{}
+	// run through all the Properties and populate the extra support
+	// fields as needed.
+	isStruct := map[string]*CustomType{}
 	firstEnumValue := map[string]string{}
 	for _, ct := range result.CustomTypes {
 		if len(ct.Enum) == 0 && len(ct.Properties) > 0 {
-			isStruct[ct.Name] = true
+			isStruct[ct.Name] = ct
 		}
 		if len(ct.Enum) > 0 {
 			firstEnumValue[ct.Name] = ct.Enum[0]
@@ -37,8 +37,8 @@ func ParseV1(yamlStr string) (*Plugin, error) {
 			if prop.Ref != "" {
 				parts := strings.Split(prop.Ref, "/")
 				refName := parts[len(parts)-1]
-				if isStruct[refName] {
-					prop.IsStruct = true
+				if p := isStruct[refName]; p != nil {
+					prop.RefCustomType = p
 				}
 				if v := firstEnumValue[refName]; v != "" {
 					prop.FirstEnumValue = v

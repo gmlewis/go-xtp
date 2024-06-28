@@ -3,7 +3,7 @@ package testdata // this line will be stripped in the unit test
 // Address represents a users address.
 type Address struct {
 	// Street address
-	Street *string `json:"street,omitempty"`
+	Street string `json:"street"`
 }
 
 // User represents a user object in our system..

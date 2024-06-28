@@ -22,15 +22,15 @@ func TestAddressMarshal(t *testing.T) {
 	}{
 		{
 			name: "required fields",
-			obj:  &Address{},
-			want: `{}`,
+			obj: &Address{
+				Street: "street",
+			},
+			want: `{"street":"street"}`,
 		},
 		{
 			name: "optional fields",
-			obj: &Address{
-				Street: stringPtr("street"),
-			},
-			want: `{"street":"street"}`,
+			obj:  &Address{},
+			want: `{"street":""}`,
 		},
 	}
 
@@ -68,7 +68,7 @@ func TestUserMarshal(t *testing.T) {
 				Email:   stringPtr("email"),
 				Address: &Address{},
 			},
-			want: `{"age":0,"email":"email","address":{}}`,
+			want: `{"age":0,"email":"email","address":{"street":""}}`,
 		},
 	}
 

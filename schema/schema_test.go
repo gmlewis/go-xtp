@@ -20,6 +20,18 @@ func floatPtr(f float64) *float64 { return &f }
 
 func TestParseStr(t *testing.T) {
 	t.Parallel()
+
+	// To test the "user" struct, we need to point two places in the test to the same struct, so define it here:
+	addressCustomTypePointer := &CustomType{
+		Name:        "Address",
+		Description: "A users address",
+		Required:    []string{"street"},
+		Properties: []*Property{
+			{Name: "street", Description: "Street address", Type: "string", IsRequired: true},
+		},
+		ContentType: "application/json",
+	}
+
 	tests := []struct {
 		name    string
 		yamlStr string
@@ -145,14 +157,7 @@ func TestParseStr(t *testing.T) {
 					},
 				},
 				CustomTypes: []*CustomType{
-					{
-						Name:        "Address",
-						Description: "A users address",
-						Properties: []*Property{
-							{Name: "street", Description: "Street address", Type: "string"},
-						},
-						ContentType: "application/json",
-					},
+					addressCustomTypePointer,
 					{
 						Name:        "User",
 						Description: "A user object in our system.",
@@ -170,9 +175,9 @@ func TestParseStr(t *testing.T) {
 								Description: "The user's email, of course", Type: "string",
 							},
 							{
-								Name:     "address",
-								Ref:      "#/schemas/Address",
-								IsStruct: true,
+								Name:          "address",
+								Ref:           "#/schemas/Address",
+								RefCustomType: addressCustomTypePointer,
 							},
 						},
 						ContentType: "application/json",

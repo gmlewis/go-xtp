@@ -80,10 +80,16 @@ func addOmitIfNeeded(prop *Property) string {
 	return ",omitempty"
 }
 
-func defaultJSONValue(prop *Property) string {
+func defaultJSONValue(prop *Property, ct *CustomType) string {
 	if prop.Ref != "" {
-		if !prop.IsRequired && prop.IsStruct {
-			return "{}"
+		if !prop.IsRequired && prop.RefCustomType != nil {
+			// populate all the required fields recursively:
+			requiredProps := prop.RefCustomType.GetRequiredProps()
+			fields := make([]string, 0, len(requiredProps))
+			for _, p2 := range requiredProps {
+				fields = append(fields, fmt.Sprintf("%q:%v", p2.Name, defaultJSONValue(p2, prop.RefCustomType)))
+			}
+			return fmt.Sprintf("{%v}", strings.Join(fields, ","))
 		}
 		return `""`
 	}
@@ -107,7 +113,7 @@ func defaultValue(prop *Property) string {
 	if prop.Ref != "" {
 		parts := strings.Split(prop.Ref, "/")
 		refName := parts[len(parts)-1]
-		if !prop.IsRequired && prop.IsStruct {
+		if !prop.IsRequired && prop.RefCustomType != nil {
 			return "&" + refName + "{}"
 		}
 		return `""`
@@ -144,7 +150,7 @@ func downcaseFirst(s string) string {
 func getGoType(prop *Property) string {
 	if prop.Ref != "" {
 		parts := strings.Split(prop.Ref, "/")
-		if prop.IsStruct {
+		if prop.RefCustomType != nil {
 			return "*" + parts[len(parts)-1]
 		}
 		return parts[len(parts)-1]
@@ -177,10 +183,10 @@ func optionalMultilineComment(s string) string {
 	return "// " + strings.ReplaceAll(strings.TrimSpace(s), "\n", "\n  // ") + "\n  "
 }
 
-func requiredJSONValue(prop *Property, ct *CustomType) string {
+func requiredJSONValue(prop *Property) string {
 	if prop.Ref != "" {
 		parts := strings.Split(prop.Ref, "/")
-		if prop.IsStruct {
+		if prop.RefCustomType != nil {
 			return "&" + parts[len(parts)-1] + "{}"
 		}
 		return fmt.Sprintf("%q", prop.FirstEnumValue)
@@ -198,11 +204,11 @@ func requiredJSONValue(prop *Property, ct *CustomType) string {
 	}
 }
 
-func requiredValue(prop *Property, ct *CustomType) string {
+func requiredValue(prop *Property) string {
 	if prop.Ref != "" {
 		parts := strings.Split(prop.Ref, "/")
 		refName := parts[len(parts)-1]
-		if prop.IsStruct {
+		if prop.RefCustomType != nil {
 			return "&" + refName + "{}"
 		}
 		return fmt.Sprintf("%vEnum%v", uppercaseFirst(refName), uppercaseFirst(prop.FirstEnumValue))
