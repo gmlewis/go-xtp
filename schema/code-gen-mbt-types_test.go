@@ -5,10 +5,10 @@ import (
 	"testing"
 )
 
-//go:embed testdata/hand-fruit.mbt
+//go:embed testdata/hand-fruit-types.mbt
 var wantFruitMbt string
 
-//go:embed testdata/hand-fruit_test.mbt
+//go:embed testdata/hand-fruit-types_test.mbt
 var wantFruitTestMbt string
 
 func TestGenMbtCustomTypes(t *testing.T) {

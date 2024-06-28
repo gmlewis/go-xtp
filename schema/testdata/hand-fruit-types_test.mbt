@@ -23,6 +23,6 @@ test {
   }
   let got = optionalFields.to_json()
   let want =
-    #|{"ghost":"blinky","aBoolean":true,"aString":"aString","anInt":0}`
+    #|{"ghost":"blinky","aBoolean":true,"aString":"aString","anInt":0,"anOptionalDate":"anOptionalDate"}`
   assert_eq(got, want)
 }

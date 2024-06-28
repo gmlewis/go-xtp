@@ -8,10 +8,10 @@ pub enum Fruit {
 
 pub impl @jsonutil.ToJson for Fruit with to_json(self) {
   match self {
-    Apple => @json.JsonValue::String("apple")
-    Orange => @json.JsonValue::String("orange")
-    Banana => @json.JsonValue::String("banana")
-    Strawberry => @json.JsonValue::String("strawberry")
+    Apple => @jsonutil.to_json("apple")
+    Orange => @jsonutil.to_json("orange")
+    Banana => @jsonutil.to_json("banana")
+    Strawberry => @jsonutil.to_json("strawberry")
   }
 }
 
@@ -25,10 +25,10 @@ pub enum GhostGang {
 
 pub impl @jsonutil.ToJson for GhostGang with to_json(self) {
   match self {
-    Blinky => @json.JsonValue::String("blinky")
-    Pinky => @json.JsonValue::String("pinky")
-    Inky => @json.JsonValue::String("inky")
-    Clyde => @json.JsonValue::String("clyde")
+    Blinky => @jsonutil.to_json("blinky")
+    Pinky => @jsonutil.to_json("pinky")
+    Inky => @jsonutil.to_json("inky")
+    Clyde => @jsonutil.to_json("clyde")
   }
 }
 
@@ -55,7 +55,8 @@ pub impl @jsonutil.ToJson for ComplexObject with to_json(self) {
     ("anInt", self.anInt),
   ]
   match self.anOptionalDate {
-    Some(value) => fields.append(("anOptionalDate", value))
+    Some(value) => fields.append([("anOptionalDate", value)])
+    None => ()
   }
   @jsonutil.from_entries(fields)
 }

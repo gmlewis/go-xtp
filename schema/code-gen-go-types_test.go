@@ -8,16 +8,16 @@ import (
 	"github.com/google/go-cmp/cmp"
 )
 
-//go:embed testdata/hand-fruit.go
+//go:embed testdata/hand-fruit-types.go
 var wantFruitGo string
 
-//go:embed testdata/hand-fruit_test.go.txt
+//go:embed testdata/hand-fruit-types_test.go.txt
 var wantFruitTestGo string
 
-//go:embed testdata/hand-user.go
+//go:embed testdata/hand-user-types.go
 var wantUserGo string
 
-//go:embed testdata/hand-user_test.go.txt
+//go:embed testdata/hand-user-types_test.go.txt
 var wantUserTestGo string
 
 func stripLeadingLines(s string, n int) string {
