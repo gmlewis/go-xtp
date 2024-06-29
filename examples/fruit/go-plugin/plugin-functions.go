@@ -6,12 +6,12 @@ import (
 	"github.com/extism/go-pdk"
 )
 
-//go:wasmexport voidFunc
+//export voidFunc
 func voidFunc() {
 	VoidFunc()
 }
 
-//go:wasmexport primitiveTypeFunc
+//export primitiveTypeFunc
 func primitiveTypeFunc() int {
 	input := pdk.InputString()
 	output := PrimitiveTypeFunc(input)
@@ -26,7 +26,7 @@ func primitiveTypeFunc() int {
 	return 0 // success
 }
 
-//go:wasmexport referenceTypeFunc
+//export referenceTypeFunc
 func referenceTypeFunc() int {
 	input := pdk.InputString()
 	output := ReferenceTypeFunc(Fruit(input))
