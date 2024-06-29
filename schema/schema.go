@@ -97,6 +97,7 @@ type Property struct {
 	Description string   `yaml:"description,omitempty"`
 	Maximum     *float64 `yaml:"maximum,omitempty"`
 	Minimum     *float64 `yaml:"minimum,omitempty"`
+	Default     *string  `yaml:"default,omitempty"`
 
 	// the following fields are only used by the code generator:
 	FirstEnumValue string      `yaml:"-"`
