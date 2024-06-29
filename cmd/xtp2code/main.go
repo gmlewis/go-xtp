@@ -31,12 +31,12 @@ import (
 )
 
 var (
-	appID      = flag.String("appid", "", "XTP App ID to generate code from.")
-	lang       = flag.String("lang", "", "Target language for generated code ('go' or 'mbt').")
-	hostFile   = flag.String("host", "", "Output filename to generate Host SDK code.")
-	pluginFile = flag.String("plugin", "", "Output filename to generate Plugin PDK code.")
-	typesFile  = flag.String("types", "", "Output filename to generate simple types code.")
-	yamlFile   = flag.String("yaml", "", "Input schema.yaml file to generate code from.")
+	appID         = flag.String("appid", "", "XTP App ID to generate code from.")
+	lang          = flag.String("lang", "", "Target language for generated code ('go' or 'mbt').")
+	hostDirFile   = flag.String("host", "", "Output dirname or filename to generate Host SDK code.")
+	pluginDirFile = flag.String("plugin", "", "Output dirname or filename to generate Plugin PDK code.")
+	typesDirFile  = flag.String("types", "", "Output dirname or filename to generate simple types code.")
+	yamlFile      = flag.String("yaml", "", "Input schema.yaml file to generate code from.")
 )
 
 func main() {
@@ -46,8 +46,8 @@ func main() {
 		log.Fatalf("Must specify either '-appid=<id>' or '-yaml=<filename>' but not both.")
 	}
 
-	if *hostFile == "" && *pluginFile == "" && *typesFile == "" {
-		log.Fatalf("Must specify at least one of: -host=<filename>, -plugin=<filename>, or -types=<filename>")
+	if *hostDirFile == "" && *pluginDirFile == "" && *typesDirFile == "" {
+		log.Fatalf("Must specify at least one of: -host=<dirname>, -plugin=<dirname>, or -types=<dirname/filename>")
 	}
 
 	switch *lang {
@@ -109,65 +109,89 @@ func processPlugin(plugin *schema.Plugin) error {
 		return err
 	}
 
-	if *typesFile != "" {
-		pkgName := genPkgName(*typesFile)
-		fullSrc := custTypes
+	if *typesDirFile != "" {
+		if err := processTypesDirFile(*typesDirFile, custTypes, custTypesTests); err != nil {
+			return err
+		}
+	}
+
+	if *hostDirFile != "" {
+		if err := processHostDirFile(plugin, *hostDirFile, custTypes, custTypesTests); err != nil {
+			return err
+		}
+	}
+
+	if *pluginDirFile != "" {
+		if err := processPluginDirFile(plugin, *pluginDirFile, custTypes, custTypesTests); err != nil {
+			return err
+		}
+	}
+
+	return nil
+}
+
+func processTypesDirFile(dirFile, custTypes, custTypesTests string) error {
+	pkgName := genPkgName(dirFile)
+	fullSrc := custTypes
+	if *lang == "go" {
+		fullSrc = fmt.Sprintf("// Package %v represents the custom datatypes for an XTP Extension Plugin.\npackage %[1]v\n\n%v", pkgName, custTypes)
+	}
+	if err := os.WriteFile(dirFile, []byte(fullSrc), 0644); err != nil {
+		return err
+	}
+
+	if custTypesTests != "" {
+		testFilename := strings.Replace(dirFile, "."+*lang, "_test."+*lang, 1)
+		testSrc := custTypesTests
 		if *lang == "go" {
-			fullSrc = fmt.Sprintf("// Package %v represents the custom datatypes for an XTP Extension Plugin.\npackage %[1]v\n\n%v", pkgName, custTypes)
+			testSrc = fmt.Sprintf("package %v\n\n%v", pkgName, custTypesTests)
 		}
-		if err := os.WriteFile(*typesFile, []byte(fullSrc), 0644); err != nil {
+		if err := os.WriteFile(testFilename, []byte(testSrc), 0644); err != nil {
 			return err
-		}
-
-		if custTypesTests != "" {
-			testFilename := strings.Replace(*typesFile, "."+*lang, "_test."+*lang, 1)
-			testSrc := custTypesTests
-			if *lang == "go" {
-				testSrc = fmt.Sprintf("package %v\n\n%v", pkgName, custTypesTests)
-			}
-			if err := os.WriteFile(testFilename, []byte(testSrc), 0644); err != nil {
-				return err
-			}
-		}
-
-		if *lang == "mbt" {
-			if err := genMoonPkgJsonFileIfNeeded(filepath.Dir(*typesFile)); err != nil {
-				return err
-			}
 		}
 	}
 
-	if *hostFile != "" {
-		pkgName := genPkgName(*hostFile)
-		hostSrc, err := plugin.GenHostSDK(custTypes, pkgName)
-		if err != nil {
+	if *lang == "mbt" {
+		if err := genMoonPkgJsonFileIfNeeded(filepath.Dir(dirFile)); err != nil {
 			return err
-		}
-		if err := os.WriteFile(*hostFile, []byte(hostSrc), 0644); err != nil {
-			return err
-		}
-
-		if *lang == "mbt" {
-			if err := genMoonPkgJsonFileIfNeeded(filepath.Dir(*hostFile)); err != nil {
-				return err
-			}
 		}
 	}
 
-	if *pluginFile != "" {
-		pkgName := genPkgName(*pluginFile)
-		pluginSrc, err := plugin.GenPluginPDK(custTypes, pkgName)
-		if err != nil {
-			return err
-		}
-		if err := os.WriteFile(*pluginFile, []byte(pluginSrc), 0644); err != nil {
-			return err
-		}
+	return nil
+}
 
-		if *lang == "mbt" {
-			if err := genMoonPkgJsonFileIfNeeded(filepath.Dir(*pluginFile)); err != nil {
-				return err
-			}
+func processHostDirFile(plugin *schema.Plugin, dirFile, custTypes, custTypesTests string) error {
+	pkgName := genPkgName(dirFile)
+	hostSrc, err := plugin.GenHostSDK(custTypes, pkgName)
+	if err != nil {
+		return err
+	}
+	if err := os.WriteFile(dirFile, []byte(hostSrc), 0644); err != nil {
+		return err
+	}
+
+	if *lang == "mbt" {
+		if err := genMoonPkgJsonFileIfNeeded(filepath.Dir(dirFile)); err != nil {
+			return err
+		}
+	}
+
+	return nil
+}
+
+func processPluginDirFile(plugin *schema.Plugin, dirFile, custTypes, custTypesTests string) error {
+	pkgName := genPkgName(dirFile)
+	pluginSrc, err := plugin.GenPluginPDK(custTypes, pkgName)
+	if err != nil {
+		return err
+	}
+	if err := os.WriteFile(dirFile, []byte(pluginSrc), 0644); err != nil {
+		return err
+	}
+
+	if *lang == "mbt" {
+		if err := genMoonPkgJsonFileIfNeeded(filepath.Dir(dirFile)); err != nil {
+			return err
 		}
 	}
 

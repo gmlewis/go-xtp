@@ -7,8 +7,9 @@ import (
 )
 
 //export voidFunc
-func voidFunc() {
+func voidFunc() int {
 	VoidFunc()
+	return 0 // success
 }
 
 //export primitiveTypeFunc

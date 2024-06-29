@@ -1,0 +1,11 @@
+app_id = "app_01j1b1mek5frq9x7ymk52m7bw5"
+
+# This is where 'xtp plugin push' expects to find the wasm file after the build script has run.
+bin = "fruit.wasm"
+extension_point_id = "ext_01j1gszkhmenz9ecq0cbvmm9mt"
+name = "mbt-xtp-plugin-fruit"
+
+[scripts]
+
+  # xtp plugin build runs this script to generate the wasm file
+  build = "moon build --target wasm"
