@@ -129,6 +129,12 @@ func processPlugin(plugin *schema.Plugin) error {
 				return err
 			}
 		}
+
+		if *lang == "mbt" {
+			if err := genMoonPkgJsonFileIfNeeded(filepath.Dir(*typesFile)); err != nil {
+				return err
+			}
+		}
 	}
 
 	if *hostFile != "" {
@@ -139,6 +145,12 @@ func processPlugin(plugin *schema.Plugin) error {
 		}
 		if err := os.WriteFile(*hostFile, []byte(hostSrc), 0644); err != nil {
 			return err
+		}
+
+		if *lang == "mbt" {
+			if err := genMoonPkgJsonFileIfNeeded(filepath.Dir(*hostFile)); err != nil {
+				return err
+			}
 		}
 	}
 
@@ -151,7 +163,33 @@ func processPlugin(plugin *schema.Plugin) error {
 		if err := os.WriteFile(*pluginFile, []byte(pluginSrc), 0644); err != nil {
 			return err
 		}
+
+		if *lang == "mbt" {
+			if err := genMoonPkgJsonFileIfNeeded(filepath.Dir(*pluginFile)); err != nil {
+				return err
+			}
+		}
 	}
 
 	return nil
 }
+
+func genMoonPkgJsonFileIfNeeded(dirname string) error {
+	filename := filepath.Join(dirname, "moon.mod.json")
+	_, err := os.Stat(filename)
+	if err == nil || !os.IsNotExist(err) {
+		return err
+	}
+
+	// create the file
+	return os.WriteFile(filename, []byte(moonModJSONFile), 0644)
+}
+
+const moonModJSONFile = `{
+  "import": [
+    {
+      "path": "gmlewis/json",
+      "alias": "jsonutil"
+    }
+  ]
+}`

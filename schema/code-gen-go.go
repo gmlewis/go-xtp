@@ -2,6 +2,7 @@ package schema
 
 import (
 	"fmt"
+	"log"
 	"strings"
 )
 
@@ -20,8 +21,6 @@ func defaultGoJSONValue(prop *Property, ct *CustomType) string {
 	}
 
 	switch prop.Type {
-	case "boolean":
-		return "false"
 	case "integer":
 		return "0"
 	case "string":
@@ -29,7 +28,18 @@ func defaultGoJSONValue(prop *Property, ct *CustomType) string {
 			return fmt.Sprintf("%q", prop.Name)
 		}
 		return `""`
+	case "number":
+		return "0.0"
+	case "boolean":
+		return "false"
+	case "object":
+		return "{}"
+	case "array":
+		return "[]"
+	case "buffer":
+		return `""`
 	default:
+		log.Printf("WARNING: unknown property type %q", prop.Type)
 		return `""`
 	}
 }
@@ -81,11 +91,22 @@ func getGoType(prop *Property) string {
 	}
 
 	switch prop.Type {
-	case "boolean":
-		return asterisk + "bool"
 	case "integer":
 		return asterisk + "int"
+	case "string":
+		return asterisk + "string"
+	case "number":
+		return asterisk + "float64"
+	case "boolean":
+		return asterisk + "bool"
+	case "object":
+		return asterisk + "{}" // TODO - what should this be?
+	case "array":
+		return asterisk + "[]" // TODO - what should this be?
+	case "buffer":
+		return asterisk + "buffer" // TODO - what should this be?
 	default:
+		log.Printf("WARNING: unknown property type %q", prop.Type)
 		return asterisk + prop.Type
 	}
 }
@@ -108,13 +129,22 @@ func requiredGoJSONValue(prop *Property) string {
 	}
 
 	switch prop.Type {
-	case "boolean":
-		return "true"
 	case "integer":
 		return "0"
 	case "string":
 		return fmt.Sprintf("%q", prop.Name)
+	case "number":
+		return "0.0"
+	case "boolean":
+		return "true"
+	case "object":
+		return "{}" // TODO - what should this be?
+	case "array":
+		return "[]" // TODO - what should this be?
+	case "buffer":
+		return "Buffer" // TODO - what should this be?
 	default:
+		log.Printf("WARNING: unknown property type %q", prop.Type)
 		return `""`
 	}
 }
@@ -130,13 +160,22 @@ func requiredGoValue(prop *Property) string {
 	}
 
 	switch prop.Type {
-	case "boolean":
-		return "true"
 	case "integer":
 		return "0"
 	case "string":
 		return fmt.Sprintf("%q", prop.Name)
+	case "number":
+		return "0.0"
+	case "boolean":
+		return "true"
+	case "object":
+		return "{}" // TODO - what should this be?
+	case "array":
+		return "[]" // TODO - what should this be?
+	case "buffer":
+		return "Buffer" // TODO - what should this be?
 	default:
+		log.Printf("WARNING: unknown property type %q", prop.Type)
 		return `""`
 	}
 }

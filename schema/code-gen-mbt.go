@@ -2,6 +2,7 @@ package schema
 
 import (
 	"fmt"
+	"log"
 	"strings"
 )
 
@@ -20,13 +21,22 @@ func defaultMbtJSONValue(prop *Property, ct *CustomType) string {
 	}
 
 	switch prop.Type {
-	case "boolean":
-		return "false"
 	case "integer":
 		return "0"
 	case "string":
 		return `""`
+	case "number":
+		return "0.0"
+	case "boolean":
+		return "false"
+	case "object":
+		return "{}"
+	case "array":
+		return "[]"
+	case "buffer":
+		return `""`
 	default:
+		log.Printf("WARNING: unknown property type %q", prop.Type)
 		return `""`
 	}
 }
@@ -49,13 +59,22 @@ func defaultMbtValue(prop *Property) string {
 	}
 
 	switch prop.Type {
-	case "boolean":
-		return "false"
 	case "integer":
 		return "0"
 	case "string":
 		return `""`
+	case "number":
+		return "0.0"
+	case "boolean":
+		return "false"
+	case "object":
+		return "{}"
+	case "array":
+		return "[]"
+	case "buffer":
+		return `""`
 	default:
+		log.Printf("WARNING: unknown property type %q", prop.Type)
 		return `""`
 	}
 }
@@ -76,13 +95,22 @@ func getMbtType(prop *Property) string {
 	}
 
 	switch prop.Type {
-	case "boolean":
-		return "Bool" + optional
 	case "integer":
 		return "Int" + optional
 	case "string":
 		return "String" + optional
+	case "number":
+		return "Double" + optional
+	case "boolean":
+		return "Bool" + optional
+	case "object":
+		return "{}" + optional // TODO - what should this be?
+	case "array":
+		return "[]" + optional // TODO - what should this be?
+	case "buffer":
+		return "Buffer" + optional // TODO - what should this be?
 	default:
+		log.Printf("WARNING: unknown property type %q", prop.Type)
 		return prop.Type + optional
 	}
 }
@@ -108,11 +136,22 @@ func optionalMbtValue(prop *Property) string {
 	}
 
 	switch prop.Type {
-	case "boolean":
-		return "Some(true)"
 	case "integer":
 		return "Some(0)"
+	case "string":
+		return fmt.Sprintf("Some(%q)", prop.Name)
+	case "number":
+		return "Some(0.0)"
+	case "boolean":
+		return "Some(true)"
+	case "object":
+		return "Some({})" // TODO - what should this be?
+	case "array":
+		return "Some([])" // TODO - what should this be?
+	case "buffer":
+		return "Some(Buffer)" // TODO - what should this be?
 	default:
+		log.Printf("WARNING: unknown property type %q", prop.Type)
 		return fmt.Sprintf("Some(%q)", prop.Name)
 	}
 }
@@ -133,13 +172,22 @@ func requiredMbtJSONValue(prop *Property, ct *CustomType) string {
 	}
 
 	switch prop.Type {
-	case "boolean":
-		return "true"
 	case "integer":
 		return "0"
 	case "string":
 		return fmt.Sprintf("%q", prop.Name)
+	case "number":
+		return "0.0"
+	case "boolean":
+		return "true"
+	case "object":
+		return "{}" // TODO - what should this be?
+	case "array":
+		return "[]" // TODO - what should this be?
+	case "buffer":
+		return "Buffer" // TODO - what should this be?
 	default:
+		log.Printf("WARNING: unknown property type %q", prop.Type)
 		return `""`
 	}
 }
@@ -159,13 +207,22 @@ func requiredMbtValue(prop *Property) string {
 	}
 
 	switch prop.Type {
-	case "boolean":
-		return "true"
 	case "integer":
 		return "0"
 	case "string":
 		return fmt.Sprintf("%q", prop.Name)
+	case "number":
+		return "0.0"
+	case "boolean":
+		return "true"
+	case "object":
+		return "{}" // TODO - what should this be?
+	case "array":
+		return "[]" // TODO - what should this be?
+	case "buffer":
+		return "Buffer" // TODO - what should this be?
 	default:
+		log.Printf("WARNING: unknown property type %q", prop.Type)
 		return `""`
 	}
 }
