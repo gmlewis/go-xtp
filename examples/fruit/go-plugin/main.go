@@ -5,7 +5,6 @@ package main
 // no inputs or outputs.
 func VoidFunc() {
 	// TODO: fill out your implementation here
-	panic("VoidFunc not yet implemented.")
 }
 
 // PrimitiveTypeFunc - This demonstrates how you can accept or return primtive types.
@@ -15,14 +14,14 @@ func VoidFunc() {
 // Returns A boolean encoded as json
 func PrimitiveTypeFunc(input string) bool {
 	// TODO: fill out your implementation here
-	panic("PrimitiveTypeFunc not yet implemented.")
+	return false
 }
 
 // ReferenceTypeFunc - This demonstrates how you can accept or return references to schema types.
 // And it shows how you can define an enum to be used as a property or input/output.
 func ReferenceTypeFunc(input Fruit) ComplexObject {
 	// TODO: fill out your implementation here
-	panic("ReferenceTypeFunc not yet implemented.")
+	return ComplexObject{}
 }
 
 func main() {}
