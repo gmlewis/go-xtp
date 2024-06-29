@@ -11,9 +11,9 @@
       "exports": [
         "voidFunc",
         "primitiveTypeFunc",
-        "referenceTypeFunc",
+        "referenceTypeFunc"
       ],
       "export-memory-name": "memory"
-    },
+    }
   }
 }
