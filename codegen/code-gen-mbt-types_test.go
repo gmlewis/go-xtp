@@ -8,7 +8,7 @@ import (
 	"github.com/google/go-cmp/cmp"
 )
 
-//go:embed testdata/hand-fruit-types.mbt
+//go:embed testdata/fruit/mbt-types/fruit.mbt
 var wantFruitMbt string
 
 //go:embed testdata/hand-fruit-types_test.mbt
