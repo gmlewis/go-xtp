@@ -1,0 +1,41 @@
+version: v1-draft
+exports:
+  - name: processUser
+    description: The second export function
+    input:
+      $ref: '#/schemas/User'
+    output:
+      $ref: '#/schemas/User'
+    codeSamples:
+      - lang: typescript
+        label: Process a user by email
+        source: |
+          function processUser(user: User): User {
+            if (user.email.endsWith('@aol.com')) user.age += 10
+            return user
+          }
+schemas:
+  - name: Address
+    contentType: application/json
+    description: A users address
+    required:
+      - street
+    properties:
+      - name: street
+        type: string
+        description: Street address
+  - name: User
+    contentType: application/json
+    description: A user object in our system.
+    properties:
+      - name: age
+        type: integer
+        format: int32
+        description: The user's age, naturally
+        maximum: 200
+        minimum: 0
+      - name: email
+        type: string
+        description: The user's email, of course
+      - name: address
+        $ref: '#/schemas/Address'

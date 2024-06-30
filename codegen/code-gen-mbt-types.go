@@ -1,4 +1,4 @@
-package schema
+package codegen
 
 import (
 	"bytes"
@@ -6,6 +6,8 @@ import (
 	"fmt"
 	"strings"
 	"text/template"
+
+	"github.com/gmlewis/go-xtp/schema"
 )
 
 var (
@@ -15,17 +17,17 @@ var (
 )
 
 // genMbtCustomTypes generates custom types with tests for the plugin in Go.
-func (p *Plugin) genMbtCustomTypes() (srcOut, testSrcOut string, err error) {
-	srcBlocks, testBlocks := make([]string, 0, len(p.CustomTypes)), make([]string, 0, len(p.CustomTypes))
+func (c *Client) genMbtCustomTypes() (srcOut, testSrcOut string, err error) {
+	srcBlocks, testBlocks := make([]string, 0, len(c.Plugin.CustomTypes)), make([]string, 0, len(c.Plugin.CustomTypes))
 
-	for _, ct := range p.CustomTypes {
-		srcBlock, err := p.genMbtCustomType(ct)
+	for _, ct := range c.Plugin.CustomTypes {
+		srcBlock, err := c.genMbtCustomType(ct)
 		if err != nil {
 			return "", "", err
 		}
 		srcBlocks = append(srcBlocks, srcBlock)
 
-		testBlock, err := p.genTestMbtCustomType(ct)
+		testBlock, err := c.genTestMbtCustomType(ct)
 		if err != nil {
 			return "", "", err
 		}
@@ -41,23 +43,23 @@ func (p *Plugin) genMbtCustomTypes() (srcOut, testSrcOut string, err error) {
 }
 
 // genMbtCustomType generates MoonBit source code for a single custom datatype.
-func (p *Plugin) genMbtCustomType(ct *CustomType) (string, error) {
+func (c *Client) genMbtCustomType(ct *schema.CustomType) (string, error) {
 	if ct == nil {
 		return "", errors.New("unexpected nil CustomType")
 	}
 
 	switch {
 	case len(ct.Enum) > 0:
-		return p.genMbtEnum(ct)
+		return c.genMbtEnum(ct)
 	case len(ct.Properties) > 0:
-		return p.genMbtStruct(ct)
+		return c.genMbtStruct(ct)
 	default:
 		return "", fmt.Errorf("unhandled CustomType: %#v", *ct)
 	}
 }
 
 // genTestMbtCustomType generates MoonBit source code for a single custom datatype.
-func (p *Plugin) genTestMbtCustomType(ct *CustomType) (string, error) {
+func (c *Client) genTestMbtCustomType(ct *schema.CustomType) (string, error) {
 	if ct == nil {
 		return "", errors.New("unexpected nil CustomType")
 	}
@@ -66,14 +68,14 @@ func (p *Plugin) genTestMbtCustomType(ct *CustomType) (string, error) {
 	case len(ct.Enum) > 0:
 		return "", nil // no enum tests written yet... possibly not necessary.
 	case len(ct.Properties) > 0:
-		return p.genTestMbtStruct(ct)
+		return c.genTestMbtStruct(ct)
 	default:
 		return "", fmt.Errorf("unhandled CustomType: %#v", *ct)
 	}
 }
 
 // getGoEnum generates MoonBit source code for a single enum custom datatype.
-func (p *Plugin) genMbtEnum(ct *CustomType) (string, error) {
+func (c *Client) genMbtEnum(ct *schema.CustomType) (string, error) {
 	var buf bytes.Buffer
 	if err := enumMbtTemplate.Execute(&buf, ct); err != nil {
 		return "", err
@@ -97,7 +99,7 @@ pub impl @jsonutil.ToJson for {{ $name }} with to_json(self) {
 `
 
 // getGoStruct generates MoonBit source code for a single struct custom datatype.
-func (p *Plugin) genMbtStruct(ct *CustomType) (string, error) {
+func (c *Client) genMbtStruct(ct *schema.CustomType) (string, error) {
 	var buf bytes.Buffer
 	if err := structMbtTemplate.Execute(&buf, ct); err != nil {
 		return "", err
@@ -107,7 +109,7 @@ func (p *Plugin) genMbtStruct(ct *CustomType) (string, error) {
 }
 
 // getTestGoStruct generates MoonBit source code for a single struct custom datatype.
-func (p *Plugin) genTestMbtStruct(ct *CustomType) (string, error) {
+func (c *Client) genTestMbtStruct(ct *schema.CustomType) (string, error) {
 	var buf bytes.Buffer
 	if err := structTestMbtTemplate.Execute(&buf, ct); err != nil {
 		return "", err

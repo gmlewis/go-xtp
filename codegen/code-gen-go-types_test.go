@@ -1,12 +1,19 @@
-package schema
+package codegen
 
 import (
 	_ "embed"
 	"strings"
 	"testing"
 
+	"github.com/gmlewis/go-xtp/schema"
 	"github.com/google/go-cmp/cmp"
 )
+
+//go:embed testdata/fruit.yaml
+var fruitYaml string
+
+//go:embed testdata/user.yaml
+var userYaml string
 
 //go:embed testdata/hand-fruit-types.go
 var wantFruitGo string
@@ -48,12 +55,13 @@ func TestGenGoCustomTypes(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			plugin, err := ParseStr(tt.yamlStr)
+			plugin, err := schema.ParseStr(tt.yamlStr)
 			if err != nil {
 				t.Fatal(err)
 			}
 
-			gotSrc, gotTest, err := plugin.genGoCustomTypes()
+			c := &Client{Plugin: plugin}
+			gotSrc, gotTest, err := c.genGoCustomTypes()
 			if err != nil {
 				t.Fatal(err)
 			}

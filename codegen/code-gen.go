@@ -1,61 +1,47 @@
-package schema
+package codegen
 
 import (
 	"errors"
-	"fmt"
 	"strings"
+
+	"github.com/gmlewis/go-xtp/schema"
 )
 
 var (
-	ErrNoCodeGeneration = errors.New("code generation not supported for version v0")
+	unreachable = errors.New("unreachable")
 )
 
-// GenCustomTypes generates custom types with tests for the plugin.
-func (p *Plugin) GenCustomTypes() (srcFile, testFile string, err error) {
-	if p.Version == "v0" {
-		return "", "", ErrNoCodeGeneration
-	}
-
-	switch p.Lang {
+// genCustomTypes generates custom types with tests for the plugin.
+func (c *Client) genCustomTypes() (srcFile, testFile string, err error) {
+	switch c.Lang {
 	case "go":
-		return p.genGoCustomTypes()
+		return c.genGoCustomTypes()
 	case "mbt":
-		return p.genMbtCustomTypes()
-	default:
-		return "", "", fmt.Errorf("unsupported programming language: %q", p.Lang)
+		return c.genMbtCustomTypes()
 	}
+	return "", "", unreachable
 }
 
 // GenHostSDK generates Host SDK code to call the extension plugin.
-func (p *Plugin) GenHostSDK(customTypes, pkgName string) (string, error) {
-	if p.Version == "v0" {
-		return "", ErrNoCodeGeneration
-	}
-
-	switch p.Lang {
+func (c *Client) GenHostSDK(pkgName string) (string, error) {
+	switch c.Lang {
 	case "go":
-		return p.genGoHostSDK(customTypes, pkgName)
+		return c.genGoHostSDK(pkgName)
 	case "mbt":
-		return p.genMbtHostSDK(customTypes, pkgName)
-	default:
-		return "", fmt.Errorf("unsupported programming language: %q", p.Lang)
+		return c.genMbtHostSDK(pkgName)
 	}
+	return "", unreachable
 }
 
 // GenPluginPDK generates Plugin PDK code to process plugin calls.
-func (p *Plugin) GenPluginPDK(customTypes, pkgName string) (string, error) {
-	if p.Version == "v0" {
-		return "", ErrNoCodeGeneration
-	}
-
-	switch p.Lang {
+func (c *Client) GenPluginPDK(pkgName string) (string, error) {
+	switch c.Lang {
 	case "go":
-		return p.genGoPluginPDK(customTypes, pkgName)
+		return c.genGoPluginPDK(pkgName)
 	case "mbt":
-		return p.genMbtPluginPDK(customTypes, pkgName)
-	default:
-		return "", fmt.Errorf("unsupported programming language: %q", p.Lang)
+		return c.genMbtPluginPDK(pkgName)
 	}
+	return "", unreachable
 }
 
 var funcMap = map[string]any{
@@ -82,7 +68,7 @@ var funcMap = map[string]any{
 	"uppercaseFirst":              uppercaseFirst,
 }
 
-func addOmitIfNeeded(prop *Property) string {
+func addOmitIfNeeded(prop *schema.Property) string {
 	if prop.IsRequired {
 		return ""
 	}
@@ -96,7 +82,7 @@ func downcaseFirst(s string) string {
 	return strings.ToLower(s[0:1]) + s[1:]
 }
 
-func hasOptionalFields(ct *CustomType) bool {
+func hasOptionalFields(ct *schema.CustomType) bool {
 	return len(ct.Required) != len(ct.Properties)
 }
 
@@ -120,14 +106,14 @@ func multilineComment(s string) string {
 	return strings.ReplaceAll(strings.TrimSpace(s), "\n", "\n// ")
 }
 
-func showJSONCommaForOptional(index int, ct *CustomType) string {
+func showJSONCommaForOptional(index int, ct *schema.CustomType) string {
 	if index < len(ct.Properties)-1 {
 		return ","
 	}
 	return ""
 }
 
-func showJSONCommaForRequired(index int, ct *CustomType) string {
+func showJSONCommaForRequired(index int, ct *schema.CustomType) string {
 	for index++; index < len(ct.Properties); index++ {
 		prop := ct.Properties[index]
 		if prop.IsRequired {

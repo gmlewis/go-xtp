@@ -20,13 +20,11 @@ package main
 
 import (
 	"flag"
-	"fmt"
 	"log"
 	"os"
-	"path/filepath"
-	"strings"
 
 	"github.com/gmlewis/go-xtp/api"
+	"github.com/gmlewis/go-xtp/codegen"
 	"github.com/gmlewis/go-xtp/schema"
 )
 
@@ -96,124 +94,29 @@ func main() {
 	log.Printf("Done.")
 }
 
-func genPkgName(filename string) string {
-	baseName := strings.Replace(filepath.Base(filename), "."+*lang, "", 1)
-	return strings.ToLower(strings.Replace(baseName, "-", "_", -1))
-}
-
 func processPlugin(plugin *schema.Plugin) error {
-	plugin.Lang = *lang
-
-	custTypes, custTypesTests, err := plugin.GenCustomTypes()
+	c, err := codegen.New(*lang, plugin)
 	if err != nil {
 		return err
 	}
 
 	if *typesDirFile != "" {
-		if err := processTypesDirFile(*typesDirFile, custTypes, custTypesTests); err != nil {
+		if err := c.GenTypesDirFiles(*typesDirFile); err != nil {
 			return err
 		}
 	}
 
 	if *hostDirFile != "" {
-		if err := processHostDirFile(plugin, *hostDirFile, custTypes, custTypesTests); err != nil {
+		if err := c.GenHostDirFiles(*hostDirFile); err != nil {
 			return err
 		}
 	}
 
 	if *pluginDirFile != "" {
-		if err := processPluginDirFile(plugin, *pluginDirFile, custTypes, custTypesTests); err != nil {
+		if err := c.GenPluginDirFiles(*pluginDirFile); err != nil {
 			return err
 		}
 	}
 
 	return nil
 }
-
-func processTypesDirFile(dirFile, custTypes, custTypesTests string) error {
-	pkgName := genPkgName(dirFile)
-	fullSrc := custTypes
-	if *lang == "go" {
-		fullSrc = fmt.Sprintf("// Package %v represents the custom datatypes for an XTP Extension Plugin.\npackage %[1]v\n\n%v", pkgName, custTypes)
-	}
-	if err := os.WriteFile(dirFile, []byte(fullSrc), 0644); err != nil {
-		return err
-	}
-
-	if custTypesTests != "" {
-		testFilename := strings.Replace(dirFile, "."+*lang, "_test."+*lang, 1)
-		testSrc := custTypesTests
-		if *lang == "go" {
-			testSrc = fmt.Sprintf("package %v\n\n%v", pkgName, custTypesTests)
-		}
-		if err := os.WriteFile(testFilename, []byte(testSrc), 0644); err != nil {
-			return err
-		}
-	}
-
-	if *lang == "mbt" {
-		if err := genMoonPkgJsonFileIfNeeded(filepath.Dir(dirFile)); err != nil {
-			return err
-		}
-	}
-
-	return nil
-}
-
-func processHostDirFile(plugin *schema.Plugin, dirFile, custTypes, custTypesTests string) error {
-	pkgName := genPkgName(dirFile)
-	hostSrc, err := plugin.GenHostSDK(custTypes, pkgName)
-	if err != nil {
-		return err
-	}
-	if err := os.WriteFile(dirFile, []byte(hostSrc), 0644); err != nil {
-		return err
-	}
-
-	if *lang == "mbt" {
-		if err := genMoonPkgJsonFileIfNeeded(filepath.Dir(dirFile)); err != nil {
-			return err
-		}
-	}
-
-	return nil
-}
-
-func processPluginDirFile(plugin *schema.Plugin, dirFile, custTypes, custTypesTests string) error {
-	pkgName := genPkgName(dirFile)
-	pluginSrc, err := plugin.GenPluginPDK(custTypes, pkgName)
-	if err != nil {
-		return err
-	}
-	if err := os.WriteFile(dirFile, []byte(pluginSrc), 0644); err != nil {
-		return err
-	}
-
-	if *lang == "mbt" {
-		if err := genMoonPkgJsonFileIfNeeded(filepath.Dir(dirFile)); err != nil {
-			return err
-		}
-	}
-
-	return nil
-}
-
-func genMoonPkgJsonFileIfNeeded(dirname string) error {
-	filename := filepath.Join(dirname, "moon.mod.json")
-	_, err := os.Stat(filename)
-	if err == nil || !os.IsNotExist(err) {
-		return err
-	}
-
-	// create the file
-	return os.WriteFile(filename, []byte(moonModJSONFile), 0644)
-}
-
-const moonModJSONFile = `{
-  "import": [
-    {
-      "path": "gmlewis/json",
-      "alias": "jsonutil"
-    }
-  ]
-}`

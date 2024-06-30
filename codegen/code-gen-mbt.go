@@ -1,12 +1,14 @@
-package schema
+package codegen
 
 import (
 	"fmt"
 	"log"
 	"strings"
+
+	"github.com/gmlewis/go-xtp/schema"
 )
 
-func defaultMbtJSONValue(prop *Property, ct *CustomType) string {
+func defaultMbtJSONValue(prop *schema.Property, ct *schema.CustomType) string {
 	if prop.Ref != "" {
 		if !prop.IsRequired && prop.RefCustomType != nil {
 			// populate all the required fields recursively:
@@ -41,7 +43,7 @@ func defaultMbtJSONValue(prop *Property, ct *CustomType) string {
 	}
 }
 
-func defaultMbtValue(prop *Property) string {
+func defaultMbtValue(prop *schema.Property) string {
 	if prop.Ref != "" {
 		// parts := strings.Split(prop.Ref, "/")
 		// refName := parts[len(parts)-1]
@@ -79,7 +81,7 @@ func defaultMbtValue(prop *Property) string {
 	}
 }
 
-func getMbtType(prop *Property) string {
+func getMbtType(prop *schema.Property) string {
 	if prop.Ref != "" {
 		parts := strings.Split(prop.Ref, "/")
 		refName := parts[len(parts)-1]
@@ -123,7 +125,7 @@ func optionalMbtMultilineComment(s string) string {
 	return "/// " + strings.ReplaceAll(strings.TrimSpace(s), "\n", "\n  /// ") + "\n  "
 }
 
-func optionalMbtValue(prop *Property) string {
+func optionalMbtValue(prop *schema.Property) string {
 	if prop.Ref != "" {
 		parts := strings.Split(prop.Ref, "/")
 		refName := parts[len(parts)-1]
@@ -156,7 +158,7 @@ func optionalMbtValue(prop *Property) string {
 	}
 }
 
-func requiredMbtJSONValue(prop *Property, ct *CustomType) string {
+func requiredMbtJSONValue(prop *schema.Property, ct *schema.CustomType) string {
 	if prop.Ref != "" {
 		if prop.RefCustomType != nil {
 			// populate all the required fields recursively:
@@ -192,7 +194,7 @@ func requiredMbtJSONValue(prop *Property, ct *CustomType) string {
 	}
 }
 
-func requiredMbtValue(prop *Property) string {
+func requiredMbtValue(prop *schema.Property) string {
 	if !prop.IsRequired {
 		return "None"
 	}

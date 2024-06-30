@@ -1,8 +1,8 @@
-package schema
+package codegen
 
 import "testing"
 
-func TestGenMbtHostSDK(t *testing.T) {
+func TestGenGoPluginPDK(t *testing.T) {
 	t.Parallel()
 	tests := []struct {
 		name string

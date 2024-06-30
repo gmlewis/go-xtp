@@ -1,6 +1,6 @@
-package schema
+package codegen
 
 // genGoPluginPDK generates Plugin PDK code to process plugin calls in Go.
-func (p *Plugin) genGoPluginPDK(customTypes, pkgName string) (string, error) {
+func (c *Client) genGoPluginPDK(pkgName string) (string, error) {
 	return "", nil
 }

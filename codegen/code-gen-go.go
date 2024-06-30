@@ -1,12 +1,14 @@
-package schema
+package codegen
 
 import (
 	"fmt"
 	"log"
 	"strings"
+
+	"github.com/gmlewis/go-xtp/schema"
 )
 
-func defaultGoJSONValue(prop *Property, ct *CustomType) string {
+func defaultGoJSONValue(prop *schema.Property, ct *schema.CustomType) string {
 	if prop.Ref != "" {
 		if !prop.IsRequired && prop.RefCustomType != nil {
 			// populate all the required fields recursively:
@@ -44,7 +46,7 @@ func defaultGoJSONValue(prop *Property, ct *CustomType) string {
 	}
 }
 
-func defaultGoValue(prop *Property) string {
+func defaultGoValue(prop *schema.Property) string {
 	if prop.Ref != "" {
 		parts := strings.Split(prop.Ref, "/")
 		refName := parts[len(parts)-1]
@@ -75,7 +77,7 @@ func defaultGoValue(prop *Property) string {
 	}
 }
 
-func getGoType(prop *Property) string {
+func getGoType(prop *schema.Property) string {
 	if prop.Ref != "" {
 		parts := strings.Split(prop.Ref, "/")
 		refName := parts[len(parts)-1]
@@ -119,7 +121,7 @@ func optionalGoMultilineComment(s string) string {
 	return "// " + strings.ReplaceAll(strings.TrimSpace(s), "\n", "\n  // ") + "\n  "
 }
 
-func requiredGoJSONValue(prop *Property) string {
+func requiredGoJSONValue(prop *schema.Property) string {
 	if prop.Ref != "" {
 		parts := strings.Split(prop.Ref, "/")
 		if prop.RefCustomType != nil {
@@ -149,7 +151,7 @@ func requiredGoJSONValue(prop *Property) string {
 	}
 }
 
-func requiredGoValue(prop *Property) string {
+func requiredGoValue(prop *schema.Property) string {
 	if prop.Ref != "" {
 		parts := strings.Split(prop.Ref, "/")
 		refName := parts[len(parts)-1]

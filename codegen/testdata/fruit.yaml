@@ -1,0 +1,89 @@
+version: v1-draft
+exports:
+  - name: voidFunc
+    description: |
+      This demonstrates how you can create an export with
+      no inputs or outputs.
+  - name: primitiveTypeFunc
+    description: |
+      This demonstrates how you can accept or return primtive types.
+      This function takes a utf8 string and returns a json encoded boolean
+    input:
+      type: string
+      description: A string passed into plugin input
+      contentType: text/plain; charset=UTF-8
+    output:
+      type: boolean
+      description: A boolean encoded as json
+      contentType: application/json
+    codeSamples:
+      - lang: typescript
+        label: |
+          Test if a string has more than one character.
+          Code samples show up in documentation and inline in docstrings
+        source: |
+          function primitiveTypeFunc(input: string): boolean {
+            return input.length > 1
+          }
+  - name: referenceTypeFunc
+    description: |
+      This demonstrates how you can accept or return references to schema types.
+      And it shows how you can define an enum to be used as a property or input/output.
+    input:
+      $ref: '#/schemas/Fruit'
+    output:
+      $ref: '#/schemas/ComplexObject'
+imports:
+  - name: eatAFruit
+    description: |
+      This is a host function. Right now host functions can only be the type (i64) -> i64.
+      We will support more in the future. Much of the same rules as exports apply.
+    input:
+      $ref: '#/schemas/Fruit'
+    output:
+      type: boolean
+      description: boolean encoded as json
+      contentType: application/json
+schemas:
+  - name: Fruit
+    description: A set of available fruits you can consume
+    enum:
+      - apple
+      - orange
+      - banana
+      - strawberry
+  - name: GhostGang
+    description: A set of all the enemies of pac-man
+    enum:
+      - blinky
+      - pinky
+      - inky
+      - clyde
+  - name: ComplexObject
+    contentType: application/json
+    description: A complex json object
+    required:
+      - ghost
+      - aBoolean
+      - aString
+      - anInt
+    properties:
+      - name: ghost
+        $ref: '#/schemas/GhostGang'
+        description: I can override the description for the property here
+      - name: aBoolean
+        type: boolean
+        description: A boolean prop
+      - name: aString
+        type: string
+        description: An string prop
+      - name: anInt
+        type: integer
+        format: int32
+        description: An int prop
+      - name: anOptionalDate
+        type: string
+        format: date-time
+        description: |
+          A datetime object, we will automatically serialize and deserialize
+          this for you.

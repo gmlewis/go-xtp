@@ -1,9 +1,10 @@
-package schema
+package codegen
 
 import (
 	_ "embed"
 	"testing"
 
+	"github.com/gmlewis/go-xtp/schema"
 	"github.com/google/go-cmp/cmp"
 )
 
@@ -43,12 +44,13 @@ func TestGenMbtCustomTypes(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			plugin, err := ParseStr(tt.yamlStr)
+			plugin, err := schema.ParseStr(tt.yamlStr)
 			if err != nil {
 				t.Fatal(err)
 			}
 
-			gotSrc, gotTest, err := plugin.genMbtCustomTypes()
+			c := &Client{Plugin: plugin}
+			gotSrc, gotTest, err := c.genMbtCustomTypes()
 			if err != nil {
 				t.Fatal(err)
 			}

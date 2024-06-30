@@ -1,4 +1,4 @@
-package schema
+package codegen
 
 import (
 	"bytes"
@@ -7,6 +7,8 @@ import (
 	"go/format"
 	"strings"
 	"text/template"
+
+	"github.com/gmlewis/go-xtp/schema"
 )
 
 var (
@@ -16,17 +18,17 @@ var (
 )
 
 // genGoCustomTypes generates custom types with tests for the plugin in Go.
-func (p *Plugin) genGoCustomTypes() (srcOut, testSrcOut string, err error) {
-	srcBlocks, testBlocks := make([]string, 0, len(p.CustomTypes)), make([]string, 0, len(p.CustomTypes))
+func (c *Client) genGoCustomTypes() (srcOut, testSrcOut string, err error) {
+	srcBlocks, testBlocks := make([]string, 0, len(c.Plugin.CustomTypes)), make([]string, 0, len(c.Plugin.CustomTypes))
 
-	for _, ct := range p.CustomTypes {
-		srcBlock, err := p.genGoCustomType(ct)
+	for _, ct := range c.Plugin.CustomTypes {
+		srcBlock, err := c.genGoCustomType(ct)
 		if err != nil {
 			return "", "", err
 		}
 		srcBlocks = append(srcBlocks, srcBlock)
 
-		testBlock, err := p.genTestGoCustomType(ct)
+		testBlock, err := c.genTestGoCustomType(ct)
 		if err != nil {
 			return "", "", err
 		}
@@ -49,23 +51,23 @@ func (p *Plugin) genGoCustomTypes() (srcOut, testSrcOut string, err error) {
 }
 
 // genGoCustomType generates Go source code for a single custom datatype.
-func (p *Plugin) genGoCustomType(ct *CustomType) (string, error) {
+func (c *Client) genGoCustomType(ct *schema.CustomType) (string, error) {
 	if ct == nil {
 		return "", errors.New("unexpected nil CustomType")
 	}
 
 	switch {
 	case len(ct.Enum) > 0:
-		return p.genGoEnum(ct)
+		return c.genGoEnum(ct)
 	case len(ct.Properties) > 0:
-		return p.genGoStruct(ct)
+		return c.genGoStruct(ct)
 	default:
 		return "", fmt.Errorf("unhandled CustomType: %#v", *ct)
 	}
 }
 
 // genTestGoCustomType generates Go source code for a single custom datatype.
-func (p *Plugin) genTestGoCustomType(ct *CustomType) (string, error) {
+func (c *Client) genTestGoCustomType(ct *schema.CustomType) (string, error) {
 	if ct == nil {
 		return "", errors.New("unexpected nil CustomType")
 	}
@@ -74,14 +76,14 @@ func (p *Plugin) genTestGoCustomType(ct *CustomType) (string, error) {
 	case len(ct.Enum) > 0:
 		return "", nil // no enum tests written yet... possibly not necessary.
 	case len(ct.Properties) > 0:
-		return p.genTestGoStruct(ct)
+		return c.genTestGoStruct(ct)
 	default:
 		return "", fmt.Errorf("unhandled CustomType: %#v", *ct)
 	}
 }
 
 // getGoEnum generates Go source code for a single enum custom datatype.
-func (p *Plugin) genGoEnum(ct *CustomType) (string, error) {
+func (c *Client) genGoEnum(ct *schema.CustomType) (string, error) {
 	var buf bytes.Buffer
 	if err := enumGoTemplate.Execute(&buf, ct); err != nil {
 		return "", err
@@ -100,7 +102,7 @@ const (
 `
 
 // getGoStruct generates Go source code for a single struct custom datatype.
-func (p *Plugin) genGoStruct(ct *CustomType) (string, error) {
+func (c *Client) genGoStruct(ct *schema.CustomType) (string, error) {
 	var buf bytes.Buffer
 	if err := structGoTemplate.Execute(&buf, ct); err != nil {
 		return "", err
@@ -110,7 +112,7 @@ func (p *Plugin) genGoStruct(ct *CustomType) (string, error) {
 }
 
 // getTestGoStruct generates Go source code for a single struct custom datatype.
-func (p *Plugin) genTestGoStruct(ct *CustomType) (string, error) {
+func (c *Client) genTestGoStruct(ct *schema.CustomType) (string, error) {
 	var buf bytes.Buffer
 	if err := structTestGoTemplate.Execute(&buf, ct); err != nil {
 		return "", err
