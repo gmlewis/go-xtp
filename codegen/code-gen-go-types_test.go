@@ -24,7 +24,7 @@ var wantFruitTestGo string
 //go:embed testdata/user/go-types/user.go
 var wantUserGo string
 
-//go:embed testdata/hand-user-types_test.go.txt
+//go:embed testdata/user/go-types/user_test.go
 var wantUserTestGo string
 
 func stripLeadingLines(s string, n int) string {
