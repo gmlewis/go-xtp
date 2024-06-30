@@ -21,7 +21,7 @@ var wantFruitGo string
 //go:embed testdata/fruit/go-types/fruit_test.go
 var wantFruitTestGo string
 
-//go:embed testdata/hand-user-types.go
+//go:embed testdata/user/go-types/user.go
 var wantUserGo string
 
 //go:embed testdata/hand-user-types_test.go.txt
