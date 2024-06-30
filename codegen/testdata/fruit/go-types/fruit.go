@@ -1,5 +1,4 @@
-// Package fruit represents the custom datatypes for an XTP Extension Plugin.
-package fruit
+package testdata // this line will be stripped in the unit test
 
 // Fruit represents a set of available fruits you can consume.
 type Fruit string
