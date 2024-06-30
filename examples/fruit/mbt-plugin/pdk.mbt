@@ -6,6 +6,18 @@ pub enum Fruit {
   Strawberry
 }
 
+pub fn Fruit::parse(s : String) -> Fruit!String {
+  match s {
+    "apple" => Apple
+    "orange" => Orange
+    "banana" => Banana
+    "strawberry" => Strawberry
+    _ => {
+      raise "not a Fruit: \(s)"
+    }
+  }
+}
+
 pub impl @jsonutil.ToJson for Fruit with to_json(self) {
   match self {
     Apple => @jsonutil.to_json("apple")
@@ -21,6 +33,18 @@ pub enum GhostGang {
   Pinky
   Inky
   Clyde
+}
+
+pub fn GhostGang::parse(s : String) -> GhostGang!String {
+  match s {
+    "blinky" => Blinky
+    "pinky" => Pinky
+    "inky" => Inky
+    "clyde" => Clyde
+    _ => {
+      raise "not a GhostGang: \(s)"
+    }
+  }
 }
 
 pub impl @jsonutil.ToJson for GhostGang with to_json(self) {

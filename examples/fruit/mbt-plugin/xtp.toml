@@ -8,4 +8,4 @@ name = "mbt-xtp-plugin-fruit"
 [scripts]
 
   # xtp plugin build runs this script to generate the wasm file
-  build = "moon build --target wasm"
+  build = "moon build --target wasm && cp ../../../target/wasm/release/build/examples/fruit/mbt-plugin/mbt-plugin.wasm ./fruit.wasm"
