@@ -13,5 +13,5 @@
 #     -yaml=schema.yaml
 
 for i in $(echo */build.sh); do
-    pushd {$i%build.sh} && ./build.sh && popd
+    pushd ${i%"build.sh"} && ./build.sh && popd
 done
