@@ -18,7 +18,7 @@ var userYaml string
 //go:embed testdata/fruit/go-types/fruit.go
 var wantFruitGo string
 
-//go:embed testdata/hand-fruit-types_test.go.txt
+//go:embed testdata/fruit/go-types/fruit_test.go
 var wantFruitTestGo string
 
 //go:embed testdata/hand-user-types.go
