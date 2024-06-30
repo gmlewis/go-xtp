@@ -11,7 +11,7 @@ import (
 //go:embed testdata/fruit/mbt-types/fruit.mbt
 var wantFruitMbt string
 
-//go:embed testdata/hand-fruit-types_test.mbt
+//go:embed testdata/fruit/mbt-types/fruit_test.mbt
 var wantFruitTestMbt string
 
 //go:embed testdata/hand-user-types.mbt
