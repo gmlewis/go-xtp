@@ -14,7 +14,7 @@ var wantFruitMbt string
 //go:embed testdata/fruit/mbt-types/fruit_test.mbt
 var wantFruitTestMbt string
 
-//go:embed testdata/hand-user-types.mbt
+//go:embed testdata/user/mbt-types/user.mbt
 var wantUserMbt string
 
 //go:embed testdata/hand-user-types_test.mbt
