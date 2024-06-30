@@ -1,5 +1,4 @@
-// fruit is a simple program that uses the Extism Go Host SDK to communicate with
-// plugins defined by the XTP Extension Plugin mechanism.
+// go-plugin represents an XTP Extension Plugin.
 package main
 
 // Fruit represents a set of available fruits you can consume.
@@ -37,5 +36,17 @@ type ComplexObject struct {
 	AnOptionalDate *string `json:"anOptionalDate,omitempty"`
 }
 
-func main() {
+// XTPSchema describes the values and types of an XTP object
+// in a language-agnostic format.
+type XTPSchema map[string]string
+
+// GetSchema returns an `XTPSchema` for the `ComplexObject`.
+func (c *ComplexObject) GetSchema() XTPSchema {
+	return XTPSchema{
+		"ghost":          "GhostGang",
+		"aBoolean":       "boolean",
+		"aString":        "string",
+		"anInt":          "integer",
+		"anOptionalDate": "?Date",
+	}
 }

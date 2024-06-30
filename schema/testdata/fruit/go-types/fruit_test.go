@@ -1,4 +1,4 @@
-package main
+package fruit
 
 import (
 	"testing"

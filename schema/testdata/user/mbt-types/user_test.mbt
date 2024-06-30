@@ -6,9 +6,7 @@ test "Address" {
     #|{"street":""}
   @assertion.assert_eq(got, want)?
   //
-  let required_fields : Address = {
-    street: "street",
-  }
+  let required_fields : Address = { street: "street" }
   let got = @jsonutil.to_json(required_fields)
     |> @jsonutil.stringify(spaces=0, newline=false)
   let want =
@@ -24,11 +22,7 @@ test "User" {
     #|{}
   @assertion.assert_eq(got, want)?
   //
-  let required_fields : User = {
-    age: None,
-    email: None,
-    address: None,
-  }
+  let required_fields : User = { age: None, email: None, address: None }
   let got = @jsonutil.to_json(required_fields)
     |> @jsonutil.stringify(spaces=0, newline=false)
   let want =

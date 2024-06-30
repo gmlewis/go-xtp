@@ -1,6 +1,5 @@
-// fruit is a simple program that uses the Extism Go Host SDK to communicate with
-// plugins defined by the XTP Extension Plugin mechanism.
-package main
+// Package fruit represents the custom datatypes for an XTP Extension Plugin.
+package fruit
 
 // Fruit represents a set of available fruits you can consume.
 type Fruit string
@@ -35,7 +34,4 @@ type ComplexObject struct {
 	// A datetime object, we will automatically serialize and deserialize
 	// this for you.
 	AnOptionalDate *string `json:"anOptionalDate,omitempty"`
-}
-
-func main() {
 }
