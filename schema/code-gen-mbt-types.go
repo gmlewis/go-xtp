@@ -88,7 +88,7 @@ pub enum {{ $name }} {
 {{ end -}}
 }
 
-impl @jsonutil.ToJson for {{ $name }} with to_json(self) {
+pub impl @jsonutil.ToJson for {{ $name }} with to_json(self) {
   match self {
   {{range .Enum}}  {{ . | uppercaseFirst }} => @jsonutil.to_json("{{ . }}")
   {{ end -}}
@@ -130,7 +130,7 @@ pub fn {{ $name }}::new() -> {{ $name }} {
 {{ "  }" }}
 }
 
-impl @jsonutil.ToJson for {{ $name }} with to_json(self) {
+pub impl @jsonutil.ToJson for {{ $name }} with to_json(self) {
   let fields : Array[(String, @jsonutil.ToJson)] = [
 {{range .Properties}}{{ if .IsRequired }}    ("{{ .Name }}", self.{{ .Name | lowerSnakeCase }}),
 {{ end }}{{ end -}}

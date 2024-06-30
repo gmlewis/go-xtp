@@ -6,7 +6,7 @@ pub enum Fruit {
   Strawberry
 }
 
-impl @jsonutil.ToJson for Fruit with to_json(self) {
+pub impl @jsonutil.ToJson for Fruit with to_json(self) {
   match self {
     Apple => @jsonutil.to_json("apple")
     Orange => @jsonutil.to_json("orange")
@@ -23,7 +23,7 @@ pub enum GhostGang {
   Clyde
 }
 
-impl @jsonutil.ToJson for GhostGang with to_json(self) {
+pub impl @jsonutil.ToJson for GhostGang with to_json(self) {
   match self {
     Blinky => @jsonutil.to_json("blinky")
     Pinky => @jsonutil.to_json("pinky")
@@ -58,7 +58,7 @@ pub fn ComplexObject::new() -> ComplexObject {
   }
 }
 
-impl @jsonutil.ToJson for ComplexObject with to_json(self) {
+pub impl @jsonutil.ToJson for ComplexObject with to_json(self) {
   let fields : Array[(String, @jsonutil.ToJson)] = [
     ("ghost", self.ghost),
     ("aBoolean", self.a_boolean),
