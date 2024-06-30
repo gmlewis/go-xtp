@@ -11,3 +11,7 @@
 #     -plugin=mbt-plugin/main.mbt \
 #     -types=mbt-types/user.mbt \
 #     -yaml=schema.yaml
+
+for i in $(echo */build.sh); do
+    pushd {$i%build.sh} && ./build.sh && popd
+done

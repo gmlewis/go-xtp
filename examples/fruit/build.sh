@@ -12,4 +12,6 @@
 #     -types=mbt-types/fruit.mbt \
 #     -yaml=schema.yaml
 
-pushd go-plugin && ./build.sh && popd
+for i in $(echo */build.sh); do
+    pushd {$i%build.sh} && ./build.sh && popd
+done
