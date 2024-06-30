@@ -23,23 +23,23 @@ func (c *Client) genCustomTypes() (srcFile, testFile string, err error) {
 }
 
 // GenHostSDK generates Host SDK code to call the extension plugin.
-func (c *Client) GenHostSDK(pkgName string) (string, error) {
+func (c *Client) GenHostSDK() (string, error) {
 	switch c.Lang {
 	case "go":
-		return c.genGoHostSDK(pkgName)
+		return c.genGoHostSDK()
 	case "mbt":
-		return c.genMbtHostSDK(pkgName)
+		return c.genMbtHostSDK()
 	}
 	return "", unreachable
 }
 
 // GenPluginPDK generates Plugin PDK code to process plugin calls.
-func (c *Client) GenPluginPDK(pkgName string) (string, error) {
+func (c *Client) GenPluginPDK() (string, error) {
 	switch c.Lang {
 	case "go":
-		return c.genGoPluginPDK(pkgName)
+		return c.genGoPluginPDK()
 	case "mbt":
-		return c.genMbtPluginPDK(pkgName)
+		return c.genMbtPluginPDK()
 	}
 	return "", unreachable
 }

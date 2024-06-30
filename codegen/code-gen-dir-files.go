@@ -2,18 +2,20 @@ package codegen
 
 import (
 	"fmt"
+	"log"
 	"os"
 	"path/filepath"
 	"strings"
 )
 
-func (c *Client) GenTypesDirFiles(dirFile string) error {
-	pkgName := c.genPkgName(dirFile)
+func (c *Client) GenTypesDir(dirName string) error {
 	fullSrc := c.CustTypes
 	if c.Lang == "go" {
-		fullSrc = fmt.Sprintf("// Package %v represents the custom datatypes for an XTP Extension Plugin.\npackage %[1]v\n\n%v", pkgName, c.CustTypes)
+		fullSrc = fmt.Sprintf("// Package %v represents the custom datatypes for an XTP Extension Plugin.\npackage %[1]v\n\n%v", c.PkgName, c.CustTypes)
 	}
-	if err := os.WriteFile(dirFile, []byte(fullSrc), 0644); err != nil {
+
+	dirFile := filepath.Join(dirName, fmt.Sprintf("%v.%v", c.PkgName, c.Lang))
+	if err := c.maybeWriteFile(dirFile, fullSrc); err != nil {
 		return err
 	}
 
@@ -21,15 +23,15 @@ func (c *Client) GenTypesDirFiles(dirFile string) error {
 		testFilename := strings.Replace(dirFile, "."+c.Lang, "_test."+c.Lang, 1)
 		testSrc := c.CustTypesTests
 		if c.Lang == "go" {
-			testSrc = fmt.Sprintf("package %v\n\n%v", pkgName, c.CustTypesTests)
+			testSrc = fmt.Sprintf("package %v\n\n%v", c.PkgName, c.CustTypesTests)
 		}
-		if err := os.WriteFile(testFilename, []byte(testSrc), 0644); err != nil {
+		if err := c.maybeWriteFile(testFilename, testSrc); err != nil {
 			return err
 		}
 	}
 
 	if c.Lang == "mbt" {
-		if err := genMoonPkgJsonFileIfNeeded(filepath.Dir(dirFile)); err != nil {
+		if err := c.genMoonPkgJsonFileIfNeeded(filepath.Dir(dirFile)); err != nil {
 			return err
 		}
 	}
@@ -37,18 +39,19 @@ func (c *Client) GenTypesDirFiles(dirFile string) error {
 	return nil
 }
 
-func (c *Client) GenHostDirFiles(dirFile string) error {
-	pkgName := c.genPkgName(dirFile)
-	hostSrc, err := c.GenHostSDK(pkgName)
+func (c *Client) GenHostDir(dirName string) error {
+	hostSrc, err := c.GenHostSDK()
 	if err != nil {
 		return err
 	}
-	if err := os.WriteFile(dirFile, []byte(hostSrc), 0644); err != nil {
+
+	dirFile := filepath.Join(dirName, fmt.Sprintf("%v.%v", c.PkgName, c.Lang))
+	if err := c.maybeWriteFile(dirFile, hostSrc); err != nil {
 		return err
 	}
 
 	if c.Lang == "mbt" {
-		if err := genMoonPkgJsonFileIfNeeded(filepath.Dir(dirFile)); err != nil {
+		if err := c.genMoonPkgJsonFileIfNeeded(dirName); err != nil {
 			return err
 		}
 	}
@@ -56,18 +59,19 @@ func (c *Client) GenHostDirFiles(dirFile string) error {
 	return nil
 }
 
-func (c *Client) GenPluginDirFiles(dirFile string) error {
-	pkgName := c.genPkgName(dirFile)
-	pluginSrc, err := c.GenPluginPDK(pkgName)
+func (c *Client) GenPluginDir(dirName string) error {
+	pluginSrc, err := c.GenPluginPDK()
 	if err != nil {
 		return err
 	}
-	if err := os.WriteFile(dirFile, []byte(pluginSrc), 0644); err != nil {
+
+	dirFile := filepath.Join(dirName, fmt.Sprintf("%v.%v", c.PkgName, c.Lang))
+	if err := c.maybeWriteFile(dirFile, pluginSrc); err != nil {
 		return err
 	}
 
 	if c.Lang == "mbt" {
-		if err := genMoonPkgJsonFileIfNeeded(filepath.Dir(dirFile)); err != nil {
+		if err := c.genMoonPkgJsonFileIfNeeded(dirName); err != nil {
 			return err
 		}
 	}
@@ -75,23 +79,38 @@ func (c *Client) GenPluginDirFiles(dirFile string) error {
 	return nil
 }
 
-func (c *Client) genPkgName(filename string) string {
-	baseName := strings.Replace(filepath.Base(filename), "."+c.Lang, "", 1)
-	return strings.ToLower(strings.Replace(baseName, "-", "_", -1))
-}
-
-func genMoonPkgJsonFileIfNeeded(dirname string) error {
-	filename := filepath.Join(dirname, "moon.mod.json")
-	_, err := os.Stat(filename)
-	if err == nil || !os.IsNotExist(err) {
+func (c *Client) genMoonPkgJsonFileIfNeeded(dirName string) error {
+	filename := filepath.Join(dirName, "moon.pkg.json")
+	if err := c.maybeWriteFile(filename, moonPkgJSONFile); err != nil {
 		return err
 	}
 
-	// create the file
-	return os.WriteFile(filename, []byte(moonModJSONFile), 0644)
+	return nil
 }
 
-const moonModJSONFile = `{
+func (c *Client) maybeWriteFile(path, buf string) error {
+	parent := filepath.Dir(path)
+	if _, err := os.Stat(parent); parent != "." && err != nil && os.IsNotExist(err) {
+		if err := os.MkdirAll(parent, 0755); err != nil {
+			return err
+		}
+	}
+
+	if !c.force {
+		if _, err := os.Stat(path); err == nil {
+			log.Printf("WARNING: not writing file %q - add -force to overwrite", path)
+			return nil
+		}
+	}
+
+	if err := os.WriteFile(path, []byte(buf), 0644); err != nil {
+		return err
+	}
+
+	return nil
+}
+
+const moonPkgJSONFile = `{
   "import": [
     {
       "path": "gmlewis/json",

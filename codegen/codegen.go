@@ -14,16 +14,19 @@ var (
 
 // Client represents a codegen client.
 type Client struct {
-	Lang   string // "go" or "mbt"
-	Plugin *schema.Plugin
+	PkgName string
+	Lang    string // "go" or "mbt"
+	Plugin  *schema.Plugin
 
 	CustTypes      string
 	CustTypesTests string
+
+	force bool
 }
 
 // New returns a new codegen `Client` for either "go" or "mbt" and the
-// provided plugin.
-func New(language string, plugin *schema.Plugin) (*Client, error) {
+// provided plugin with the given package name.
+func New(language, packageName string, plugin *schema.Plugin, force bool) (*Client, error) {
 	if plugin == nil {
 		return nil, errors.New("plugin cannot be nil")
 	}
@@ -33,10 +36,15 @@ func New(language string, plugin *schema.Plugin) (*Client, error) {
 	if language != "go" && language != "mbt" {
 		return nil, errors.New("language must be 'go' or 'mbt'")
 	}
+	if packageName == "" {
+		return nil, errors.New("packageName must be provided")
+	}
 
 	c := &Client{
-		Lang:   language,
-		Plugin: plugin,
+		PkgName: packageName,
+		Lang:    language,
+		Plugin:  plugin,
+		force:   force,
 	}
 
 	custTypes, custTypesTests, err := c.genCustomTypes()
