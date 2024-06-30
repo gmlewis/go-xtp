@@ -146,7 +146,8 @@ pub impl @jsonutil.ToJson for {{ $name }} with to_json(self) {
 
 var structTestMbtTemplateStr = `{{ $name := .Name }}{{ $top := . }}test "{{ $name }}" {
   let default_object = {{ $name }}::new()
-  let got = default_object.to_json()
+  let got = @jsonutil.to_json(default_object)
+    |> @jsonutil.stringify(spaces=0, newline=false)
   let want =
 {{ "    #|{" }}{{range $index, $prop := .Properties}}{{ if .IsRequired }}"{{ .Name }}":{{ defaultMbtJSONValue . $top }}{{ showJSONCommaForRequired $index $top }}{{ end }}{{ end -}}{{ "}" }}
   @assertion.assert_eq(got, want)?
@@ -155,7 +156,8 @@ var structTestMbtTemplateStr = `{{ $name := .Name }}{{ $top := . }}test "{{ $nam
 {{range .Properties}}    {{ .Name | lowerSnakeCase }}: {{ requiredMbtValue . }},
 {{ end -}}
 {{ "  }" }}
-  let got = required_fields.to_json()
+  let got = @jsonutil.to_json(required_fields)
+    |> @jsonutil.stringify(spaces=0, newline=false)
   let want =
 {{ "    #|{" }}{{range $index, $prop := .Properties}}{{ if .IsRequired }}"{{ .Name }}":{{ requiredMbtJSONValue . $top }}{{ showJSONCommaForRequired $index $top }}{{ end }}{{ end -}}{{ "}" }}
   @assertion.assert_eq(got, want)?
@@ -165,7 +167,8 @@ var structTestMbtTemplateStr = `{{ $name := .Name }}{{ $top := . }}test "{{ $nam
 {{range $index, $prop := .Properties}}{{ if .IsRequired | not}}    {{ .Name | lowerSnakeCase }}: {{ optionalMbtValue . }},
 {{ end }}{{ end -}}
 {{ "  }" }}
-  let got = optional_fields.to_json()
+  let got = @jsonutil.to_json(optional_fields)
+    |> @jsonutil.stringify(spaces=0, newline=false)
   let want =
 {{ "    #|{" }}{{range $index, $prop := .Properties}}"{{ .Name }}":{{ requiredMbtJSONValue . $top }}{{ showJSONCommaForOptional $index $top }}{{ end -}}{{ "}" }}
   @assertion.assert_eq(got, want)?
