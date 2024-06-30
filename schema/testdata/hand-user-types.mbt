@@ -11,7 +11,7 @@ pub fn Address::new() -> Address {
   }
 }
 
-pub impl @jsonutil.ToJson for Address with to_json(self) {
+impl @jsonutil.ToJson for Address with to_json(self) {
   let fields : Array[(String, @jsonutil.ToJson)] = [
     ("street", self.street),
   ]
@@ -36,7 +36,7 @@ pub fn User::new() -> User {
   }
 }
 
-pub impl @jsonutil.ToJson for User with to_json(self) {
+impl @jsonutil.ToJson for User with to_json(self) {
   let fields : Array[(String, @jsonutil.ToJson)] = [
   ]
   match self.age {
