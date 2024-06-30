@@ -17,7 +17,7 @@ var wantFruitTestMbt string
 //go:embed testdata/user/mbt-types/user.mbt
 var wantUserMbt string
 
-//go:embed testdata/hand-user-types_test.mbt
+//go:embed testdata/user/mbt-types/user_test.mbt
 var wantUserTestMbt string
 
 func TestGenMbtCustomTypes(t *testing.T) {
