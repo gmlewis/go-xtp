@@ -1,14 +1,14 @@
 test "Address" {
   let default_object = Address::new()
-  let got = default_object.to_json()
+  let got = @jsonutil.to_json(default_object)
+    |> @jsonutil.stringify(spaces=0, newline=false)
   let want =
     #|{"street":""}
   @assertion.assert_eq(got, want)?
   //
-  let required_fields : Address = {
-    street: "street",
-  }
-  let got = required_fields.to_json()
+  let required_fields : Address = { street: "street" }
+  let got = @jsonutil.to_json(required_fields)
+    |> @jsonutil.stringify(spaces=0, newline=false)
   let want =
     #|{"street":"street"}
   @assertion.assert_eq(got, want)?
@@ -16,17 +16,15 @@ test "Address" {
 
 test "User" {
   let default_object = User::new()
-  let got = default_object.to_json()
+  let got = @jsonutil.to_json(default_object)
+    |> @jsonutil.stringify(spaces=0, newline=false)
   let want =
     #|{}
   @assertion.assert_eq(got, want)?
   //
-  let required_fields : User = {
-    age: None,
-    email: None,
-    address: None,
-  }
-  let got = required_fields.to_json()
+  let required_fields : User = { age: None, email: None, address: None }
+  let got = @jsonutil.to_json(required_fields)
+    |> @jsonutil.stringify(spaces=0, newline=false)
   let want =
     #|{}
   @assertion.assert_eq(got, want)?
@@ -37,7 +35,8 @@ test "User" {
     email: Some("email"),
     address: Some(Address::new()),
   }
-  let got = optional_fields.to_json()
+  let got = @jsonutil.to_json(optional_fields)
+    |> @jsonutil.stringify(spaces=0, newline=false)
   let want =
     #|{"age":0,"email":"email","address":{"street":""}}
   @assertion.assert_eq(got, want)?

@@ -1,6 +1,7 @@
 test "ComplexObject" {
   let default_object = ComplexObject::new()
-  let got = default_object.to_json()
+  let got = @jsonutil.to_json(default_object)
+    |> @jsonutil.stringify(spaces=0, newline=false)
   let want =
     #|{"ghost":"blinky","aBoolean":false,"aString":"","anInt":0}
   @assertion.assert_eq(got, want)?
@@ -12,7 +13,8 @@ test "ComplexObject" {
     an_int: 0,
     an_optional_date: None,
   }
-  let got = required_fields.to_json()
+  let got = @jsonutil.to_json(required_fields)
+    |> @jsonutil.stringify(spaces=0, newline=false)
   let want =
     #|{"ghost":"blinky","aBoolean":true,"aString":"aString","anInt":0}
   @assertion.assert_eq(got, want)?
@@ -21,7 +23,8 @@ test "ComplexObject" {
     ..required_fields,
     an_optional_date: Some("anOptionalDate"),
   }
-  let got = optional_fields.to_json()
+  let got = @jsonutil.to_json(optional_fields)
+    |> @jsonutil.stringify(spaces=0, newline=false)
   let want =
     #|{"ghost":"blinky","aBoolean":true,"aString":"aString","anInt":0,"anOptionalDate":"anOptionalDate"}
   @assertion.assert_eq(got, want)?
