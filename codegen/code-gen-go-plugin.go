@@ -2,7 +2,7 @@ package codegen
 
 import (
 	"bytes"
-	"html/template"
+	"text/template"
 )
 
 // GeneratedFiles represents the files in the generated code.

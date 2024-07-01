@@ -2,7 +2,7 @@ package codegen
 
 import (
 	"bytes"
-	"html/template"
+	"text/template"
 )
 
 var (
@@ -50,7 +50,7 @@ name = "mbt-xtp-plugin-{{ .PkgName }}"
 
 var mbtPluginHostFunctionsTemplateStr = `{{ $top := . }}{{range .Plugin.Imports }}{{ $name := .Name }}pub fn host_{{ $name | lowerSnakeCase }}(offset : Int64) -> Int64 = "extism:host/user" "{{ $name }}"
 
-/// ` + "`{{ $name }}`" + ` - {{ .Description | optionalMbtMultilineComment }}
+/// ` + "`{{ $name | lowerSnakeCase }}`" + ` - {{ .Description | mbtMultilineComment | stripLeadingSlashes | leftJustify }}
 pub fn {{ $name | lowerSnakeCase }}(input : {{ .Input | inputToMbtType }}) -> {{ .Output | outputToMbtType }}!String {
   let json = @jsonutil.to_json(input)
   let mem = @host.Memory::allocate_json_value(json)
@@ -69,7 +69,5 @@ pub fn {{ $name | lowerSnakeCase }}(input : {{ .Input | inputToMbtType }}) -> {{
       raise "unable to parse \(buf): \(e)"
     }
   }
-}
-
-{{ end }}
+}{{ end }}
 `

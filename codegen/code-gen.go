@@ -76,7 +76,9 @@ var funcMap = map[string]any{
 	"hasOptionalFields":           hasOptionalFields,
 	"inputToMbtType":              inputToMbtType,
 	"jsonOutputAsMbtType":         jsonOutputAsMbtType,
+	"leftJustify":                 leftJustify,
 	"lowerSnakeCase":              lowerSnakeCase,
+	"mbtMultilineComment":         mbtMultilineComment,
 	"multilineComment":            multilineComment,
 	"optionalGoMultilineComment":  optionalGoMultilineComment,
 	"optionalMbtMultilineComment": optionalMbtMultilineComment,
@@ -88,6 +90,7 @@ var funcMap = map[string]any{
 	"requiredMbtValue":            requiredMbtValue,
 	"showJSONCommaForOptional":    showJSONCommaForOptional,
 	"showJSONCommaForRequired":    showJSONCommaForRequired,
+	"stripLeadingSlashes":         stripLeadingSlashes,
 	"uppercaseFirst":              uppercaseFirst,
 }
 
@@ -136,6 +139,14 @@ func hasOptionalFields(ct *schema.CustomType) bool {
 	return len(ct.Required) != len(ct.Properties)
 }
 
+func leftJustify(s string) string {
+	lines := strings.Split(s, "\n")
+	for i, line := range lines {
+		lines[i] = strings.TrimSpace(line)
+	}
+	return strings.Join(lines, "\n")
+}
+
 func lowerSnakeCase(s string) string {
 	if len(s) < 2 {
 		return strings.ToLower(s)
@@ -171,6 +182,10 @@ func showJSONCommaForRequired(index int, ct *schema.CustomType) string {
 		}
 	}
 	return ""
+}
+
+func stripLeadingSlashes(s string) string {
+	return strings.TrimLeft(s, "/ ")
 }
 
 func uppercaseFirst(s string) string {

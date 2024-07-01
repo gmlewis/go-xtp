@@ -185,6 +185,14 @@ func jsonOutputAsMbtType(output *schema.Output) string {
 	}
 }
 
+func mbtMultilineComment(s string) string {
+	s = strings.TrimSpace(s)
+	if s == "" {
+		return "\n"
+	}
+	return "/// " + strings.ReplaceAll(strings.TrimSpace(s), "\n", "\n  /// ")
+}
+
 func optionalMbtMultilineComment(s string) string {
 	s = strings.TrimSpace(s)
 	if s == "" {

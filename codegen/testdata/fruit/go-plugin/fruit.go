@@ -35,10 +35,6 @@ type ComplexObject struct {
 	AnOptionalDate *string `json:"anOptionalDate,omitempty"`
 }
 
-// XTPSchema describes the values and types of an XTP object
-// in a language-agnostic format.
-type XTPSchema map[string]string
-
 // GetSchema returns an `XTPSchema` for the `ComplexObject`.
 func (c *ComplexObject) GetSchema() XTPSchema {
 	return XTPSchema{
@@ -49,3 +45,7 @@ func (c *ComplexObject) GetSchema() XTPSchema {
 		"anOptionalDate": "?Date",
 	}
 }
+
+// XTPSchema describes the values and types of an XTP object
+// in a language-agnostic format.
+type XTPSchema map[string]string
