@@ -14,13 +14,13 @@ func (c *Client) GenTypesDir(dirName string) error {
 		fullSrc = fmt.Sprintf("// Package %v represents the custom datatypes for an XTP Extension Plugin.\npackage %[1]v\n\n%v", c.PkgName, c.CustTypes)
 	}
 
-	dirFile := filepath.Join(dirName, fmt.Sprintf("%v.%v", c.PkgName, c.Lang))
+	dirFile := filepath.Join(dirName, c.CustTypesFilename)
 	if err := c.maybeWriteSourceFile(dirFile, fullSrc); err != nil {
 		return err
 	}
 
 	if c.CustTypesTests != "" {
-		testFilename := strings.Replace(dirFile, "."+c.Lang, "_test."+c.Lang, 1)
+		testFilename := filepath.Join(dirName, c.CustTypesTestsFilename)
 		testSrc := c.CustTypesTests
 		if c.Lang == "go" {
 			testSrc = fmt.Sprintf("package %v\n\n%v", c.PkgName, c.CustTypesTests)

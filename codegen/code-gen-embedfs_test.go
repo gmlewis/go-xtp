@@ -3,6 +3,7 @@ package codegen
 import (
 	"embed"
 	"path/filepath"
+	"sort"
 	"testing"
 
 	"github.com/gmlewis/go-xtp/schema"
@@ -17,6 +18,8 @@ var userYaml string
 
 type embedFSTest struct {
 	name        string
+	lang        string
+	pkgName     string
 	yamlStr     string
 	files       []string
 	embedSubdir string
@@ -29,6 +32,7 @@ func (e *embedFSTest) readFS(t *testing.T) GeneratedFiles {
 	if e.embedSubdir == "" {
 		t.Fatalf("missing embedSubdir: %+v", *e)
 	}
+
 	r := GeneratedFiles{}
 	for _, name := range e.files {
 		b, err := e.embedFS.ReadFile(filepath.Join(e.embedSubdir, name))
@@ -51,13 +55,25 @@ func runEmbedFSTest(t *testing.T, tests []*embedFSTest) {
 				t.Fatal(err)
 			}
 
-			c := &Client{Plugin: plugin}
+			c, err := New(tt.lang, tt.pkgName, plugin, false)
+			if err != nil {
+				t.Fatal(err)
+			}
 			got, err := tt.genFunc(c)
 			if err != nil {
 				t.Fatal(err)
 			}
 
 			wantAll := tt.readFS(t)
+
+			if len(wantAll) != len(got) {
+				gotFiles := make([]string, 0, len(got))
+				for k := range got {
+					gotFiles = append(gotFiles, k)
+				}
+				sort.Strings(gotFiles)
+				t.Errorf("%v generated %v files: %+v, wanted %v files", tt.name, len(got), gotFiles, len(wantAll))
+			}
 
 			for _, name := range tt.files {
 				want := wantAll[name]
@@ -74,7 +90,7 @@ func runEmbedFSTest(t *testing.T, tests []*embedFSTest) {
 
 				if diff := cmp.Diff(want, got[name]); diff != "" {
 					t.Logf("got %v:\n%v", fullName, got[name])
-					t.Errorf("genGoCustomPlugin %q mismatch (-want +got):\n%v", name, diff)
+					t.Errorf("gen %q mismatch (-want +got):\n%v", fullName, diff)
 				}
 			}
 		})

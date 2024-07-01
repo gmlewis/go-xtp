@@ -50,5 +50,16 @@ func New(language, packageName string, plugin *schema.Plugin, force bool) (*Clie
 		force:   force,
 	}
 
-	return c, c.genCustomTypes()
+	if err := c.genCustomTypes(); err != nil {
+		return nil, err
+	}
+
+	if c.CustTypes == "" || c.CustTypesFilename == "" {
+		return nil, errors.New("programming error: CustTypes or CustTypesFilename empty")
+	}
+	if c.CustTypesTests == "" || c.CustTypesTestsFilename == "" {
+		return nil, errors.New("programming error: CustTypesTests or CustTypesTestsFilename empty")
+	}
+
+	return c, nil
 }

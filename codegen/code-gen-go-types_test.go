@@ -28,6 +28,8 @@ func TestGenGoCustomTypes(t *testing.T) {
 	tests := []*embedFSTest{
 		{
 			name:    "fruit",
+			lang:    "go",
+			pkgName: "fruit",
 			yamlStr: fruitYaml,
 			files: []string{
 				"fruit.go",
@@ -39,6 +41,8 @@ func TestGenGoCustomTypes(t *testing.T) {
 		},
 		{
 			name:    "user",
+			lang:    "go",
+			pkgName: "user",
 			yamlStr: userYaml,
 			files: []string{
 				"user.go",

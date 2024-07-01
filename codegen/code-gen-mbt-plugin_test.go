@@ -17,6 +17,8 @@ func TestGenMbtPluginPDK(t *testing.T) {
 	tests := []*embedFSTest{
 		{
 			name:    "fruit",
+			lang:    "mbt",
+			pkgName: "fruit",
 			yamlStr: fruitYaml,
 			files: []string{
 				"build.sh",

@@ -29,6 +29,8 @@ func TestGenMbtCustomTypes(t *testing.T) {
 	tests := []*embedFSTest{
 		{
 			name:    "fruit",
+			lang:    "mbt",
+			pkgName: "fruit",
 			yamlStr: fruitYaml,
 			files: []string{
 				"fruit.mbt",
@@ -40,6 +42,8 @@ func TestGenMbtCustomTypes(t *testing.T) {
 		},
 		{
 			name:    "user",
+			lang:    "mbt",
+			pkgName: "user",
 			yamlStr: userYaml,
 			files: []string{
 				"user.mbt",

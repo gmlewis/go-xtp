@@ -16,6 +16,8 @@ func TestGenGoPluginPDK(t *testing.T) {
 	tests := []*embedFSTest{
 		{
 			name:    "fruit",
+			lang:    "go",
+			pkgName: "fruit",
 			yamlStr: fruitYaml,
 			files: []string{
 				"build.sh",
