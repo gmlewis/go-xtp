@@ -10,9 +10,9 @@
   "link": {
     "wasm": {
       "exports": [
-        "voidFunc",
-        "primitiveTypeFunc",
-        "referenceTypeFunc"
+        "exported_void_func:voidFunc",
+        "exported_primitive_type_func:primitiveTypeFunc",
+        "exported_reference_type_func:referenceTypeFunc"
       ],
       "export-memory-name": "memory"
     }
