@@ -35,10 +35,23 @@ func TestGenMbtPluginPDK(t *testing.T) {
 			genFunc:     func(c *Client) (GeneratedFiles, error) { return c.genMbtPluginPDK() },
 		},
 		// {
-		// 	name:     "user",
-		// 	yamlStr:  userYaml,
-		// 	wantSrc:  wantUserMbt,
-		// 	wantTest: wantUserTestMbt
+		// 	name:    "user",
+		// 	lang:    "mbt",
+		// 	pkgName: "user",
+		// 	yamlStr: userYaml,
+		// 	files: []string{
+		// 		"build.sh",
+		// 		"user.mbt",
+		// 		"user_test.mbt",
+		// 		"host-functions.mbt",
+		// 		"main.mbt",
+		// 		"moon.pkg.json",
+		// 		"plugin-functions.mbt",
+		// 		"xtp.toml",
+		// 	},
+		// 	embedSubdir: "testdata/user/mbt-plugin",
+		// 	embedFS:     wantUserMbtPluginFS,
+		// 	genFunc:     func(c *Client) (GeneratedFiles, error) { return c.genMbtPluginPDK() },
 		// },
 	}
 

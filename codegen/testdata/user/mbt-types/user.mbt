@@ -18,6 +18,13 @@ pub impl @jsonutil.ToJson for Address with to_json(self) {
   @jsonutil.from_entries(fields)
 }
 
+/// `get_schema` returns an `XTPSchema` for the `Address`.
+pub fn get_schema(self : Address) -> XTPSchema {
+  {
+    "street": "string",
+  }
+}
+
 /// `User` represents a user object in our system..
 pub struct User {
   /// The user's age, naturally
@@ -53,3 +60,16 @@ pub impl @jsonutil.ToJson for User with to_json(self) {
   }
   @jsonutil.from_entries(fields)
 }
+
+/// `get_schema` returns an `XTPSchema` for the `User`.
+pub fn get_schema(self : User) -> XTPSchema {
+  {
+    "age": "?integer",
+    "email": "?string",
+    "address": "?Address",
+  }
+}
+
+// XTPSchema describes the values and types of an XTP object
+// in a language-agnostic format.
+type XTPSchema Map[String, String]

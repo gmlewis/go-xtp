@@ -6,6 +6,18 @@ pub enum Fruit {
   Strawberry
 }
 
+pub fn Fruit::parse(s : String) -> Fruit!String {
+  match s {
+    "apple" => Apple
+    "orange" => Orange
+    "banana" => Banana
+    "strawberry" => Strawberry
+    _ => {
+      raise "not a Fruit: \(s)"
+    }
+  }
+}
+
 pub impl @jsonutil.ToJson for Fruit with to_json(self) {
   match self {
     Apple => @jsonutil.to_json("apple")
@@ -21,6 +33,18 @@ pub enum GhostGang {
   Pinky
   Inky
   Clyde
+}
+
+pub fn GhostGang::parse(s : String) -> GhostGang!String {
+  match s {
+    "blinky" => Blinky
+    "pinky" => Pinky
+    "inky" => Inky
+    "clyde" => Clyde
+    _ => {
+      raise "not a GhostGang: \(s)"
+    }
+  }
 }
 
 pub impl @jsonutil.ToJson for GhostGang with to_json(self) {
@@ -71,3 +95,18 @@ pub impl @jsonutil.ToJson for ComplexObject with to_json(self) {
   }
   @jsonutil.from_entries(fields)
 }
+
+/// `get_schema` returns an `XTPSchema` for the `ComplexObject`.
+pub fn get_schema(self : ComplexObject) -> XTPSchema {
+  {
+    "ghost": "GhostGang",
+    "aBoolean": "boolean",
+    "aString": "string",
+    "anInt": "integer",
+    "anOptionalDate": "?Date",
+  }
+}
+
+// XTPSchema describes the values and types of an XTP object
+// in a language-agnostic format.
+type XTPSchema Map[String, String]
