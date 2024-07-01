@@ -1,8 +1,8 @@
-app_id = "app_01j1b1mek5frq9x7ymk52m7bw5"
+app_id = "app_<enter-app-id-here>"
 
 # This is where 'xtp plugin push' expects to find the wasm file after the build script has run.
 bin = "fruit.wasm"
-extension_point_id = "ext_01j1gszkhmenz9ecq0cbvmm9mt"
+extension_point_id = "ext_<enter-extension-point-id-here>"
 name = "go-xtp-plugin-fruit"
 
 [scripts]
