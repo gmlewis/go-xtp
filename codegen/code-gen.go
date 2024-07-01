@@ -18,9 +18,12 @@ func (c *Client) GenCustomTypes() (GeneratedFiles, error) {
 		c.CustTypesTestsFilename: c.CustTypesTests,
 	}
 
-	if c.Lang == "go" {
+	switch c.Lang {
+	case "go":
 		m[c.CustTypesFilename] = fmt.Sprintf("// Package %v represents the custom datatypes for an XTP Extension Plugin.\npackage %[1]v\n\n%v", c.PkgName, c.CustTypes)
 		m[c.CustTypesTestsFilename] = fmt.Sprintf("package %v\n\n%v", c.PkgName, c.CustTypesTests)
+	case "mbt":
+		m["moon.pkg.json"] = defaultMoonPkgJSONFile
 	}
 
 	return m, nil
@@ -144,3 +147,12 @@ func uppercaseFirst(s string) string {
 	}
 	return strings.ToUpper(s[0:1]) + s[1:]
 }
+
+const defaultMoonPkgJSONFile = `{
+  "import": [
+    {
+      "path": "gmlewis/json",
+      "alias": "jsonutil"
+    }
+  ]
+}`

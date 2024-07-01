@@ -26,6 +26,7 @@ func TestGenMbtPluginPDK(t *testing.T) {
 				"fruit_test.mbt",
 				"host-functions.mbt",
 				"main.mbt",
+				"moon.pkg.json",
 				"plugin-functions.mbt",
 				"xtp.toml",
 			},

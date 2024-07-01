@@ -46,21 +46,6 @@ func (c *Client) writeSrcFiles(dirName string, srcFiles GeneratedFiles) error {
 		}
 	}
 
-	if c.Lang == "mbt" {
-		if err := c.genMoonPkgJsonFileIfNeeded(dirName); err != nil {
-			return err
-		}
-	}
-
-	return nil
-}
-
-func (c *Client) genMoonPkgJsonFileIfNeeded(dirName string) error {
-	filename := filepath.Join(dirName, "moon.pkg.json")
-	if err := c.maybeWriteSourceFile(filename, moonPkgJSONFile); err != nil {
-		return err
-	}
-
 	return nil
 }
 
@@ -93,12 +78,3 @@ func (c *Client) maybeWriteFile(path, buf string, perm os.FileMode) error {
 
 	return nil
 }
-
-const moonPkgJSONFile = `{
-  "import": [
-    {
-      "path": "gmlewis/json",
-      "alias": "jsonutil"
-    }
-  ]
-}`

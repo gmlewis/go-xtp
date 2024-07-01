@@ -72,7 +72,12 @@ func runEmbedFSTest(t *testing.T, tests []*embedFSTest) {
 					gotFiles = append(gotFiles, k)
 				}
 				sort.Strings(gotFiles)
-				t.Errorf("%v generated %v files: %+v, wanted %v files", tt.name, len(got), gotFiles, len(wantAll))
+				wantAllFiles := make([]string, 0, len(wantAll))
+				for k := range wantAll {
+					wantAllFiles = append(wantAllFiles, k)
+				}
+				sort.Strings(wantAllFiles)
+				t.Errorf("%v generated %v files: %+v, wanted %v files: %+v", tt.name, len(got), gotFiles, len(wantAll), wantAllFiles)
 			}
 
 			for _, name := range tt.files {

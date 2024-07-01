@@ -24,6 +24,7 @@ func TestGenMbtCustomTypes(t *testing.T) {
 			files: []string{
 				"fruit.mbt",
 				"fruit_test.mbt",
+				"moon.pkg.json",
 			},
 			embedSubdir: "testdata/fruit/mbt-types",
 			embedFS:     wantFruitMbtTypesFS,
@@ -37,6 +38,7 @@ func TestGenMbtCustomTypes(t *testing.T) {
 			files: []string{
 				"user.mbt",
 				"user_test.mbt",
+				"moon.pkg.json",
 			},
 			embedSubdir: "testdata/user/mbt-types",
 			embedFS:     wantUserMbtTypesFS,

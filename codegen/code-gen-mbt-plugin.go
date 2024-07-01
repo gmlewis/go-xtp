@@ -20,6 +20,10 @@ func (c *Client) genMbtPluginPDK() (GeneratedFiles, error) {
 		"build.sh":               buildShScript,
 		c.CustTypesFilename:      c.CustTypes,
 		c.CustTypesTestsFilename: c.CustTypesTests,
+		"host-functions.mbt":     "", // TODO
+		"main.mbt":               "", // TODO
+		"moon.pkg.json":          "", // TODO
+		"plugin-functions.mbt":   "", // TODO
 		"xtp.toml":               buf.String(),
 	}
 
