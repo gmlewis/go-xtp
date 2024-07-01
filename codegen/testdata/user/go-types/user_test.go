@@ -1,4 +1,4 @@
-package testdata // this line will be stripped in the unit test
+package user
 
 import (
 	"testing"

@@ -1,4 +1,5 @@
-package testdata // this line will be stripped in the unit test
+// Package user represents the custom datatypes for an XTP Extension Plugin.
+package user
 
 // Address represents a users address.
 type Address struct {

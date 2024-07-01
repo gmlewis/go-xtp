@@ -1,20 +1,43 @@
 package codegen
 
-import "testing"
+import (
+	"embed"
+	_ "embed"
+	"testing"
+)
+
+//go:embed testdata/fruit/mbt-plugin/*
+var wantFruitMbtPluginFS embed.FS
+
+//go:embed testdata/user/mbt-plugin/*
+var wantUserMbtPluginFS embed.FS
 
 func TestGenMbtPluginPDK(t *testing.T) {
 	t.Parallel()
-	tests := []struct {
-		name string
-	}{
+	tests := []*embedFSTest{
 		{
-			name: "",
+			name:    "fruit",
+			yamlStr: fruitYaml,
+			files: []string{
+				"build.sh",
+				"fruit.mbt",
+				"fruit_test.mbt",
+				"host-functions.mbt",
+				"main.mbt",
+				"plugin-functions.mbt",
+				"xtp.toml",
+			},
+			embedSubdir: "testdata/fruit/mbt-plugin",
+			embedFS:     wantFruitMbtPluginFS,
+			genFunc:     func(c *Client) (GeneratedFiles, error) { return c.genMbtPluginPDK() },
 		},
+		// {
+		// 	name:     "user",
+		// 	yamlStr:  userYaml,
+		// 	wantSrc:  wantUserMbt,
+		// 	wantTest: wantUserTestMbt
+		// },
 	}
 
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-
-		})
-	}
+	runEmbedFSTest(t, tests)
 }

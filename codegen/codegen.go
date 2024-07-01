@@ -18,8 +18,11 @@ type Client struct {
 	Lang    string // "go" or "mbt"
 	Plugin  *schema.Plugin
 
-	CustTypes      string
-	CustTypesTests string
+	CustTypesFilename string
+	CustTypes         string
+
+	CustTypesTestsFilename string
+	CustTypesTests         string
 
 	force bool
 }
@@ -47,13 +50,5 @@ func New(language, packageName string, plugin *schema.Plugin, force bool) (*Clie
 		force:   force,
 	}
 
-	custTypes, custTypesTests, err := c.genCustomTypes()
-	if err != nil {
-		return nil, err
-	}
-
-	c.CustTypes = custTypes
-	c.CustTypesTests = custTypesTests
-
-	return c, nil
+	return c, c.genCustomTypes()
 }

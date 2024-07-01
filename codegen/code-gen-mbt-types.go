@@ -17,19 +17,19 @@ var (
 )
 
 // genMbtCustomTypes generates custom types with tests for the plugin in Go.
-func (c *Client) genMbtCustomTypes() (srcOut, testSrcOut string, err error) {
+func (c *Client) genMbtCustomTypes() error {
 	srcBlocks, testBlocks := make([]string, 0, len(c.Plugin.CustomTypes)), make([]string, 0, len(c.Plugin.CustomTypes))
 
 	for _, ct := range c.Plugin.CustomTypes {
 		srcBlock, err := c.genMbtCustomType(ct)
 		if err != nil {
-			return "", "", err
+			return err
 		}
 		srcBlocks = append(srcBlocks, srcBlock)
 
 		testBlock, err := c.genTestMbtCustomType(ct)
 		if err != nil {
-			return "", "", err
+			return err
 		}
 		if testBlock != "" {
 			testBlocks = append(testBlocks, testBlock)
@@ -37,9 +37,13 @@ func (c *Client) genMbtCustomTypes() (srcOut, testSrcOut string, err error) {
 	}
 
 	src := strings.Join(srcBlocks, "\n")
+	c.CustTypesFilename = fmt.Sprintf("%v.%v", c.PkgName, c.Lang)
+	c.CustTypes = src
 	testSrc := strings.Join(testBlocks, "\n")
+	c.CustTypesTestsFilename = fmt.Sprintf("%v_test.%v", c.PkgName, c.Lang)
+	c.CustTypesTests = testSrc
 
-	return string(src), string(testSrc), nil
+	return nil
 }
 
 // genMbtCustomType generates MoonBit source code for a single custom datatype.

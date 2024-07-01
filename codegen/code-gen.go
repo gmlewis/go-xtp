@@ -12,36 +12,36 @@ var (
 )
 
 // genCustomTypes generates custom types with tests for the plugin.
-func (c *Client) genCustomTypes() (srcFile, testFile string, err error) {
+func (c *Client) genCustomTypes() error {
 	switch c.Lang {
 	case "go":
 		return c.genGoCustomTypes()
 	case "mbt":
 		return c.genMbtCustomTypes()
 	}
-	return "", "", unreachable
+	return unreachable
 }
 
 // GenHostSDK generates Host SDK code to call the extension plugin.
-func (c *Client) GenHostSDK() (string, error) {
+func (c *Client) GenHostSDK() (GeneratedFiles, error) {
 	switch c.Lang {
 	case "go":
 		return c.genGoHostSDK()
 	case "mbt":
 		return c.genMbtHostSDK()
 	}
-	return "", unreachable
+	return GeneratedFiles{}, unreachable
 }
 
 // GenPluginPDK generates Plugin PDK code to process plugin calls.
-func (c *Client) GenPluginPDK() (string, error) {
+func (c *Client) GenPluginPDK() (GeneratedFiles, error) {
 	switch c.Lang {
 	case "go":
 		return c.genGoPluginPDK()
 	case "mbt":
 		return c.genMbtPluginPDK()
 	}
-	return "", unreachable
+	return GeneratedFiles{}, unreachable
 }
 
 var funcMap = map[string]any{

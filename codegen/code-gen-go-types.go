@@ -18,19 +18,19 @@ var (
 )
 
 // genGoCustomTypes generates custom types with tests for the plugin in Go.
-func (c *Client) genGoCustomTypes() (srcOut, testSrcOut string, err error) {
+func (c *Client) genGoCustomTypes() error {
 	srcBlocks, testBlocks := make([]string, 0, len(c.Plugin.CustomTypes)), make([]string, 0, len(c.Plugin.CustomTypes))
 
 	for _, ct := range c.Plugin.CustomTypes {
 		srcBlock, err := c.genGoCustomType(ct)
 		if err != nil {
-			return "", "", err
+			return err
 		}
 		srcBlocks = append(srcBlocks, srcBlock)
 
 		testBlock, err := c.genTestGoCustomType(ct)
 		if err != nil {
-			return "", "", err
+			return err
 		}
 		testBlocks = append(testBlocks, testBlock)
 	}
@@ -38,16 +38,20 @@ func (c *Client) genGoCustomTypes() (srcOut, testSrcOut string, err error) {
 	srcToFmt := strings.Join(srcBlocks, "\n")
 	src, err := format.Source([]byte(srcToFmt))
 	if err != nil {
-		return "", "", fmt.Errorf("gofmt error: %v\npre-formatted source:\n%v", err, srcToFmt)
+		return fmt.Errorf("gofmt error: %v\npre-formatted source:\n%v", err, srcToFmt)
 	}
+	c.CustTypesFilename = fmt.Sprintf("%v.%v", c.PkgName, c.Lang)
+	c.CustTypes = string(src)
 
 	testSrcToFmt := testGoPrelude + strings.Join(testBlocks, "\n")
 	testSrc, err := format.Source([]byte(testSrcToFmt))
 	if err != nil {
-		return "", "", fmt.Errorf("gofmt error: %v\npre-formatted test source:\n%v", err, testSrcToFmt)
+		return fmt.Errorf("gofmt error: %v\npre-formatted test source:\n%v", err, testSrcToFmt)
 	}
+	c.CustTypesTestsFilename = fmt.Sprintf("%v_test.%v", c.PkgName, c.Lang)
+	c.CustTypesTests = string(testSrc)
 
-	return string(src), string(testSrc), nil
+	return nil
 }
 
 // genGoCustomType generates Go source code for a single custom datatype.

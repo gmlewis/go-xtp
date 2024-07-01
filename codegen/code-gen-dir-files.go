@@ -15,7 +15,7 @@ func (c *Client) GenTypesDir(dirName string) error {
 	}
 
 	dirFile := filepath.Join(dirName, fmt.Sprintf("%v.%v", c.PkgName, c.Lang))
-	if err := c.maybeWriteFile(dirFile, fullSrc); err != nil {
+	if err := c.maybeWriteSourceFile(dirFile, fullSrc); err != nil {
 		return err
 	}
 
@@ -25,7 +25,7 @@ func (c *Client) GenTypesDir(dirName string) error {
 		if c.Lang == "go" {
 			testSrc = fmt.Sprintf("package %v\n\n%v", c.PkgName, c.CustTypesTests)
 		}
-		if err := c.maybeWriteFile(testFilename, testSrc); err != nil {
+		if err := c.maybeWriteSourceFile(testFilename, testSrc); err != nil {
 			return err
 		}
 	}
@@ -45,18 +45,7 @@ func (c *Client) GenHostDir(dirName string) error {
 		return err
 	}
 
-	dirFile := filepath.Join(dirName, fmt.Sprintf("%v.%v", c.PkgName, c.Lang))
-	if err := c.maybeWriteFile(dirFile, hostSrc); err != nil {
-		return err
-	}
-
-	if c.Lang == "mbt" {
-		if err := c.genMoonPkgJsonFileIfNeeded(dirName); err != nil {
-			return err
-		}
-	}
-
-	return nil
+	return c.writeSrcFiles(dirName, hostSrc)
 }
 
 func (c *Client) GenPluginDir(dirName string) error {
@@ -65,9 +54,19 @@ func (c *Client) GenPluginDir(dirName string) error {
 		return err
 	}
 
-	dirFile := filepath.Join(dirName, fmt.Sprintf("%v.%v", c.PkgName, c.Lang))
-	if err := c.maybeWriteFile(dirFile, pluginSrc); err != nil {
-		return err
+	return c.writeSrcFiles(dirName, pluginSrc)
+}
+
+func (c *Client) writeSrcFiles(dirName string, srcFiles GeneratedFiles) error {
+	for filename, src := range srcFiles {
+		dirFile := filepath.Join(dirName, filename)
+		fileWriter := c.maybeWriteSourceFile
+		if strings.HasSuffix(filename, ".sh") {
+			fileWriter = c.maybeWriteScriptFile
+		}
+		if err := fileWriter(dirFile, src); err != nil {
+			return err
+		}
 	}
 
 	if c.Lang == "mbt" {
@@ -81,14 +80,22 @@ func (c *Client) GenPluginDir(dirName string) error {
 
 func (c *Client) genMoonPkgJsonFileIfNeeded(dirName string) error {
 	filename := filepath.Join(dirName, "moon.pkg.json")
-	if err := c.maybeWriteFile(filename, moonPkgJSONFile); err != nil {
+	if err := c.maybeWriteSourceFile(filename, moonPkgJSONFile); err != nil {
 		return err
 	}
 
 	return nil
 }
 
-func (c *Client) maybeWriteFile(path, buf string) error {
+func (c *Client) maybeWriteScriptFile(path, buf string) error {
+	return c.maybeWriteFile(path, buf, 0755)
+}
+
+func (c *Client) maybeWriteSourceFile(path, buf string) error {
+	return c.maybeWriteFile(path, buf, 0644)
+}
+
+func (c *Client) maybeWriteFile(path, buf string, perm os.FileMode) error {
 	parent := filepath.Dir(path)
 	if _, err := os.Stat(parent); parent != "." && err != nil && os.IsNotExist(err) {
 		if err := os.MkdirAll(parent, 0755); err != nil {
@@ -103,7 +110,7 @@ func (c *Client) maybeWriteFile(path, buf string) error {
 		}
 	}
 
-	if err := os.WriteFile(path, []byte(buf), 0644); err != nil {
+	if err := os.WriteFile(path, []byte(buf), perm); err != nil {
 		return err
 	}
 

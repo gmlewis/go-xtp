@@ -1,4 +1,3 @@
-// go-plugin represents an XTP Extension Plugin.
 package main
 
 // Fruit represents a set of available fruits you can consume.

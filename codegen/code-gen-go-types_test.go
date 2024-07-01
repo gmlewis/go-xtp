@@ -1,80 +1,54 @@
 package codegen
 
 import (
-	_ "embed"
-	"strings"
+	"embed"
 	"testing"
-
-	"github.com/gmlewis/go-xtp/schema"
-	"github.com/google/go-cmp/cmp"
 )
 
-//go:embed testdata/fruit.yaml
-var fruitYaml string
+//go:embed testdata/fruit/go-types/*
+var wantFruitGoTypesFS embed.FS
 
-//go:embed testdata/user.yaml
-var userYaml string
-
-//go:embed testdata/fruit/go-types/fruit.go
-var wantFruitGo string
-
-//go:embed testdata/fruit/go-types/fruit_test.go
-var wantFruitTestGo string
-
-//go:embed testdata/user/go-types/user.go
-var wantUserGo string
-
-//go:embed testdata/user/go-types/user_test.go
-var wantUserTestGo string
-
-func stripLeadingLines(s string, n int) string {
-	return strings.Join(strings.Split(s, "\n")[2:], "\n")
-}
+//go:embed testdata/user/go-types/*
+var wantUserGoTypesFS embed.FS
 
 func TestGenGoCustomTypes(t *testing.T) {
 	t.Parallel()
-	tests := []struct {
-		name     string
-		yamlStr  string
-		wantSrc  string
-		wantTest string
-	}{
+
+	genFunc := func(c *Client) (GeneratedFiles, error) {
+		if err := c.genGoCustomTypes(); err != nil {
+			return nil, err
+		}
+		m := GeneratedFiles{
+			c.CustTypesFilename:      c.CustTypes,
+			c.CustTypesTestsFilename: c.CustTypesTests,
+		}
+		return m, nil
+	}
+
+	tests := []*embedFSTest{
 		{
-			name:     "fruit",
-			yamlStr:  fruitYaml,
-			wantSrc:  stripLeadingLines(wantFruitGo, 2),
-			wantTest: stripLeadingLines(wantFruitTestGo, 2),
+			name:    "fruit",
+			yamlStr: fruitYaml,
+			files: []string{
+				"fruit.go",
+				"fruit_test.go",
+			},
+			embedSubdir: "testdata/fruit/go-types",
+			embedFS:     wantFruitGoTypesFS,
+			genFunc:     genFunc,
 		},
 		{
-			name:     "user",
-			yamlStr:  userYaml,
-			wantSrc:  stripLeadingLines(wantUserGo, 2),
-			wantTest: stripLeadingLines(wantUserTestGo, 2),
+			name:    "user",
+			yamlStr: userYaml,
+			files: []string{
+				"user.go",
+				"user_test.go",
+			},
+			embedSubdir: "testdata/user/go-types",
+			embedFS:     wantUserGoTypesFS,
+			genFunc:     genFunc,
 		},
 	}
 
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			plugin, err := schema.ParseStr(tt.yamlStr)
-			if err != nil {
-				t.Fatal(err)
-			}
-
-			c := &Client{Plugin: plugin}
-			gotSrc, gotTest, err := c.genGoCustomTypes()
-			if err != nil {
-				t.Fatal(err)
-			}
-
-			if diff := cmp.Diff(tt.wantSrc, gotSrc); diff != "" {
-				t.Logf("got src:\n%v", gotSrc)
-				t.Errorf("genGoCustomTypes src mismatch (-want +got):\n%v", diff)
-			}
-
-			if diff := cmp.Diff(tt.wantTest, gotTest); diff != "" {
-				t.Logf("got test:\n%v", gotTest)
-				t.Errorf("genGoCustomTypes test mismatch (-want +got):\n%v", diff)
-			}
-		})
-	}
+	runEmbedFSTest(t, tests)
 }
