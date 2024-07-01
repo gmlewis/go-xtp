@@ -1,7 +1,6 @@
 package codegen
 
 import (
-	"fmt"
 	"log"
 	"os"
 	"path/filepath"
@@ -9,34 +8,12 @@ import (
 )
 
 func (c *Client) GenTypesDir(dirName string) error {
-	fullSrc := c.CustTypes
-	if c.Lang == "go" {
-		fullSrc = fmt.Sprintf("// Package %v represents the custom datatypes for an XTP Extension Plugin.\npackage %[1]v\n\n%v", c.PkgName, c.CustTypes)
-	}
-
-	dirFile := filepath.Join(dirName, c.CustTypesFilename)
-	if err := c.maybeWriteSourceFile(dirFile, fullSrc); err != nil {
+	typesSrc, err := c.GenCustomTypes()
+	if err != nil {
 		return err
 	}
 
-	if c.CustTypesTests != "" {
-		testFilename := filepath.Join(dirName, c.CustTypesTestsFilename)
-		testSrc := c.CustTypesTests
-		if c.Lang == "go" {
-			testSrc = fmt.Sprintf("package %v\n\n%v", c.PkgName, c.CustTypesTests)
-		}
-		if err := c.maybeWriteSourceFile(testFilename, testSrc); err != nil {
-			return err
-		}
-	}
-
-	if c.Lang == "mbt" {
-		if err := c.genMoonPkgJsonFileIfNeeded(filepath.Dir(dirFile)); err != nil {
-			return err
-		}
-	}
-
-	return nil
+	return c.writeSrcFiles(dirName, typesSrc)
 }
 
 func (c *Client) GenHostDir(dirName string) error {

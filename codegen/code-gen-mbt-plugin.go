@@ -18,8 +18,8 @@ func (c *Client) genMbtPluginPDK() (GeneratedFiles, error) {
 
 	m := GeneratedFiles{
 		"build.sh":               buildShScript,
-		c.CustTypesFilename:      "package main\n\n" + c.CustTypes,
-		c.CustTypesTestsFilename: "package main\n\n" + c.CustTypesTests,
+		c.CustTypesFilename:      c.CustTypes,
+		c.CustTypesTestsFilename: c.CustTypesTests,
 		"xtp.toml":               buf.String(),
 	}
 

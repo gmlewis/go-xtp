@@ -14,17 +14,6 @@ var wantUserGoTypesFS embed.FS
 func TestGenGoCustomTypes(t *testing.T) {
 	t.Parallel()
 
-	genFunc := func(c *Client) (GeneratedFiles, error) {
-		if err := c.genGoCustomTypes(); err != nil {
-			return nil, err
-		}
-		m := GeneratedFiles{
-			c.CustTypesFilename:      c.CustTypes,
-			c.CustTypesTestsFilename: c.CustTypesTests,
-		}
-		return m, nil
-	}
-
 	tests := []*embedFSTest{
 		{
 			name:    "fruit",
@@ -37,7 +26,7 @@ func TestGenGoCustomTypes(t *testing.T) {
 			},
 			embedSubdir: "testdata/fruit/go-types",
 			embedFS:     wantFruitGoTypesFS,
-			genFunc:     genFunc,
+			genFunc:     func(c *Client) (GeneratedFiles, error) { return c.GenCustomTypes() },
 		},
 		{
 			name:    "user",
@@ -50,7 +39,7 @@ func TestGenGoCustomTypes(t *testing.T) {
 			},
 			embedSubdir: "testdata/user/go-types",
 			embedFS:     wantUserGoTypesFS,
-			genFunc:     genFunc,
+			genFunc:     func(c *Client) (GeneratedFiles, error) { return c.GenCustomTypes() },
 		},
 	}
 

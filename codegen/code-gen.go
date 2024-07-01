@@ -2,6 +2,7 @@ package codegen
 
 import (
 	"errors"
+	"fmt"
 	"strings"
 
 	"github.com/gmlewis/go-xtp/schema"
@@ -10,6 +11,20 @@ import (
 var (
 	unreachable = errors.New("unreachable")
 )
+
+func (c *Client) GenCustomTypes() (GeneratedFiles, error) {
+	m := GeneratedFiles{
+		c.CustTypesFilename:      c.CustTypes,
+		c.CustTypesTestsFilename: c.CustTypesTests,
+	}
+
+	if c.Lang == "go" {
+		m[c.CustTypesFilename] = fmt.Sprintf("// Package %v represents the custom datatypes for an XTP Extension Plugin.\npackage %[1]v\n\n%v", c.PkgName, c.CustTypes)
+		m[c.CustTypesTestsFilename] = fmt.Sprintf("package %v\n\n%v", c.PkgName, c.CustTypesTests)
+	}
+
+	return m, nil
+}
 
 // genCustomTypes generates custom types with tests for the plugin.
 func (c *Client) genCustomTypes() error {
