@@ -3,6 +3,7 @@ package codegen
 import (
 	"errors"
 	"fmt"
+	"log"
 	"strings"
 
 	"github.com/gmlewis/go-xtp/schema"
@@ -69,14 +70,18 @@ var funcMap = map[string]any{
 	"defaultMbtJSONValue":         defaultMbtJSONValue,
 	"defaultMbtValue":             defaultMbtValue,
 	"downcaseFirst":               downcaseFirst,
+	"getExtismType":               getExtismType,
 	"getGoType":                   getGoType,
 	"getMbtType":                  getMbtType,
 	"hasOptionalFields":           hasOptionalFields,
+	"inputToMbtType":              inputToMbtType,
+	"jsonOutputAsMbtType":         jsonOutputAsMbtType,
 	"lowerSnakeCase":              lowerSnakeCase,
 	"multilineComment":            multilineComment,
 	"optionalGoMultilineComment":  optionalGoMultilineComment,
 	"optionalMbtMultilineComment": optionalMbtMultilineComment,
 	"optionalMbtValue":            optionalMbtValue,
+	"outputToMbtType":             outputToMbtType,
 	"requiredGoJSONValue":         requiredGoJSONValue,
 	"requiredGoValue":             requiredGoValue,
 	"requiredMbtJSONValue":        requiredMbtJSONValue,
@@ -100,13 +105,40 @@ func downcaseFirst(s string) string {
 	return strings.ToLower(s[0:1]) + s[1:]
 }
 
+func getExtismType(prop *schema.Property, ct *schema.CustomType) string {
+	var optionalMark string
+	if !prop.IsRequired {
+		optionalMark = "?"
+	}
+
+	var extismType string
+	switch prop.Type {
+	case "integer", "number", "boolean":
+		extismType = prop.Type
+	case "string":
+		extismType = prop.Type
+		if prop.Format == "date-time" {
+			extismType = "Date"
+		}
+	default:
+		if prop.Ref != "" {
+			parts := strings.Split(prop.Ref, "/")
+			extismType = parts[len(parts)-1]
+		} else {
+			log.Printf("WARNING: unknown property type %q: %#v", prop.Type, prop)
+		}
+	}
+
+	return optionalMark + extismType
+}
+
 func hasOptionalFields(ct *schema.CustomType) bool {
 	return len(ct.Required) != len(ct.Properties)
 }
 
 func lowerSnakeCase(s string) string {
-	if s == "" {
-		return s
+	if len(s) < 2 {
+		return strings.ToLower(s)
 	}
 	result := strings.ToLower(s[0:1])
 	for _, r := range s[1:] {

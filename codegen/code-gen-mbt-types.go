@@ -18,7 +18,7 @@ var (
 
 // genMbtCustomTypes generates custom types with tests for the plugin in Go.
 func (c *Client) genMbtCustomTypes() error {
-	srcBlocks, testBlocks := make([]string, 0, len(c.Plugin.CustomTypes)), make([]string, 0, len(c.Plugin.CustomTypes))
+	srcBlocks, testBlocks := make([]string, 0, len(c.Plugin.CustomTypes)+1), make([]string, 0, len(c.Plugin.CustomTypes))
 
 	for _, ct := range c.Plugin.CustomTypes {
 		srcBlock, err := c.genMbtCustomType(ct)
@@ -34,6 +34,10 @@ func (c *Client) genMbtCustomTypes() error {
 		if testBlock != "" {
 			testBlocks = append(testBlocks, testBlock)
 		}
+	}
+
+	if c.numStructs > 0 {
+		srcBlocks = append(srcBlocks, mbtXTPSchemaMap)
 	}
 
 	src := strings.Join(srcBlocks, "\n")
@@ -56,6 +60,7 @@ func (c *Client) genMbtCustomType(ct *schema.CustomType) (string, error) {
 	case len(ct.Enum) > 0:
 		return c.genMbtEnum(ct)
 	case len(ct.Properties) > 0:
+		c.numStructs++
 		return c.genMbtStruct(ct)
 	default:
 		return "", fmt.Errorf("unhandled CustomType: %#v", *ct)
@@ -94,6 +99,16 @@ pub enum {{ $name }} {
 {{ end -}}
 }
 
+pub fn {{ $name }}::parse(s : String) -> {{ $name }}!String {
+  match s {
+{{range .Enum}}    "{{ . }}" => {{ . | uppercaseFirst }}
+{{ end -}}
+{{ "    _ => {" }}
+      raise "not a {{ $name }}: \(s)"
+    }
+  }
+}
+
 pub impl @jsonutil.ToJson for {{ $name }} with to_json(self) {
   match self {
   {{range .Enum}}  {{ . | uppercaseFirst }} => @jsonutil.to_json("{{ . }}")
@@ -122,6 +137,11 @@ func (c *Client) genTestMbtStruct(ct *schema.CustomType) (string, error) {
 	return buf.String(), nil
 }
 
+var mbtXTPSchemaMap = `// XTPSchema describes the values and types of an XTP object
+// in a language-agnostic format.
+type XTPSchema Map[String, String]
+`
+
 var structMbtTemplateStr = `{{ $name := .Name }}{{ $top := . }}/// ` + "`" + `{{ $name }}` + "`" + ` represents {{ .Description | downcaseFirst }}.
 pub struct {{ $name }} {
 {{range .Properties}}  {{ .Description | optionalMbtMultilineComment }}{{ .Name | lowerSnakeCase }} : {{ getMbtType . }}
@@ -147,6 +167,14 @@ pub impl @jsonutil.ToJson for {{ $name }} with to_json(self) {
   }
 {{ end }}{{ end -}}
 {{ "  @jsonutil.from_entries(fields)" }}
+}
+
+/// ` + "`" + `get_schema` + "`" + ` returns an ` + "`" + `XTPSchema` + "`" + ` for the ` + "`" + `{{ $name }}` + "`" + `.
+pub fn get_schema(self : {{ $name }}) -> XTPSchema {
+  {
+{{range .Properties}}    "{{ .Name }}": "{{ getExtismType . $top }}",
+{{ end -}}
+{{ "  }" }}
 }
 `
 

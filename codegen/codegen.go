@@ -24,7 +24,9 @@ type Client struct {
 	CustTypesTestsFilename string
 	CustTypesTests         string
 
-	force bool
+	// internal fields used by the code generator:
+	force      bool
+	numStructs int
 }
 
 // New returns a new codegen `Client` for either "go" or "mbt" and the

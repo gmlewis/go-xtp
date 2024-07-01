@@ -19,7 +19,7 @@ var (
 
 // genGoCustomTypes generates custom types with tests for the plugin in Go.
 func (c *Client) genGoCustomTypes() error {
-	srcBlocks, testBlocks := make([]string, 0, len(c.Plugin.CustomTypes)), make([]string, 0, len(c.Plugin.CustomTypes))
+	srcBlocks, testBlocks := make([]string, 0, len(c.Plugin.CustomTypes)+1), make([]string, 0, len(c.Plugin.CustomTypes))
 
 	for _, ct := range c.Plugin.CustomTypes {
 		srcBlock, err := c.genGoCustomType(ct)
@@ -33,6 +33,10 @@ func (c *Client) genGoCustomTypes() error {
 			return err
 		}
 		testBlocks = append(testBlocks, testBlock)
+	}
+
+	if c.numStructs > 0 {
+		srcBlocks = append(srcBlocks, goXTPSchemaMap)
 	}
 
 	srcToFmt := strings.Join(srcBlocks, "\n")
@@ -64,6 +68,7 @@ func (c *Client) genGoCustomType(ct *schema.CustomType) (string, error) {
 	case len(ct.Enum) > 0:
 		return c.genGoEnum(ct)
 	case len(ct.Properties) > 0:
+		c.numStructs++
 		return c.genGoStruct(ct)
 	default:
 		return "", fmt.Errorf("unhandled CustomType: %#v", *ct)
@@ -125,10 +130,23 @@ func (c *Client) genTestGoStruct(ct *schema.CustomType) (string, error) {
 	return buf.String(), nil
 }
 
+var goXTPSchemaMap = `// XTPSchema describes the values and types of an XTP object
+// in a language-agnostic format.
+type XTPSchema map[string]string
+`
+
 var structGoTemplateStr = `{{ $name := .Name }}{{ $top := . }}// {{ $name }} represents {{ .Description | downcaseFirst }}.
 type {{ $name }} struct {
 {{range .Properties}}  {{ .Description | optionalGoMultilineComment }}{{ .Name | uppercaseFirst }} {{ getGoType . }} ` + "`" + `json:"{{ .Name }}{{ addOmitIfNeeded . }}"` + "`" + `
 {{ end -}}
+}
+
+// GetSchema returns an ` + "`" + `XTPSchema` + "`" + ` for the ` + "`" + `{{ $name }}` + "`" + `.
+func (c *{{ $name }}) GetSchema() XTPSchema {
+	return XTPSchema{
+{{range .Properties}}    "{{ .Name }}": "{{ getExtismType . $top }}",
+{{ end -}}
+	}
 }
 `
 

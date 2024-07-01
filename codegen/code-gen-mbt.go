@@ -117,6 +117,74 @@ func getMbtType(prop *schema.Property) string {
 	}
 }
 
+func inputToMbtType(input *schema.Input) string {
+	if input.Ref != "" {
+		parts := strings.Split(input.Ref, "/")
+		refName := parts[len(parts)-1]
+		// if input.RefCustomType != nil {
+		// 	return refName + "?"
+		// }
+		return refName
+	}
+
+	switch input.Type {
+	case "integer":
+		return "Int"
+	case "string":
+		return "String"
+	case "number":
+		return "Double"
+	case "boolean":
+		return "Bool"
+	case "object":
+		return "{}" // TODO - what should this be?
+	case "array":
+		return "[]" // TODO - what should this be?
+	case "buffer":
+		return "Buffer" // TODO - what should this be?
+	default:
+		log.Printf("WARNING: unknown property type %q", input.Type)
+		return input.Type
+	}
+}
+
+func jsonOutputAsMbtType(output *schema.Output) string {
+	// TODO: finish this
+	// if output.Ref != "" {
+	// 	parts := strings.Split(output.Ref, "/")
+	// 	refName := parts[len(parts)-1]
+	// 	if output.RefCustomType != nil {
+	// 		return refName + "?"
+	// 	}
+	// 	return refName
+	// }
+
+	// var optional string
+	// if !output.IsRequired {
+	// 	optional = "?"
+	// }
+
+	switch output.Type {
+	// case "integer":
+	// 	return "Int" + optional
+	// case "string":
+	// 	return "String" + optional
+	// case "number":
+	// 	return "Double" + optional
+	case "boolean":
+		return "as_bool"
+	// case "object":
+	// 	return "{}" + optional // TODO - what should this be?
+	// case "array":
+	// 	return "[]" + optional // TODO - what should this be?
+	// case "buffer":
+	// 	return "Buffer" + optional // TODO - what should this be?
+	default:
+		log.Printf("WARNING: unknown property type %q", output.Type)
+		return output.Type
+	}
+}
+
 func optionalMbtMultilineComment(s string) string {
 	s = strings.TrimSpace(s)
 	if s == "" {
@@ -155,6 +223,37 @@ func optionalMbtValue(prop *schema.Property) string {
 	default:
 		log.Printf("WARNING: unknown property type %q", prop.Type)
 		return fmt.Sprintf("Some(%q)", prop.Name)
+	}
+}
+
+func outputToMbtType(output *schema.Output) string {
+	if output.Ref != "" {
+		parts := strings.Split(output.Ref, "/")
+		refName := parts[len(parts)-1]
+		// if output.RefCustomType != nil {
+		// 	return refName + "?"
+		// }
+		return refName
+	}
+
+	switch output.Type {
+	case "integer":
+		return "Int"
+	case "string":
+		return "String"
+	case "number":
+		return "Double"
+	case "boolean":
+		return "Bool"
+	case "object":
+		return "{}" // TODO - what should this be?
+	case "array":
+		return "[]" // TODO - what should this be?
+	case "buffer":
+		return "Buffer" // TODO - what should this be?
+	default:
+		log.Printf("WARNING: unknown property type %q", output.Type)
+		return output.Type
 	}
 }
 
