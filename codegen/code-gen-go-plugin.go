@@ -114,5 +114,39 @@ func {{ $name | uppercaseFirst }}({{ .Input | inputToGoType }}){{ if .Output }} 
 func main() {}
 `
 
-var goPluginPluginFunctionsTemplateStr = `
-`
+var goPluginPluginFunctionsTemplateStr = `//go:build tinygo
+
+package main
+
+import (
+	"encoding/json"
+
+	"github.com/extism/go-pdk"
+)
+{{range $index, $export := .Plugin.Exports }}{{ $name := .Name }}
+//export {{ $name }}
+func {{ $name }}() int {
+{{ if . | inputIsVoidType }}	{{ $name | uppercaseFirst }}(){{ end -}}
+{{ if . | inputIsPrimitiveType }}	input := pdk.InputString()
+	output := {{ $name | uppercaseFirst }}(input)
+
+	buf, err := json.Marshal(output)
+	if err != nil {
+		pdk.Log(pdk.LogError, err.Error())
+		return 1 // failure
+	}
+
+	pdk.OutputString(string(buf)){{ end -}}
+{{ if . | inputIsReferenceType }}	input := pdk.InputString()
+	output := {{ $name | uppercaseFirst }}({{ inputReferenceTypeName . }}(input))
+
+	buf, err := json.Marshal(output)
+	if err != nil {
+		pdk.Log(pdk.LogError, err.Error())
+		return 1 // failure
+	}
+
+	pdk.OutputString(string(buf)){{ end }}
+	return 0 // success
+{{ "}" }}
+{{ end }}`

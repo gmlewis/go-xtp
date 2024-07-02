@@ -122,11 +122,11 @@ var mbtPluginMoonPkgJSONTemplateStr = `{
 var mbtPluginPluginFunctionsTemplateStr = `{{range $index, $export := .Plugin.Exports }}{{ $name := .Name }}{{ if $index | lt 0 }}
 {{ end }}/// Exported: {{ $name }}
 pub fn exported_{{ $name | lowerSnakeCase }}() -> Int {
-{{ if . | inputIsMbtVoidType }}  {{ $name | lowerSnakeCase }}(){{ end -}}
-{{ if . | inputIsMbtPrimitiveType }}  let input = @host.input_string()
+{{ if . | inputIsVoidType }}  {{ $name | lowerSnakeCase }}(){{ end -}}
+{{ if . | inputIsPrimitiveType }}  let input = @host.input_string()
   let output = {{ $name | lowerSnakeCase }}(input) |> @jsonutil.to_json()
   @host.output_json_value(output){{ end -}}
-{{ if . | inputIsMbtReferenceType }}  {{ inputMbtReferenceTypeName . }}::parse(@host.input_string())!!.unwrap()
+{{ if . | inputIsReferenceType }}  {{ inputReferenceTypeName . }}::parse(@host.input_string())!!.unwrap()
   |> {{ $name | lowerSnakeCase }}()
   |> @jsonutil.to_json()
   |> @host.output_json_value(){{ end }}

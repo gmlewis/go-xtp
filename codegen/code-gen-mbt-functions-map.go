@@ -117,48 +117,6 @@ func getMbtType(prop *schema.Property) string {
 	}
 }
 
-func inputIsMbtVoidType(export *schema.Export) bool {
-	return export.Input == nil
-}
-
-func inputIsMbtPrimitiveType(export *schema.Export) bool {
-	if export.Input == nil || export.Input.Ref != "" {
-		return false
-	}
-	switch export.Input.Type {
-	case "integer", "string", "number", "boolean":
-		return true
-	case "object":
-		return false // TODO - what should this be?
-	case "array":
-		return false // TODO - what should this be?
-	case "buffer":
-		return false // TODO - what should this be?
-	default:
-		log.Printf("WARNING: unknown export input type %q", export.Input.Type)
-		return false
-	}
-	return false
-}
-
-func inputIsMbtReferenceType(export *schema.Export) bool {
-	return export.Input != nil && export.Input.Ref != ""
-}
-
-func inputMbtReferenceTypeName(export *schema.Export) string {
-	if export.Input == nil {
-		return ""
-	}
-
-	if export.Input.Ref != "" {
-		parts := strings.Split(export.Input.Ref, "/")
-		refName := parts[len(parts)-1]
-		return refName
-	}
-
-	return ""
-}
-
 func inputToMbtType(input *schema.Input) string {
 	if input == nil {
 		return ""

@@ -78,10 +78,10 @@ var funcMap = map[string]any{
 	"getMbtType":                        getMbtType,
 	"goMultilineComment":                goMultilineComment,
 	"hasOptionalFields":                 hasOptionalFields,
-	"inputIsMbtVoidType":                inputIsMbtVoidType,
-	"inputIsMbtPrimitiveType":           inputIsMbtPrimitiveType,
-	"inputIsMbtReferenceType":           inputIsMbtReferenceType,
-	"inputMbtReferenceTypeName":         inputMbtReferenceTypeName,
+	"inputIsVoidType":                   inputIsVoidType,
+	"inputIsPrimitiveType":              inputIsPrimitiveType,
+	"inputIsReferenceType":              inputIsReferenceType,
+	"inputReferenceTypeName":            inputReferenceTypeName,
 	"inputToGoType":                     inputToGoType,
 	"inputToMbtType":                    inputToMbtType,
 	"jsonOutputAsGoType":                jsonOutputAsGoType,
@@ -165,6 +165,48 @@ func getExtismType(prop *schema.Property, ct *schema.CustomType) string {
 
 func hasOptionalFields(ct *schema.CustomType) bool {
 	return len(ct.Required) != len(ct.Properties)
+}
+
+func inputIsVoidType(export *schema.Export) bool {
+	return export.Input == nil
+}
+
+func inputIsPrimitiveType(export *schema.Export) bool {
+	if export.Input == nil || export.Input.Ref != "" {
+		return false
+	}
+	switch export.Input.Type {
+	case "integer", "string", "number", "boolean":
+		return true
+	case "object":
+		return false // TODO - what should this be?
+	case "array":
+		return false // TODO - what should this be?
+	case "buffer":
+		return false // TODO - what should this be?
+	default:
+		log.Printf("WARNING: unknown export input type %q", export.Input.Type)
+		return false
+	}
+	return false
+}
+
+func inputIsReferenceType(export *schema.Export) bool {
+	return export.Input != nil && export.Input.Ref != ""
+}
+
+func inputReferenceTypeName(export *schema.Export) string {
+	if export.Input == nil {
+		return ""
+	}
+
+	if export.Input.Ref != "" {
+		parts := strings.Split(export.Input.Ref, "/")
+		refName := parts[len(parts)-1]
+		return refName
+	}
+
+	return ""
 }
 
 func leftJustify(s string) string {
