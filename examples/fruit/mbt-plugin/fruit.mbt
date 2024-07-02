@@ -96,10 +96,6 @@ pub impl @jsonutil.ToJson for ComplexObject with to_json(self) {
   @jsonutil.from_entries(fields)
 }
 
-// XTPSchema describes the values and types of an XTP object
-// in a language-agnostic format.
-type XTPSchema Map[String, String]
-
 /// `get_schema` returns an `XTPSchema` for the `ComplexObject`.
 pub fn get_schema(self : ComplexObject) -> XTPSchema {
   {
@@ -110,3 +106,7 @@ pub fn get_schema(self : ComplexObject) -> XTPSchema {
     "anOptionalDate": "?Date",
   }
 }
+
+// XTPSchema describes the values and types of an XTP object
+// in a language-agnostic format.
+type XTPSchema Map[String, String]
