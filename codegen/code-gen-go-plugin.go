@@ -98,7 +98,20 @@ func {{ $name | uppercaseFirst }}({{ .Input | inputToGoType }}) ({{ .Output | ou
 }
 {{ end }}`
 
-var goPluginMainTemplateStr = `
+var goPluginMainTemplateStr = `//go:build tinygo
+
+// go-plugin represents an XTP Extension Plugin.
+package main
+{{range .Plugin.Exports }}{{ $name := .Name }}
+// {{ $name | uppercaseFirst }} - {{ .Description | goMultilineComment | stripLeadingSlashes | leftJustify }}{{ if exportHasInputOrOutputDescription . }}
+//
+{{ end }}{{ if exportHasInputDescription . }}// ` + "`input`" + ` - {{ .Input.Description | goMultilineComment | stripLeadingSlashes | leftJustify }}{{ end }}{{ if exportHasOutputDescription . }}
+// Returns {{ .Output.Description | goMultilineComment | stripLeadingSlashes | leftJustify }}{{ end }}
+func {{ $name | uppercaseFirst }}({{ .Input | inputToGoType }}){{ if .Output }} {{ .Output | outputToGoType }}{{ end }} {
+{{ "\t" }}// TODO: fill out your implementation here{{ .Output | outputToGoExampleLiteral }}
+}
+{{ end }}
+func main() {}
 `
 
 var goPluginPluginFunctionsTemplateStr = `

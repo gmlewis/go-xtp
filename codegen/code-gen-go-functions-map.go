@@ -198,6 +198,38 @@ func optionalGoMultilineComment(s string) string {
 	return "// " + strings.ReplaceAll(strings.TrimSpace(s), "\n", "\n  // ") + "\n  "
 }
 
+func outputToGoExampleLiteral(output *schema.Output) string {
+	if output == nil {
+		return ""
+	}
+
+	if output.Ref != "" {
+		parts := strings.Split(output.Ref, "/")
+		refName := parts[len(parts)-1]
+		return fmt.Sprintf("\n\treturn %v{}", refName)
+	}
+
+	switch output.Type {
+	case "integer":
+		return "\n\treturn 0"
+	case "string":
+		return `\n\treturn ""`
+	case "number":
+		return "\n\treturn 0.0"
+	case "boolean":
+		return "\n\treturn false"
+	case "object":
+		return "\n\treturn {}" // TODO - what should this be?
+	case "array":
+		return "\n\treturn []" // TODO - what should this be?
+	case "buffer":
+		return "\n\treturn Buffer" // TODO - what should this be?
+	default:
+		log.Printf("WARNING: unknown property type %q", output.Type)
+		return "\n\t" + output.Type
+	}
+}
+
 func outputToGoType(output *schema.Output) string {
 	if output == nil {
 		return ""
