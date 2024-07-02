@@ -6,10 +6,11 @@ import (
 )
 
 var (
-	mbtPluginXtpTOMLTemplate       = template.Must(template.New("cost-gen-mbt-plugin.go:mbtPluginXtpTOMLTemplateStr").Parse(mbtPluginXtpTOMLTemplateStr))
-	mbtPluginHostFunctionsTemplate = template.Must(template.New("cost-gen-mbt-plugin.go:mbtPluginHostFunctionsTemplateStr").Funcs(funcMap).Parse(mbtPluginHostFunctionsTemplateStr))
-	mbtPluginMainTemplate          = template.Must(template.New("cost-gen-mbt-plugin.go:mbtPluginMainTemplateStr").Funcs(funcMap).Parse(mbtPluginMainTemplateStr))
-	mbtPluginMoonPkgJSONTemplate   = template.Must(template.New("cost-gen-mbt-plugin.go:mbtPluginMoonPkgJSONTemplateStr").Funcs(funcMap).Parse(mbtPluginMoonPkgJSONTemplateStr))
+	mbtPluginXtpTOMLTemplate         = template.Must(template.New("cost-gen-mbt-plugin.go:mbtPluginXtpTOMLTemplateStr").Parse(mbtPluginXtpTOMLTemplateStr))
+	mbtPluginHostFunctionsTemplate   = template.Must(template.New("cost-gen-mbt-plugin.go:mbtPluginHostFunctionsTemplateStr").Funcs(funcMap).Parse(mbtPluginHostFunctionsTemplateStr))
+	mbtPluginMainTemplate            = template.Must(template.New("cost-gen-mbt-plugin.go:mbtPluginMainTemplateStr").Funcs(funcMap).Parse(mbtPluginMainTemplateStr))
+	mbtPluginMoonPkgJSONTemplate     = template.Must(template.New("cost-gen-mbt-plugin.go:mbtPluginMoonPkgJSONTemplateStr").Funcs(funcMap).Parse(mbtPluginMoonPkgJSONTemplateStr))
+	mbtPluginPluginFunctionsTemplate = template.Must(template.New("cost-gen-mbt-plugin.go:mbtPluginPluginFunctionsTemplateStr").Funcs(funcMap).Parse(mbtPluginPluginFunctionsTemplateStr))
 )
 
 // genMbtPluginPDK generates Plugin PDK code to process plugin calls in Mbt.
@@ -30,6 +31,10 @@ func (c *Client) genMbtPluginPDK() (GeneratedFiles, error) {
 	if err := mbtPluginMoonPkgJSONTemplate.Execute(&moonPkgJSONStr, c); err != nil {
 		return nil, err
 	}
+	var pluginFunctionsStr bytes.Buffer
+	if err := mbtPluginPluginFunctionsTemplate.Execute(&pluginFunctionsStr, c); err != nil {
+		return nil, err
+	}
 
 	m := GeneratedFiles{
 		"build.sh":               buildShScript,
@@ -38,7 +43,7 @@ func (c *Client) genMbtPluginPDK() (GeneratedFiles, error) {
 		"host-functions.mbt":     hostFunctionsStr.String(),
 		"main.mbt":               mainStr.String(),
 		"moon.pkg.json":          moonPkgJSONStr.String(),
-		"plugin-functions.mbt":   "", // TODO
+		"plugin-functions.mbt":   pluginFunctionsStr.String(),
 		"xtp.toml":               xtpTomlStr.String(),
 	}
 
@@ -58,7 +63,7 @@ name = "mbt-xtp-plugin-{{ .PkgName }}"
   build = "moon build --target wasm && cp ../../../target/wasm/release/build/examples/{{ .PkgName }}/mbt-plugin/mbt-plugin.wasm ./{{ .PkgName }}.wasm"
 `
 
-var mbtPluginHostFunctionsTemplateStr = `{{ $top := . }}{{range .Plugin.Imports }}{{ $name := .Name }}pub fn host_{{ $name | lowerSnakeCase }}(offset : Int64) -> Int64 = "extism:host/user" "{{ $name }}"
+var mbtPluginHostFunctionsTemplateStr = `{{range .Plugin.Imports }}{{ $name := .Name }}pub fn host_{{ $name | lowerSnakeCase }}(offset : Int64) -> Int64 = "extism:host/user" "{{ $name }}"
 
 /// ` + "`{{ $name | lowerSnakeCase }}`" + ` - {{ .Description | mbtMultilineComment | stripLeadingSlashes | leftJustify }}
 pub fn {{ $name | lowerSnakeCase }}({{ .Input | inputToMbtType }}) -> {{ .Output | outputToMbtType }}!String {
@@ -82,7 +87,7 @@ pub fn {{ $name | lowerSnakeCase }}({{ .Input | inputToMbtType }}) -> {{ .Output
 }{{ end }}
 `
 
-var mbtPluginMainTemplateStr = `{{ $top := . }}{{range .Plugin.Exports }}{{ $name := .Name }}/// ` + "`{{ $name | lowerSnakeCase }}`" + ` - {{ .Description | mbtMultilineComment | stripLeadingSlashes | leftJustify }}{{ if exportHasInputOrOutputDescription . }}
+var mbtPluginMainTemplateStr = `{{range .Plugin.Exports }}{{ $name := .Name }}/// ` + "`{{ $name | lowerSnakeCase }}`" + ` - {{ .Description | mbtMultilineComment | stripLeadingSlashes | leftJustify }}{{ if exportHasInputOrOutputDescription . }}
 ///
 {{ end }}{{ if exportHasInputDescription . }}/// ` + "`input`" + ` - {{ .Input.Description | mbtMultilineComment | stripLeadingSlashes | leftJustify }}{{ end }}{{ if exportHasOutputDescription . }}
 /// Returns {{ .Output.Description | mbtMultilineComment | stripLeadingSlashes | leftJustify }}{{ end }}
@@ -106,10 +111,25 @@ var mbtPluginMoonPkgJSONTemplateStr = `{
   ],
   "link": {
     "wasm": {
-      "exports": [{{ $top := . }}{{ $exportsLen := .Plugin.Exports | len }}{{range $index, $export := .Plugin.Exports }}{{ $name := .Name }}
+      "exports": [{{ $exportsLen := .Plugin.Exports | len }}{{range $index, $export := .Plugin.Exports }}{{ $name := .Name }}
         "exported_{{ $name | lowerSnakeCase }}:{{ $name }}"{{ showJSONCommaForOptional $index $exportsLen }}{{ end }}
 {{ "      ]," }}
       "export-memory-name": "memory"
     }
   }
 }`
+
+var mbtPluginPluginFunctionsTemplateStr = `{{range $index, $export := .Plugin.Exports }}{{ $name := .Name }}{{ if $index | lt 0 }}
+{{ end }}/// Exported: {{ $name }}
+pub fn exported_{{ $name | lowerSnakeCase }}() -> Int {
+{{ if . | inputIsMbtVoidType }}  {{ $name | lowerSnakeCase }}(){{ end -}}
+{{ if . | inputIsMbtPrimitiveType }}  let input = @host.input_string()
+  let output = {{ $name | lowerSnakeCase }}(input) |> @jsonutil.to_json()
+  @host.output_json_value(output){{ end -}}
+{{ if . | inputIsMbtReferenceType }}  {{ inputMbtReferenceTypeName . }}::parse(@host.input_string())!!.unwrap()
+  |> {{ $name | lowerSnakeCase }}()
+  |> @jsonutil.to_json()
+  |> @host.output_json_value(){{ end }}
+  return 0 // success
+{{ "}" }}
+{{ end }}`
