@@ -186,7 +186,7 @@ var structTestGoTemplateStr = `{{ $name := .Name }}{{ $top := . }}func Test{{ $n
 {{range $index, $prop := .Properties}}{{ if .IsRequired | not }}  {{ .Name | uppercaseFirst }}: {{ defaultGoValue . }},
 {{ end }}{{ end }}
 			},
-			want: ` + "`" + `{{"{"}}{{range $index, $prop := .Properties}}"{{ .Name }}":{{ defaultGoJSONValue . $top }}{{ showJSONCommaForOptional $index $top }}{{ end }}{{"}"}}` + "`" + `,
+			want: ` + "`" + `{{"{"}}{{ $propLen := .Properties | len }}{{range $index, $prop := .Properties}}"{{ .Name }}":{{ defaultGoJSONValue . $top }}{{ showJSONCommaForOptional $index $propLen }}{{ end }}{{"}"}}` + "`" + `,
 		},
 	}
 

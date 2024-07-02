@@ -9,6 +9,7 @@ var (
 	mbtPluginXtpTOMLTemplate       = template.Must(template.New("cost-gen-mbt-plugin.go:mbtPluginXtpTOMLTemplateStr").Parse(mbtPluginXtpTOMLTemplateStr))
 	mbtPluginHostFunctionsTemplate = template.Must(template.New("cost-gen-mbt-plugin.go:mbtPluginHostFunctionsTemplateStr").Funcs(funcMap).Parse(mbtPluginHostFunctionsTemplateStr))
 	mbtPluginMainTemplate          = template.Must(template.New("cost-gen-mbt-plugin.go:mbtPluginMainTemplateStr").Funcs(funcMap).Parse(mbtPluginMainTemplateStr))
+	mbtPluginMoonPkgJSONTemplate   = template.Must(template.New("cost-gen-mbt-plugin.go:mbtPluginMoonPkgJSONTemplateStr").Funcs(funcMap).Parse(mbtPluginMoonPkgJSONTemplateStr))
 )
 
 // genMbtPluginPDK generates Plugin PDK code to process plugin calls in Mbt.
@@ -25,6 +26,10 @@ func (c *Client) genMbtPluginPDK() (GeneratedFiles, error) {
 	if err := mbtPluginMainTemplate.Execute(&mainStr, c); err != nil {
 		return nil, err
 	}
+	var moonPkgJSONStr bytes.Buffer
+	if err := mbtPluginMoonPkgJSONTemplate.Execute(&moonPkgJSONStr, c); err != nil {
+		return nil, err
+	}
 
 	m := GeneratedFiles{
 		"build.sh":               buildShScript,
@@ -32,7 +37,7 @@ func (c *Client) genMbtPluginPDK() (GeneratedFiles, error) {
 		c.CustTypesTestsFilename: c.CustTypesTests,
 		"host-functions.mbt":     hostFunctionsStr.String(),
 		"main.mbt":               mainStr.String(),
-		"moon.pkg.json":          "", // TODO
+		"moon.pkg.json":          moonPkgJSONStr.String(),
 		"plugin-functions.mbt":   "", // TODO
 		"xtp.toml":               xtpTomlStr.String(),
 	}
@@ -89,3 +94,22 @@ pub fn {{ $name | lowerSnakeCase }}({{ .Input | inputToMbtType }}) -> {{ .Output
 
 }
 `
+
+var mbtPluginMoonPkgJSONTemplateStr = `{
+  "is-main": true,
+  "import": [
+    "gmlewis/moonbit-pdk/pdk/host",
+    {
+      "path": "gmlewis/json",
+      "alias": "jsonutil"
+    }
+  ],
+  "link": {
+    "wasm": {
+      "exports": [{{ $top := . }}{{ $exportsLen := .Plugin.Exports | len }}{{range $index, $export := .Plugin.Exports }}{{ $name := .Name }}
+        "exported_{{ $name | lowerSnakeCase }}:{{ $name }}"{{ showJSONCommaForOptional $index $exportsLen }}{{ end }}
+{{ "      ]," }}
+      "export-memory-name": "memory"
+    }
+  }
+}`

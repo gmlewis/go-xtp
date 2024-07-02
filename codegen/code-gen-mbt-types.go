@@ -204,7 +204,7 @@ var structTestMbtTemplateStr = `{{ $name := .Name }}{{ $top := . }}test "{{ $nam
   let got = @jsonutil.to_json(optional_fields)
     |> @jsonutil.stringify(spaces=0, newline=false)
   let want =
-{{ "    #|{" }}{{range $index, $prop := .Properties}}"{{ .Name }}":{{ requiredMbtJSONValue . $top }}{{ showJSONCommaForOptional $index $top }}{{ end -}}{{ "}" }}
+{{ "    #|{" }}{{ $propLen := .Properties | len }}{{range $index, $prop := .Properties}}"{{ .Name }}":{{ requiredMbtJSONValue . $top }}{{ showJSONCommaForOptional $index $propLen }}{{ end -}}{{ "}" }}
   @assertion.assert_eq(got, want)?
 {{ end -}}
 }

@@ -186,8 +186,8 @@ func multilineComment(s string) string {
 	return strings.ReplaceAll(strings.TrimSpace(s), "\n", "\n// ")
 }
 
-func showJSONCommaForOptional(index int, ct *schema.CustomType) string {
-	if index < len(ct.Properties)-1 {
+func showJSONCommaForOptional(index, sliceLen int) string {
+	if index < sliceLen-1 {
 		return ","
 	}
 	return ""
