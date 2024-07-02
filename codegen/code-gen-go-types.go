@@ -40,6 +40,11 @@ func (c *Client) genGoCustomTypes() error {
 	}
 
 	srcToFmt := strings.Join(srcBlocks, "\n")
+	if strings.Contains(srcToFmt, "fmt.Errorf") {
+		srcToFmt = goPreludeWithFmt + srcToFmt
+	} else {
+		srcToFmt = goPrelude + srcToFmt
+	}
 	src, err := format.Source([]byte(srcToFmt))
 	if err != nil {
 		return fmt.Errorf("gofmt error: %v\npre-formatted source:\n%v", err, srcToFmt)
@@ -108,6 +113,17 @@ const (
 {{range .Enum}}  {{ $name }}Enum{{ . | uppercaseFirst }} {{ $name }} = "{{ . }}"
 {{ end -}}
 )
+
+// Parse{{ $name }} parses a JSON string and returns the value.
+func Parse{{ $name }}(s string) (value {{ $name }}, err error) {
+	switch s {
+{{range .Enum}}	case "{{ . }}":
+		return {{ $name }}Enum{{ . | uppercaseFirst }}, nil
+{{ end -}}
+	default:
+		return value, fmt.Errorf("not a {{ $name }}: %v", s)
+	}
+}
 `
 
 // getGoStruct generates Go source code for a single struct custom datatype.
@@ -141,6 +157,15 @@ type {{ $name }} struct {
 {{ end -}}
 }
 
+// Parse{{ $name }} parses a JSON string and returns the value.
+func Parse{{ $name }}(s string) (value {{ $name }}, err error) {
+	if err := jsoncomp.Unmarshal([]byte(s), &value); err != nil {
+		return value, err
+	}
+
+	return value, nil
+}
+
 // GetSchema returns an ` + "`" + `XTPSchema` + "`" + ` for the ` + "`" + `{{ $name }}` + "`" + `.
 func (c *{{ $name }}) GetSchema() XTPSchema {
 	return XTPSchema{
@@ -150,14 +175,29 @@ func (c *{{ $name }}) GetSchema() XTPSchema {
 }
 `
 
-var testGoPrelude = `import (
-  "testing"
-
-	"github.com/google/go-cmp/cmp"
+var goPrelude = `import (
 	jsoniter "github.com/json-iterator/go"
 )
 
 var jsoncomp = jsoniter.ConfigCompatibleWithStandardLibrary
+
+`
+
+var goPreludeWithFmt = `import (
+	"fmt"
+
+	jsoniter "github.com/json-iterator/go"
+)
+
+var jsoncomp = jsoniter.ConfigCompatibleWithStandardLibrary
+
+`
+
+var testGoPrelude = `import (
+	"testing"
+
+	"github.com/google/go-cmp/cmp"
+)
 
 func boolPtr(b bool) *bool { return &b }
 func intPtr(i int) *int { return &i }

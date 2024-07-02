@@ -2,9 +2,12 @@
 package fruit
 
 import (
-	"encoding/json"
 	"fmt"
+
+	jsoniter "github.com/json-iterator/go"
 )
+
+var jsoncomp = jsoniter.ConfigCompatibleWithStandardLibrary
 
 // Fruit represents a set of available fruits you can consume.
 type Fruit string
@@ -75,7 +78,7 @@ type ComplexObject struct {
 
 // ParseComplexObject parses a JSON string and returns the value.
 func ParseComplexObject(s string) (value ComplexObject, err error) {
-	if err := json.Unmarshal([]byte(s), &value); err != nil {
+	if err := jsoncomp.Unmarshal([]byte(s), &value); err != nil {
 		return value, err
 	}
 

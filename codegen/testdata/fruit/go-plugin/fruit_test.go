@@ -4,10 +4,7 @@ import (
 	"testing"
 
 	"github.com/google/go-cmp/cmp"
-	jsoniter "github.com/json-iterator/go"
 )
-
-var jsoncomp = jsoniter.ConfigCompatibleWithStandardLibrary
 
 func boolPtr(b bool) *bool       { return &b }
 func intPtr(i int) *int          { return &i }
