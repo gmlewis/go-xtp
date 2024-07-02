@@ -6,11 +6,11 @@ import (
 )
 
 var (
-	mbtPluginXtpTOMLTemplate         = template.Must(template.New("cost-gen-mbt-plugin.go:mbtPluginXtpTOMLTemplateStr").Parse(mbtPluginXtpTOMLTemplateStr))
 	mbtPluginHostFunctionsTemplate   = template.Must(template.New("cost-gen-mbt-plugin.go:mbtPluginHostFunctionsTemplateStr").Funcs(funcMap).Parse(mbtPluginHostFunctionsTemplateStr))
 	mbtPluginMainTemplate            = template.Must(template.New("cost-gen-mbt-plugin.go:mbtPluginMainTemplateStr").Funcs(funcMap).Parse(mbtPluginMainTemplateStr))
 	mbtPluginMoonPkgJSONTemplate     = template.Must(template.New("cost-gen-mbt-plugin.go:mbtPluginMoonPkgJSONTemplateStr").Funcs(funcMap).Parse(mbtPluginMoonPkgJSONTemplateStr))
 	mbtPluginPluginFunctionsTemplate = template.Must(template.New("cost-gen-mbt-plugin.go:mbtPluginPluginFunctionsTemplateStr").Funcs(funcMap).Parse(mbtPluginPluginFunctionsTemplateStr))
+	mbtPluginXtpTOMLTemplate         = template.Must(template.New("cost-gen-mbt-plugin.go:mbtPluginXtpTOMLTemplateStr").Parse(mbtPluginXtpTOMLTemplateStr))
 )
 
 // genMbtPluginPDK generates Plugin PDK code to process plugin calls in Mbt.

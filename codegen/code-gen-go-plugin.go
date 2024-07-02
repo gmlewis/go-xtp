@@ -9,13 +9,28 @@ import (
 type GeneratedFiles map[string]string
 
 var (
-	goPluginXtpTOMLTemplate = template.Must(template.New("cost-gen-go-plugin.go:goPluginXtpTOMLTemplateStr").Parse(goPluginXtpTOMLTemplateStr))
+	goPluginHostFunctionsTemplate   = template.Must(template.New("cost-gen-go-plugin.go:goPluginHostFunctionsTemplateStr").Funcs(funcMap).Parse(goPluginHostFunctionsTemplateStr))
+	goPluginMainTemplate            = template.Must(template.New("cost-gen-go-plugin.go:goPluginMainTemplateStr").Funcs(funcMap).Parse(goPluginMainTemplateStr))
+	goPluginPluginFunctionsTemplate = template.Must(template.New("cost-gen-go-plugin.go:goPluginPluginFunctionsTemplateStr").Funcs(funcMap).Parse(goPluginPluginFunctionsTemplateStr))
+	goPluginXtpTOMLTemplate         = template.Must(template.New("cost-gen-go-plugin.go:goPluginXtpTOMLTemplateStr").Parse(goPluginXtpTOMLTemplateStr))
 )
 
 // genGoPluginPDK generates Plugin PDK code to process plugin calls in Go.
 func (c *Client) genGoPluginPDK() (GeneratedFiles, error) {
-	var buf bytes.Buffer
-	if err := goPluginXtpTOMLTemplate.Execute(&buf, c); err != nil {
+	var xtpTomlStr bytes.Buffer
+	if err := goPluginXtpTOMLTemplate.Execute(&xtpTomlStr, c); err != nil {
+		return nil, err
+	}
+	var hostFunctionsStr bytes.Buffer
+	if err := goPluginHostFunctionsTemplate.Execute(&hostFunctionsStr, c); err != nil {
+		return nil, err
+	}
+	var mainStr bytes.Buffer
+	if err := goPluginMainTemplate.Execute(&mainStr, c); err != nil {
+		return nil, err
+	}
+	var pluginFunctionsStr bytes.Buffer
+	if err := goPluginPluginFunctionsTemplate.Execute(&pluginFunctionsStr, c); err != nil {
 		return nil, err
 	}
 
@@ -23,7 +38,10 @@ func (c *Client) genGoPluginPDK() (GeneratedFiles, error) {
 		"build.sh":               buildShScript,
 		c.CustTypesFilename:      "package main\n\n" + c.CustTypes,
 		c.CustTypesTestsFilename: "package main\n\n" + c.CustTypesTests,
-		"xtp.toml":               buf.String(),
+		"host-functions.go":      hostFunctionsStr.String(),
+		"main.go":                mainStr.String(),
+		"plugin-functions.go":    pluginFunctionsStr.String(),
+		"xtp.toml":               xtpTomlStr.String(),
 	}
 
 	return m, nil
@@ -44,4 +62,44 @@ name = "go-xtp-plugin-{{ .PkgName }}"
 
   # xtp plugin build runs this script to generate the wasm file
   build = "tinygo build -target wasi -o {{ .PkgName }}.wasm ."
+`
+
+var goPluginHostFunctionsTemplateStr = `//go:build tinygo
+
+package main
+
+import (
+	"encoding/json"
+
+	"github.com/extism/go-pdk"
+)
+{{range .Plugin.Imports }}{{ $name := .Name }}
+//go:wasmimport extism:host/user {{ $name }}
+func host{{ $name | uppercaseFirst }}(uint64) uint64
+
+// {{ $name | uppercaseFirst }} - {{ .Description | goMultilineComment | stripLeadingSlashes | leftJustify }}
+func {{ $name | uppercaseFirst }}({{ .Input | inputToGoType }}) ({{ .Output | outputToGoType }}, error) {
+	buf, err := json.Marshal(input)
+	if err != nil {
+		return false, err
+	}
+
+	mem := pdk.AllocateBytes(buf)
+	ptr := host{{ $name | uppercaseFirst }}(mem.Offset())
+
+	rmem := pdk.FindMemory(ptr)
+	buf = rmem.ReadBytes()
+
+	var result {{ .Output | jsonOutputAsGoType }}
+	if err := json.Unmarshal(buf, &result); err != nil {
+		return false, err
+	}
+	return result, nil
+}
+{{ end }}`
+
+var goPluginMainTemplateStr = `
+`
+
+var goPluginPluginFunctionsTemplateStr = `
 `

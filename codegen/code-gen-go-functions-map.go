@@ -113,12 +113,124 @@ func getGoType(prop *schema.Property) string {
 	}
 }
 
+func goMultilineComment(s string) string {
+	s = strings.TrimSpace(s)
+	if s == "" {
+		return "\n"
+	}
+	return "// " + strings.ReplaceAll(strings.TrimSpace(s), "\n", "\n  // ")
+}
+
+func inputToGoType(input *schema.Input) string {
+	if input == nil {
+		return ""
+	}
+
+	if input.Ref != "" {
+		parts := strings.Split(input.Ref, "/")
+		refName := parts[len(parts)-1]
+		return "input " + refName
+	}
+
+	switch input.Type {
+	case "integer":
+		return "input int"
+	case "string":
+		return "input string"
+	case "number":
+		return "input float64"
+	case "boolean":
+		return "input bool"
+	case "object":
+		return "input {}" // TODO - what should this be?
+	case "array":
+		return "input []" // TODO - what should this be?
+	case "buffer":
+		return "input Buffer" // TODO - what should this be?
+	default:
+		log.Printf("WARNING: unknown property type %q", input.Type)
+		return "input " + input.Type
+	}
+}
+
+func jsonOutputAsGoType(output *schema.Output) string {
+	// TODO: finish this
+	// if output.Ref != "" {
+	// 	parts := strings.Split(output.Ref, "/")
+	// 	refName := parts[len(parts)-1]
+	// 	if output.RefCustomType != nil {
+	// 		return refName + "?"
+	// 	}
+	// 	return refName
+	// }
+
+	// var optional string
+	// if !output.IsRequired {
+	// 	optional = "?"
+	// }
+
+	switch output.Type {
+	// case "integer":
+	// 	return "Int" + optional
+	// case "string":
+	// 	return "String" + optional
+	// case "number":
+	// 	return "Double" + optional
+	case "boolean":
+		return "bool"
+	// case "object":
+	// 	return "{}" + optional // TODO - what should this be?
+	// case "array":
+	// 	return "[]" + optional // TODO - what should this be?
+	// case "buffer":
+	// 	return "Buffer" + optional // TODO - what should this be?
+	default:
+		log.Printf("WARNING: unknown property type %q", output.Type)
+		return output.Type
+	}
+}
+
 func optionalGoMultilineComment(s string) string {
 	s = strings.TrimSpace(s)
 	if s == "" {
 		return "" // Don't render comment at all
 	}
 	return "// " + strings.ReplaceAll(strings.TrimSpace(s), "\n", "\n  // ") + "\n  "
+}
+
+func outputToGoType(output *schema.Output) string {
+	if output == nil {
+		return ""
+	}
+
+	if output.Ref != "" {
+		parts := strings.Split(output.Ref, "/")
+		refName := parts[len(parts)-1]
+		// if output.RefCustomType != nil {
+		// 	return refName + "?"
+		// }
+		return refName
+	}
+
+	switch output.Type {
+	case "integer":
+		return "int"
+	case "string":
+		return "string"
+	case "number":
+		return "float64"
+	case "boolean":
+		return "bool"
+	case "object":
+		return "{}" // TODO - what should this be?
+	case "array":
+		return "[]" // TODO - what should this be?
+	case "buffer":
+		return "Buffer" // TODO - what should this be?
+	default:
+		log.Printf("WARNING: unknown property type %q", output.Type)
+		return output.Type
+	}
 }
 
 func requiredGoJSONValue(prop *schema.Property) string {
