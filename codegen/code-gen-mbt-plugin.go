@@ -8,6 +8,7 @@ import (
 var (
 	mbtPluginXtpTOMLTemplate       = template.Must(template.New("cost-gen-mbt-plugin.go:mbtPluginXtpTOMLTemplateStr").Parse(mbtPluginXtpTOMLTemplateStr))
 	mbtPluginHostFunctionsTemplate = template.Must(template.New("cost-gen-mbt-plugin.go:mbtPluginHostFunctionsTemplateStr").Funcs(funcMap).Parse(mbtPluginHostFunctionsTemplateStr))
+	mbtPluginMainTemplate          = template.Must(template.New("cost-gen-mbt-plugin.go:mbtPluginMainTemplateStr").Funcs(funcMap).Parse(mbtPluginMainTemplateStr))
 )
 
 // genMbtPluginPDK generates Plugin PDK code to process plugin calls in Mbt.
@@ -20,13 +21,17 @@ func (c *Client) genMbtPluginPDK() (GeneratedFiles, error) {
 	if err := mbtPluginHostFunctionsTemplate.Execute(&hostFunctionsStr, c); err != nil {
 		return nil, err
 	}
+	var mainStr bytes.Buffer
+	if err := mbtPluginMainTemplate.Execute(&mainStr, c); err != nil {
+		return nil, err
+	}
 
 	m := GeneratedFiles{
 		"build.sh":               buildShScript,
 		c.CustTypesFilename:      c.CustTypes,
 		c.CustTypesTestsFilename: c.CustTypesTests,
 		"host-functions.mbt":     hostFunctionsStr.String(),
-		"main.mbt":               "", // TODO
+		"main.mbt":               mainStr.String(),
 		"moon.pkg.json":          "", // TODO
 		"plugin-functions.mbt":   "", // TODO
 		"xtp.toml":               xtpTomlStr.String(),
@@ -70,4 +75,15 @@ pub fn {{ $name | lowerSnakeCase }}(input : {{ .Input | inputToMbtType }}) -> {{
     }
   }
 }{{ end }}
+`
+
+var mbtPluginMainTemplateStr = `{{ $top := . }}{{range .Plugin.Exports }}{{ $name := .Name }}/// ` + "`{{ $name | lowerSnakeCase }}`" + ` - {{ .Description | mbtMultilineComment | stripLeadingSlashes | leftJustify }}
+pub fn {{ $name | lowerSnakeCase }}({{ .Input | inputToMbtType }}) -> {{ .Output | outputToMbtType }} {
+  // TODO: fill out your implementation here
+  return-type-here
+}
+
+{{ end }}fn main {
+
+}
 `
