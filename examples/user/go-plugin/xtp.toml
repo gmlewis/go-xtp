@@ -1,0 +1,11 @@
+app_id = "app_<enter-app-id-here>"
+
+# This is where 'xtp plugin push' expects to find the wasm file after the build script has run.
+bin = "user.wasm"
+extension_point_id = "ext_<enter-extension-point-id-here>"
+name = "go-xtp-plugin-user"
+
+[scripts]
+
+  # xtp plugin build runs this script to generate the wasm file
+  build = "tinygo build -target wasi -o user.wasm ."

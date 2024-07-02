@@ -1,8 +1,18 @@
 {
+  "is-main": true,
   "import": [
+    "gmlewis/moonbit-pdk/pdk/host",
     {
       "path": "gmlewis/json",
       "alias": "jsonutil"
     }
-  ]
+  ],
+  "link": {
+    "wasm": {
+      "exports": [
+        "exported_process_user:processUser"
+      ],
+      "export-memory-name": "memory"
+    }
+  }
 }

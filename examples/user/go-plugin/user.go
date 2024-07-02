@@ -1,21 +1,9 @@
-// Package user represents the custom datatypes for an XTP Extension Plugin.
-package user
-
-import "encoding/json"
+package main
 
 // Address represents a users address.
 type Address struct {
 	// Street address
 	Street string `json:"street"`
-}
-
-// ParseAddress parses a JSON string and returns the value.
-func ParseAddress(s string) (value Address, err error) {
-	if err := json.Unmarshal([]byte(s), &value); err != nil {
-		return value, err
-	}
-
-	return value, nil
 }
 
 // GetSchema returns an `XTPSchema` for the `Address`.
@@ -32,15 +20,6 @@ type User struct {
 	// The user's email, of course
 	Email   *string  `json:"email,omitempty"`
 	Address *Address `json:"address,omitempty"`
-}
-
-// ParseUser parses a JSON string and returns the value.
-func ParseUser(s string) (value User, err error) {
-	if err := json.Unmarshal([]byte(s), &value); err != nil {
-		return value, err
-	}
-
-	return value, nil
 }
 
 // GetSchema returns an `XTPSchema` for the `User`.
