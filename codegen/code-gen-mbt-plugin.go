@@ -56,7 +56,7 @@ name = "mbt-xtp-plugin-{{ .PkgName }}"
 var mbtPluginHostFunctionsTemplateStr = `{{ $top := . }}{{range .Plugin.Imports }}{{ $name := .Name }}pub fn host_{{ $name | lowerSnakeCase }}(offset : Int64) -> Int64 = "extism:host/user" "{{ $name }}"
 
 /// ` + "`{{ $name | lowerSnakeCase }}`" + ` - {{ .Description | mbtMultilineComment | stripLeadingSlashes | leftJustify }}
-pub fn {{ $name | lowerSnakeCase }}(input : {{ .Input | inputToMbtType }}) -> {{ .Output | outputToMbtType }}!String {
+pub fn {{ $name | lowerSnakeCase }}({{ .Input | inputToMbtType }}) -> {{ .Output | outputToMbtType }}!String {
   let json = @jsonutil.to_json(input)
   let mem = @host.Memory::allocate_json_value(json)
   let ptr = host_{{ $name | lowerSnakeCase }}(mem.offset)
@@ -77,10 +77,12 @@ pub fn {{ $name | lowerSnakeCase }}(input : {{ .Input | inputToMbtType }}) -> {{
 }{{ end }}
 `
 
-var mbtPluginMainTemplateStr = `{{ $top := . }}{{range .Plugin.Exports }}{{ $name := .Name }}/// ` + "`{{ $name | lowerSnakeCase }}`" + ` - {{ .Description | mbtMultilineComment | stripLeadingSlashes | leftJustify }}
+var mbtPluginMainTemplateStr = `{{ $top := . }}{{range .Plugin.Exports }}{{ $name := .Name }}/// ` + "`{{ $name | lowerSnakeCase }}`" + ` - {{ .Description | mbtMultilineComment | stripLeadingSlashes | leftJustify }}{{ if exportHasInputOrOutputDescription . }}
+///
+{{ end }}{{ if exportHasInputDescription . }}/// ` + "`input`" + ` - {{ .Input.Description | mbtMultilineComment | stripLeadingSlashes | leftJustify }}{{ end }}{{ if exportHasOutputDescription . }}
+/// Returns {{ .Output.Description | mbtMultilineComment | stripLeadingSlashes | leftJustify }}{{ end }}
 pub fn {{ $name | lowerSnakeCase }}({{ .Input | inputToMbtType }}) -> {{ .Output | outputToMbtType }} {
-  // TODO: fill out your implementation here
-  return-type-here
+  // TODO: fill out your implementation here{{ .Output | outputToMbtExampleLiteral }}
 }
 
 {{ end }}fn main {

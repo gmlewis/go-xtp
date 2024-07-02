@@ -6,7 +6,7 @@ pub fn void_func() -> Unit {
 
 /// `primitive_type_func` - This demonstrates how you can accept or return primtive types.
 /// This function takes a utf8 string and returns a json encoded boolean
-//
+///
 /// `input` - A string passed into plugin input
 /// Returns A boolean encoded as json
 pub fn primitive_type_func(input : String) -> Bool {
@@ -17,7 +17,10 @@ pub fn primitive_type_func(input : String) -> Bool {
 /// `reference_type_func` - This demonstrates how you can accept or return references to schema types.
 /// And it shows how you can define an enum to be used as a property or input/output.
 pub fn reference_type_func(input : Fruit) -> ComplexObject {
-  { ..ComplexObject::new(), a_boolean: eat_a_fruit(input)!!.unwrap() }
+  // TODO: fill out your implementation here
+  {
+    ..ComplexObject::new(),
+  }
 }
 
 fn main {

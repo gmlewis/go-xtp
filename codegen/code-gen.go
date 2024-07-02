@@ -64,34 +64,38 @@ func (c *Client) GenPluginPDK() (GeneratedFiles, error) {
 }
 
 var funcMap = map[string]any{
-	"addOmitIfNeeded":             addOmitIfNeeded,
-	"defaultGoJSONValue":          defaultGoJSONValue,
-	"defaultGoValue":              defaultGoValue,
-	"defaultMbtJSONValue":         defaultMbtJSONValue,
-	"defaultMbtValue":             defaultMbtValue,
-	"downcaseFirst":               downcaseFirst,
-	"getExtismType":               getExtismType,
-	"getGoType":                   getGoType,
-	"getMbtType":                  getMbtType,
-	"hasOptionalFields":           hasOptionalFields,
-	"inputToMbtType":              inputToMbtType,
-	"jsonOutputAsMbtType":         jsonOutputAsMbtType,
-	"leftJustify":                 leftJustify,
-	"lowerSnakeCase":              lowerSnakeCase,
-	"mbtMultilineComment":         mbtMultilineComment,
-	"multilineComment":            multilineComment,
-	"optionalGoMultilineComment":  optionalGoMultilineComment,
-	"optionalMbtMultilineComment": optionalMbtMultilineComment,
-	"optionalMbtValue":            optionalMbtValue,
-	"outputToMbtType":             outputToMbtType,
-	"requiredGoJSONValue":         requiredGoJSONValue,
-	"requiredGoValue":             requiredGoValue,
-	"requiredMbtJSONValue":        requiredMbtJSONValue,
-	"requiredMbtValue":            requiredMbtValue,
-	"showJSONCommaForOptional":    showJSONCommaForOptional,
-	"showJSONCommaForRequired":    showJSONCommaForRequired,
-	"stripLeadingSlashes":         stripLeadingSlashes,
-	"uppercaseFirst":              uppercaseFirst,
+	"addOmitIfNeeded":                   addOmitIfNeeded,
+	"defaultGoJSONValue":                defaultGoJSONValue,
+	"defaultGoValue":                    defaultGoValue,
+	"defaultMbtJSONValue":               defaultMbtJSONValue,
+	"defaultMbtValue":                   defaultMbtValue,
+	"downcaseFirst":                     downcaseFirst,
+	"exportHasInputOrOutputDescription": exportHasInputOrOutputDescription,
+	"exportHasInputDescription":         exportHasInputDescription,
+	"exportHasOutputDescription":        exportHasOutputDescription,
+	"getExtismType":                     getExtismType,
+	"getGoType":                         getGoType,
+	"getMbtType":                        getMbtType,
+	"hasOptionalFields":                 hasOptionalFields,
+	"inputToMbtType":                    inputToMbtType,
+	"jsonOutputAsMbtType":               jsonOutputAsMbtType,
+	"leftJustify":                       leftJustify,
+	"lowerSnakeCase":                    lowerSnakeCase,
+	"mbtMultilineComment":               mbtMultilineComment,
+	"multilineComment":                  multilineComment,
+	"optionalGoMultilineComment":        optionalGoMultilineComment,
+	"optionalMbtMultilineComment":       optionalMbtMultilineComment,
+	"optionalMbtValue":                  optionalMbtValue,
+	"outputToMbtExampleLiteral":         outputToMbtExampleLiteral,
+	"outputToMbtType":                   outputToMbtType,
+	"requiredGoJSONValue":               requiredGoJSONValue,
+	"requiredGoValue":                   requiredGoValue,
+	"requiredMbtJSONValue":              requiredMbtJSONValue,
+	"requiredMbtValue":                  requiredMbtValue,
+	"showJSONCommaForOptional":          showJSONCommaForOptional,
+	"showJSONCommaForRequired":          showJSONCommaForRequired,
+	"stripLeadingSlashes":               stripLeadingSlashes,
+	"uppercaseFirst":                    uppercaseFirst,
 }
 
 func addOmitIfNeeded(prop *schema.Property) string {
@@ -106,6 +110,21 @@ func downcaseFirst(s string) string {
 		return strings.ToLower(s)
 	}
 	return strings.ToLower(s[0:1]) + s[1:]
+}
+
+func exportHasInputOrOutputDescription(export *schema.Export) bool {
+	return exportHasInputDescription(export) ||
+		exportHasOutputDescription(export)
+}
+
+func exportHasInputDescription(export *schema.Export) bool {
+	return export != nil &&
+		export.Input != nil && export.Input.Description != ""
+}
+
+func exportHasOutputDescription(export *schema.Export) bool {
+	return export != nil &&
+		export.Output != nil && export.Output.Description != ""
 }
 
 func getExtismType(prop *schema.Property, ct *schema.CustomType) string {

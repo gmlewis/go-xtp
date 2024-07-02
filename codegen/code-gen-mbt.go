@@ -118,33 +118,34 @@ func getMbtType(prop *schema.Property) string {
 }
 
 func inputToMbtType(input *schema.Input) string {
+	if input == nil {
+		return ""
+	}
+
 	if input.Ref != "" {
 		parts := strings.Split(input.Ref, "/")
 		refName := parts[len(parts)-1]
-		// if input.RefCustomType != nil {
-		// 	return refName + "?"
-		// }
-		return refName
+		return "input : " + refName
 	}
 
 	switch input.Type {
 	case "integer":
-		return "Int"
+		return "input : Int"
 	case "string":
-		return "String"
+		return "input : String"
 	case "number":
-		return "Double"
+		return "input : Double"
 	case "boolean":
-		return "Bool"
+		return "input : Bool"
 	case "object":
-		return "{}" // TODO - what should this be?
+		return "input : {}" // TODO - what should this be?
 	case "array":
-		return "[]" // TODO - what should this be?
+		return "input : []" // TODO - what should this be?
 	case "buffer":
-		return "Buffer" // TODO - what should this be?
+		return "input : Buffer" // TODO - what should this be?
 	default:
 		log.Printf("WARNING: unknown property type %q", input.Type)
-		return input.Type
+		return "input : " + input.Type
 	}
 }
 
@@ -234,7 +235,46 @@ func optionalMbtValue(prop *schema.Property) string {
 	}
 }
 
+func outputToMbtExampleLiteral(output *schema.Output) string {
+	if output == nil {
+		return ""
+	}
+
+	if output.Ref != "" {
+		parts := strings.Split(output.Ref, "/")
+		refName := parts[len(parts)-1]
+		return fmt.Sprintf(`
+  {
+    ..%v::new(),
+  }`, refName)
+	}
+
+	switch output.Type {
+	case "integer":
+		return "\n  0"
+	case "string":
+		return `\n  ""`
+	case "number":
+		return "\n  0.0"
+	case "boolean":
+		return "\n  false"
+	case "object":
+		return "\n  {}" // TODO - what should this be?
+	case "array":
+		return "\n  []" // TODO - what should this be?
+	case "buffer":
+		return "\n  Buffer" // TODO - what should this be?
+	default:
+		log.Printf("WARNING: unknown property type %q", output.Type)
+		return "\n  " + output.Type
+	}
+}
+
 func outputToMbtType(output *schema.Output) string {
+	if output == nil {
+		return "Unit"
+	}
+
 	if output.Ref != "" {
 		parts := strings.Split(output.Ref, "/")
 		refName := parts[len(parts)-1]
