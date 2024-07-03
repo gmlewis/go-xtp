@@ -23,16 +23,16 @@ pub fn Address::from_json(value : @json.JsonValue) -> Address? {
 }
 
 pub fn Address::parse(s : String) -> Address!String {
-  let om = match @json.parse(s) {
-    Ok(jv) => jv.as_object()
+  match @json.parse(s) {
+    Ok(jv) =>
+      match Address::from_json(jv) {
+        Some(value) => value
+        None => {
+          raise "unable to parse Address \(s)"
+        }
+      }
     Err(e) => {
       raise "unable to parse Address \(s): \(e)"
-    }
-  }
-  match om {
-    Some(m) => { street: m["street"].to_string() }
-    None => {
-      raise "unable to parse Address \(s)"
     }
   }
 }
