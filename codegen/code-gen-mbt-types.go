@@ -172,10 +172,17 @@ pub impl @jsonutil.ToJson for {{ $name }} with to_json(self) {
 pub fn {{ $name }}::from_json(value : @json.JsonValue) -> {{ $name }}? {
   match value {
     @json.JsonValue::Object({
-      "street": Some(@json.JsonValue::String(s)),
-    }) => Some({
-      street: s,
-    })
+{{range .Properties}}{{ if .IsRequired }}      "{{ .Name }}": Some(@json.JsonValue::String(s)),
+{{ end }}{{ if .IsRequired | not }}      "{{ .Name }}": {{ .Name | lowerSnakeCase }},
+{{ end }}{{ end -}}
+{{ "    }) => Some({" }}
+{{range .Properties}}{{ if .IsRequired }}      {{ .Name | lowerSnakeCase }}: s,
+{{ end }}{{ if .IsRequired | not }}      {{ .Name | lowerSnakeCase }}: match {{ .Name | lowerSnakeCase }} {
+        Some({{ mbtFromJSONMatchKey . }}) => {{ mbtFromJSONMatchValue . }}
+        _ => None
+      }
+{{ end }}{{ end -}}
+{{ "    })" }}
     _ => None
 }
 

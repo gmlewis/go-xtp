@@ -186,6 +186,16 @@ func jsonOutputAsMbtType(output *schema.Output) string {
 	}
 }
 
+func mbtFromJSONMatchKey(prop *schema.Property) string {
+	// TODO
+	return "key"
+}
+
+func mbtFromJSONMatchValue(prop *schema.Property) string {
+	// TODO
+	return "value"
+}
+
 func mbtMultilineComment(s string) string {
 	s = strings.TrimSpace(s)
 	if s == "" {
