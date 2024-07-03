@@ -4,7 +4,7 @@ test "Address" {
     |> @jsonutil.stringify(spaces=0, newline=false)
   let want =
     #|{"street":""}
-  @assertion.assert_eq(got, want)?
+  @test.eq(got, want)!
   //
   let required_fields : Address = {
     street: "street",
@@ -13,7 +13,7 @@ test "Address" {
     |> @jsonutil.stringify(spaces=0, newline=false)
   let want =
     #|{"street":"street"}
-  @assertion.assert_eq(got, want)?
+  @test.eq(got, want)!
 }
 
 test "User" {
@@ -22,7 +22,7 @@ test "User" {
     |> @jsonutil.stringify(spaces=0, newline=false)
   let want =
     #|{}
-  @assertion.assert_eq(got, want)?
+  @test.eq(got, want)!
   //
   let required_fields : User = {
     age: None,
@@ -33,7 +33,7 @@ test "User" {
     |> @jsonutil.stringify(spaces=0, newline=false)
   let want =
     #|{}
-  @assertion.assert_eq(got, want)?
+  @test.eq(got, want)!
   //
   let optional_fields : User = {
     ..required_fields,
@@ -45,5 +45,5 @@ test "User" {
     |> @jsonutil.stringify(spaces=0, newline=false)
   let want =
     #|{"age":0,"email":"email","address":{"street":""}}
-  @assertion.assert_eq(got, want)?
+  @test.eq(got, want)!
 }

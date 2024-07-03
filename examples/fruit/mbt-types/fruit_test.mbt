@@ -4,7 +4,7 @@ test "ComplexObject" {
     |> @jsonutil.stringify(spaces=0, newline=false)
   let want =
     #|{"ghost":"blinky","aBoolean":false,"aString":"","anInt":0}
-  @assertion.assert_eq(got, want)?
+  @test.eq(got, want)!
   //
   let required_fields : ComplexObject = {
     ghost: Blinky,
@@ -17,7 +17,7 @@ test "ComplexObject" {
     |> @jsonutil.stringify(spaces=0, newline=false)
   let want =
     #|{"ghost":"blinky","aBoolean":true,"aString":"aString","anInt":0}
-  @assertion.assert_eq(got, want)?
+  @test.eq(got, want)!
   //
   let optional_fields : ComplexObject = {
     ..required_fields,
@@ -27,5 +27,5 @@ test "ComplexObject" {
     |> @jsonutil.stringify(spaces=0, newline=false)
   let want =
     #|{"ghost":"blinky","aBoolean":true,"aString":"aString","anInt":0,"anOptionalDate":"anOptionalDate"}
-  @assertion.assert_eq(got, want)?
+  @test.eq(got, want)!
 }
