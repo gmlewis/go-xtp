@@ -97,7 +97,7 @@ var enumMbtTemplateStr = `{{ $name := .Name }}/// ` + "`" + `{{ $name }}` + "`" 
 pub enum {{ $name }} {
 {{range .Enum}}  {{ . | uppercaseFirst }}
 {{ end -}}
-}
+} derive(Debug, Eq)
 
 pub fn {{ $name }}::parse(s : String) -> {{ $name }}!String {
   match s {
@@ -146,7 +146,7 @@ var structMbtTemplateStr = `{{ $name := .Name }}{{ $top := . }}/// ` + "`" + `{{
 pub struct {{ $name }} {
 {{range .Properties}}  {{ .Description | optionalMbtMultilineComment }}{{ .Name | lowerSnakeCase }} : {{ getMbtType . }}
 {{ end -}}
-}
+} derive(Debug, Eq)
 
 /// ` + "`" + `{{ $name }}::new` + "`" + ` returns a new struct with default values.
 pub fn {{ $name }}::new() -> {{ $name }} {
@@ -167,6 +167,31 @@ pub impl @jsonutil.ToJson for {{ $name }} with to_json(self) {
   }
 {{ end }}{{ end -}}
 {{ "  @jsonutil.from_entries(fields)" }}
+}
+
+pub fn {{ $name }}::from_json(value : @json.JsonValue) -> {{ $name }}? {
+  match value {
+    @json.JsonValue::Object({
+      "street": Some(@json.JsonValue::String(s)),
+    }) => Some({
+      street: s,
+    })
+    _ => None
+}
+
+pub fn {{ $name }}::parse(s : String) -> {{ $name }}!String {
+  match @json.parse(s) {
+    Ok(jv) =>
+      match {{ $name }}::from_json(jv) {
+        Some(value) => value
+        None => {
+          raise "unable to parse {{ $name }} \(s)"
+        }
+      }
+    Err(e) => {
+      raise "unable to parse {{ $name }} \(s): \(e)"
+    }
+  }
 }
 
 /// ` + "`" + `get_schema` + "`" + ` returns an ` + "`" + `XTPSchema` + "`" + ` for the ` + "`" + `{{ $name }}` + "`" + `.
