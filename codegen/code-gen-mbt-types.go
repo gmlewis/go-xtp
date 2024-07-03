@@ -180,10 +180,11 @@ pub fn {{ $name }}::from_json(value : @json.JsonValue) -> {{ $name }}? {
 {{ end }}{{ if .IsRequired | not }}      {{ .Name | lowerSnakeCase }}: match {{ .Name | lowerSnakeCase }} {
         Some({{ mbtFromJSONMatchKey . }}) => {{ mbtFromJSONMatchValue . }}
         _ => None
-      }
+      },
 {{ end }}{{ end -}}
 {{ "    })" }}
     _ => None
+  }
 }
 
 pub fn {{ $name }}::parse(s : String) -> {{ $name }}!String {
@@ -218,6 +219,9 @@ var structTestMbtTemplateStr = `{{ $name := .Name }}{{ $top := . }}test "{{ $nam
 {{ "    #|{" }}{{range $index, $prop := .Properties}}{{ if .IsRequired }}"{{ .Name }}":{{ defaultMbtJSONValue . $top }}{{ showJSONCommaForRequired $index $top }}{{ end }}{{ end -}}{{ "}" }}
   @test.eq(got, want)!
   //
+  let got_parse = {{ $name }}::parse(want)!
+  @test.eq(got_parse, default_object)!
+  //
   let required_fields : {{ $name }} = {
 {{range .Properties}}    {{ .Name | lowerSnakeCase }}: {{ requiredMbtValue . }},
 {{ end -}}
@@ -227,6 +231,9 @@ var structTestMbtTemplateStr = `{{ $name := .Name }}{{ $top := . }}test "{{ $nam
   let want =
 {{ "    #|{" }}{{range $index, $prop := .Properties}}{{ if .IsRequired }}"{{ .Name }}":{{ requiredMbtJSONValue . $top }}{{ showJSONCommaForRequired $index $top }}{{ end }}{{ end -}}{{ "}" }}
   @test.eq(got, want)!
+  //
+  let got_parse = {{ $name }}::parse(want)!
+  @test.eq(got_parse, required_fields)!
 {{ if hasOptionalFields .}}  //
   let optional_fields : {{ $name }} = {
     ..required_fields,
@@ -238,6 +245,9 @@ var structTestMbtTemplateStr = `{{ $name := .Name }}{{ $top := . }}test "{{ $nam
   let want =
 {{ "    #|{" }}{{ $propLen := .Properties | len }}{{range $index, $prop := .Properties}}"{{ .Name }}":{{ requiredMbtJSONValue . $top }}{{ showJSONCommaForOptional $index $propLen }}{{ end -}}{{ "}" }}
   @test.eq(got, want)!
+  //
+  let got_parse = {{ $name }}::parse(want)!
+  @test.eq(got_parse, optional_fields)!
 {{ end -}}
 }
 `

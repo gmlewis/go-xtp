@@ -187,13 +187,77 @@ func jsonOutputAsMbtType(output *schema.Output) string {
 }
 
 func mbtFromJSONMatchKey(prop *schema.Property) string {
-	// TODO
-	return "key"
+	if prop.Ref != "" {
+		// parts := strings.Split(prop.Ref, "/")
+		// refName := parts[len(parts)-1]
+		// if !prop.IsRequired && prop.RefCustomType != nil {
+		// 	return "None"
+		// }
+		// if prop.FirstEnumValue != "" {
+		// 	return uppercaseFirst(prop.FirstEnumValue)
+		// }
+		return "v"
+	}
+
+	// if !prop.IsRequired {
+	// 	return "None"
+	// }
+
+	switch prop.Type {
+	case "integer", "number":
+		return "@json.JsonValue::Number(n)"
+	case "string":
+		return "@json.JsonValue::String(s)"
+	case "boolean":
+		return "@json.JsonValue::Boolean(v)"
+	case "object":
+		return "{}" // TODO - what to do with this?
+	case "array":
+		return "[]" // TODO - what to do with this?
+	case "buffer":
+		return `""` // TODO - what to do with this?
+	default:
+		log.Printf("WARNING: unknown property type %q", prop.Type)
+		return `""`
+	}
 }
 
 func mbtFromJSONMatchValue(prop *schema.Property) string {
-	// TODO
-	return "value"
+	if prop.Ref != "" {
+		parts := strings.Split(prop.Ref, "/")
+		refName := parts[len(parts)-1]
+		// if !prop.IsRequired && prop.RefCustomType != nil {
+		// 	return "None"
+		// }
+		// if prop.FirstEnumValue != "" {
+		// 	return uppercaseFirst(prop.FirstEnumValue)
+		// }
+		return fmt.Sprintf("%v::from_json(v)", refName)
+	}
+
+	// if !prop.IsRequired {
+	// 	return "None"
+	// }
+
+	switch prop.Type {
+	case "integer":
+		return "Some(n.to_int())"
+	case "string":
+		return "Some(s.to_string())"
+	case "number":
+		return "Some(n.to_double())"
+	case "boolean":
+		return "Some(v.to_bool())"
+	case "object":
+		return "{}" // TODO - what to do with this?
+	case "array":
+		return "[]" // TODO - what to do with this?
+	case "buffer":
+		return `""` // TODO - what to do with this?
+	default:
+		log.Printf("WARNING: unknown property type %q", prop.Type)
+		return `""`
+	}
 }
 
 func mbtMultilineComment(s string) string {

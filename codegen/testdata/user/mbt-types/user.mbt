@@ -70,7 +70,8 @@ pub fn User::new() -> User {
 }
 
 pub impl @jsonutil.ToJson for User with to_json(self) {
-  let fields : Array[(String, @jsonutil.ToJson)] = []
+  let fields : Array[(String, @jsonutil.ToJson)] = [
+  ]
   match self.age {
     Some(value) => fields.append([("age", value)])
     None => ()
