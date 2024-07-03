@@ -2,7 +2,7 @@
 pub struct Address {
   /// Street address
   street : String
-}
+} derive(Debug, Eq)
 
 /// `Address::new` returns a new struct with default values.
 pub fn Address::new() -> Address {
@@ -25,7 +25,7 @@ pub struct User {
   /// The user's email, of course
   email : String?
   address : Address?
-}
+} derive(Debug, Eq)
 
 /// `User::new` returns a new struct with default values.
 pub fn User::new() -> User {

@@ -56,6 +56,23 @@ pub fn User::new() -> User {
   { age: None, email: None, address: None }
 }
 
+pub impl @jsonutil.ToJson for User with to_json(self) {
+  let fields : Array[(String, @jsonutil.ToJson)] = []
+  match self.age {
+    Some(value) => fields.append([("age", value)])
+    None => ()
+  }
+  match self.email {
+    Some(value) => fields.append([("email", value)])
+    None => ()
+  }
+  match self.address {
+    Some(value) => fields.append([("address", value)])
+    None => ()
+  }
+  @jsonutil.from_entries(fields)
+}
+
 pub fn User::from_json(value : @json.JsonValue) -> User? {
   match value.as_object() {
     Some(m) =>
@@ -90,23 +107,6 @@ pub fn User::parse(s : String) -> User!String {
       raise "unable to parse User \(s): \(e)"
     }
   }
-}
-
-pub impl @jsonutil.ToJson for User with to_json(self) {
-  let fields : Array[(String, @jsonutil.ToJson)] = []
-  match self.age {
-    Some(value) => fields.append([("age", value)])
-    None => ()
-  }
-  match self.email {
-    Some(value) => fields.append([("email", value)])
-    None => ()
-  }
-  match self.address {
-    Some(value) => fields.append([("address", value)])
-    None => ()
-  }
-  @jsonutil.from_entries(fields)
 }
 
 /// `get_schema` returns an `XTPSchema` for the `User`.
