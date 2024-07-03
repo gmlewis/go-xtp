@@ -159,7 +159,7 @@ type {{ $name }} struct {
 
 // Parse{{ $name }} parses a JSON string and returns the value.
 func Parse{{ $name }}(s string) (value {{ $name }}, err error) {
-	if err := jsoncomp.Unmarshal([]byte(s), &value); err != nil {
+	if err := json.Unmarshal([]byte(s), &value); err != nil {
 		return value, err
 	}
 
@@ -176,20 +176,15 @@ func (c *{{ $name }}) GetSchema() XTPSchema {
 `
 
 var goPrelude = `import (
-	jsoniter "github.com/json-iterator/go"
+	"encoding/json" // jsoniter/jsoncomp are not compatible with tinygo.
 )
-
-var jsoncomp = jsoniter.ConfigCompatibleWithStandardLibrary
 
 `
 
 var goPreludeWithFmt = `import (
+	"encoding/json" // jsoniter/jsoncomp are not compatible with tinygo.
 	"fmt"
-
-	jsoniter "github.com/json-iterator/go"
 )
-
-var jsoncomp = jsoniter.ConfigCompatibleWithStandardLibrary
 
 `
 
@@ -197,7 +192,10 @@ var testGoPrelude = `import (
 	"testing"
 
 	"github.com/google/go-cmp/cmp"
+	jsoniter "github.com/json-iterator/go"
 )
+
+var jsoncomp = jsoniter.ConfigCompatibleWithStandardLibrary
 
 func boolPtr(b bool) *bool { return &b }
 func intPtr(i int) *int { return &i }

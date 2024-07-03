@@ -2,10 +2,8 @@
 package user
 
 import (
-	jsoniter "github.com/json-iterator/go"
+	"encoding/json" // jsoniter/jsoncomp are not compatible with tinygo.
 )
-
-var jsoncomp = jsoniter.ConfigCompatibleWithStandardLibrary
 
 // Address represents a users address.
 type Address struct {
@@ -15,7 +13,7 @@ type Address struct {
 
 // ParseAddress parses a JSON string and returns the value.
 func ParseAddress(s string) (value Address, err error) {
-	if err := jsoncomp.Unmarshal([]byte(s), &value); err != nil {
+	if err := json.Unmarshal([]byte(s), &value); err != nil {
 		return value, err
 	}
 
@@ -40,7 +38,7 @@ type User struct {
 
 // ParseUser parses a JSON string and returns the value.
 func ParseUser(s string) (value User, err error) {
-	if err := jsoncomp.Unmarshal([]byte(s), &value); err != nil {
+	if err := json.Unmarshal([]byte(s), &value); err != nil {
 		return value, err
 	}
 
