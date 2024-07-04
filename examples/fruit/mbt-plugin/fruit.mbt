@@ -6,6 +6,16 @@ pub enum Fruit {
   Strawberry
 } derive(Debug, Eq)
 
+/// `Fruit.to_string` implements the Show trait.
+pub fn to_string(self : Fruit) -> String {
+  match self {
+    Apple => "apple"
+    Orange => "orange"
+    Banana => "banana"
+    Strawberry => "strawberry"
+  }
+}
+
 /// `Fruit::from_json` transforms a `@json.JsonValue` to a value.
 pub fn Fruit::from_json(value : @json.JsonValue) -> Fruit? {
   match value {
@@ -46,6 +56,16 @@ pub enum GhostGang {
   Inky
   Clyde
 } derive(Debug, Eq)
+
+/// `GhostGang.to_string` implements the Show trait.
+pub fn to_string(self : GhostGang) -> String {
+  match self {
+    Blinky => "blinky"
+    Pinky => "pinky"
+    Inky => "inky"
+    Clyde => "clyde"
+  }
+}
 
 /// `GhostGang::from_json` transforms a `@json.JsonValue` to a value.
 pub fn GhostGang::from_json(value : @json.JsonValue) -> GhostGang? {
@@ -126,10 +146,7 @@ pub fn ComplexObject::from_json(value : @json.JsonValue) -> ComplexObject? {
   let ghost = value.get("ghost")? |> GhostGang::from_json()
   let a_boolean = value.get("aBoolean")?.as_bool()
   let a_string = value.get("aString")?.as_string()
-  let an_int = match value.get("anInt")?.as_number() {
-    Some(n) => Some(n.to_int())
-    None => None
-  }
+  let an_int = json_as_integer(value.get("anInt")?)
   let an_optional_date = match value.get("anOptionalDate") {
     Some(jv) => jv.as_string()
     None => None
@@ -176,3 +193,11 @@ pub fn get_schema(self : ComplexObject) -> XTPSchema {
 /// `XTPSchema` describes the values and types of an XTP object
 /// in a language-agnostic format.
 type XTPSchema Map[String, String]
+
+// https://github.com/moonbitlang/core/issues/651
+fn json_as_integer(value : @json.JsonValue) -> Int? {
+  match value.as_number() {
+    Some(n) => Some(n.to_int())
+    None => None
+  }
+}

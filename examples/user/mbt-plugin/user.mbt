@@ -14,14 +14,17 @@ pub impl @jsonutil.ToJson for Address with to_json(self) {
   @jsonutil.from_entries(fields)
 }
 
+/// `Address::from_json` transforms a `@json.JsonValue` to a value.
 pub fn Address::from_json(value : @json.JsonValue) -> Address? {
-  match value {
-    @json.JsonValue::Object({ "street": Some(@json.JsonValue::String(s)) }) =>
-      Some({ street: s })
+  let value = value.as_object()?
+  let street = value.get("street")?.as_string()
+  match street {
+    Some(street) => Some({ street, })
     _ => None
   }
 }
 
+/// `Address::parse` parses a JSON string and returns the value.
 pub fn Address::parse(s : String) -> Address!String {
   match @json.parse(s) {
     Ok(jv) =>
@@ -73,27 +76,28 @@ pub impl @jsonutil.ToJson for User with to_json(self) {
   @jsonutil.from_entries(fields)
 }
 
+/// `User::from_json` transforms a `@json.JsonValue` to a value.
 pub fn User::from_json(value : @json.JsonValue) -> User? {
-  match value.as_object() {
-    Some(m) =>
-      Some(
-        {
-          age: match m.get_or_default("age", @json.JsonValue::Null) {
-            @json.JsonValue::Number(n) => Some(n.to_int())
-            _ => None
-          },
-          email: match m.get_or_default("email", @json.JsonValue::Null) {
-            @json.JsonValue::String(s) => Some(s.to_string())
-            _ => None
-          },
-          address: m.get_or_default("address", @json.JsonValue::Null)
-          |> Address::from_json(),
-        },
-      )
+  let value = value.as_object()?
+  let age = match value.get("age") {
+    Some(jv) => json_as_integer(jv)
     None => None
+  }
+  let email = match value.get("email") {
+    Some(jv) => jv.as_string()
+    None => None
+  }
+  let address = match value.get("address") {
+    Some(jv) => Address::from_json(jv)
+    None => None
+  }
+  match (age, email, address) {
+    (age, email, address) => Some({ age, email, address })
+    _ => None
   }
 }
 
+/// `User::parse` parses a JSON string and returns the value.
 pub fn User::parse(s : String) -> User!String {
   match @json.parse(s) {
     Ok(jv) =>
@@ -114,6 +118,14 @@ pub fn get_schema(self : User) -> XTPSchema {
   { "age": "?integer", "email": "?string", "address": "?Address" }
 }
 
-// XTPSchema describes the values and types of an XTP object
-// in a language-agnostic format.
+/// `XTPSchema` describes the values and types of an XTP object
+/// in a language-agnostic format.
 type XTPSchema Map[String, String]
+
+// https://github.com/moonbitlang/core/issues/651
+fn json_as_integer(value : @json.JsonValue) -> Int? {
+  match value.as_number() {
+    Some(n) => Some(n.to_int())
+    None => None
+  }
+}

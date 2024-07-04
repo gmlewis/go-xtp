@@ -1,7 +1,9 @@
 // Package user represents the custom datatypes for an XTP Extension Plugin.
 package user
 
-import "encoding/json"
+import (
+	"encoding/json" // jsoniter/jsoncomp are not compatible with tinygo.
+)
 
 // Address represents a users address.
 type Address struct {
