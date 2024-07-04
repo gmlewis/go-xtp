@@ -95,15 +95,18 @@ pub impl @jsonutil.ToJson for User with to_json(self) {
 /// `User::from_json` transforms a `@json.JsonValue` to a value.
 pub fn User::from_json(value : @json.JsonValue) -> User? {
   let value = value.as_object()?
-  let age = match value.get("age").as_number() {
-    Some(n) => Some(n.to_int())
+  let age = match value.get("age") {
+    Some(jv) => json_as_integer(jv)
     None => None
   }
   let email = match value.get("email") {
     Some(jv) => jv.as_string()
     None => None
   }
-  let address = value.get("address") |> Address::from_json()
+  let address = match value.get("address") {
+    Some(jv) => Address::from_json(jv)
+    None => None
+  }
   match (
     age,
     email,
@@ -150,3 +153,11 @@ pub fn get_schema(self : User) -> XTPSchema {
 /// `XTPSchema` describes the values and types of an XTP object
 /// in a language-agnostic format.
 type XTPSchema Map[String, String]
+
+// https://github.com/moonbitlang/core/issues/651
+fn json_as_integer(value : @json.JsonValue) -> Int? {
+  match value.as_number() {
+    Some(n) => Some(n.to_int())
+    None => None
+  }
+}

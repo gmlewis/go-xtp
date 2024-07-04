@@ -41,6 +41,8 @@ func (c *Client) genMbtCustomTypes() error {
 		srcBlocks = append(srcBlocks, mbtXTPSchemaMap)
 	}
 
+	srcBlocks = append(srcBlocks, mbtJSONWorkaround)
+
 	src := strings.Join(srcBlocks, "\n")
 	c.CustTypesFilename = fmt.Sprintf("%v.%v", c.PkgName, c.Lang)
 	c.CustTypes = src
@@ -310,5 +312,14 @@ var structTestMbtTemplateStr = `{{ $name := .Name }}{{ $top := . }}test "{{ $nam
   let got_parse = {{ $name }}::parse(want)!
   @test.eq(got_parse, optional_fields)!
 {{ end -}}
+}
+`
+
+var mbtJSONWorkaround = `// https://github.com/moonbitlang/core/issues/651
+fn json_as_integer(value : @json.JsonValue) -> Int? {
+  match value.as_number() {
+    Some(n) => Some(n.to_int())
+    None => None
+  }
 }
 `

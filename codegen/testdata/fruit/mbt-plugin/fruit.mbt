@@ -208,3 +208,11 @@ pub fn get_schema(self : ComplexObject) -> XTPSchema {
 /// `XTPSchema` describes the values and types of an XTP object
 /// in a language-agnostic format.
 type XTPSchema Map[String, String]
+
+// https://github.com/moonbitlang/core/issues/651
+fn json_as_integer(value : @json.JsonValue) -> Int? {
+  match value.as_number() {
+    Some(n) => Some(n.to_int())
+    None => None
+  }
+}
