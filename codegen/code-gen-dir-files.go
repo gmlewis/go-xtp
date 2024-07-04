@@ -65,9 +65,11 @@ func (c *Client) maybeWriteFile(path, buf string, perm os.FileMode) error {
 		}
 	}
 
-	if !c.force {
+	if !c.opts.Force {
 		if _, err := os.Stat(path); err == nil {
-			log.Printf("WARNING: not writing file %q - add -force to overwrite", path)
+			if !c.opts.Quiet {
+				log.Printf("WARNING: not writing file %q - add -force to overwrite and -q to silence", path)
+			}
 			return nil
 		}
 	}

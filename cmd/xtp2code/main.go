@@ -12,6 +12,7 @@
 //	xtp2code \
 //	 -lang=[go|mbt] \
 //	 -pkg=<packageName> \
+//	 [-q ] \
 //	 [-appid=<id> | -yaml=<filename>] \
 //	 [-force] \
 //	 [-host=<filename>] \
@@ -38,6 +39,7 @@ var (
 	force     = flag.Bool("force", false, "Force overwrite of any existing files.")
 	hostDir   = flag.String("host", "", "Output dirname to generate Host SDK code.")
 	pluginDir = flag.String("plugin", "", "Output dirname to generate Plugin PDK code.")
+	quiet     = flag.Bool("q", false, "Do not print warnings.")
 	typesDir  = flag.String("types", "", "Output dirname to generate simple types code.")
 	yamlFile  = flag.String("yaml", "", "Input schema.yaml file to generate code from.")
 )
@@ -100,11 +102,14 @@ func main() {
 		}
 	}
 
-	log.Printf("Done.")
+	if !*quiet {
+		log.Printf("Done.")
+	}
 }
 
 func processPlugin(plugin *schema.Plugin) error {
-	c, err := codegen.New(*lang, *pkgName, plugin, *force)
+	opts := &codegen.ClientOpts{Force: *force, Quiet: *quiet}
+	c, err := codegen.New(*lang, *pkgName, plugin, opts)
 	if err != nil {
 		return err
 	}

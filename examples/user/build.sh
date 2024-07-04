@@ -19,7 +19,8 @@ go run ../../cmd/xtp2code/main.go \
     "$@"
 
 for i in $(echo */build.sh); do
-    echo ENTER ${i%"build.sh"}
-    pushd ${i%"build.sh"} && ./build.sh && popd
-    echo LEAVE ${i%"build.sh"}
+    dirname=$(pwd)/${i%"build.sh"}
+    echo ENTER ${dirname}
+    pushd ${i%"build.sh"} && ( ./build.sh || echo "BUILD FAILED in ${dirname}" ) && popd
+    echo LEAVE ${dirname}
 done

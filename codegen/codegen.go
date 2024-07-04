@@ -12,6 +12,14 @@ var (
 	ErrNoCodeGeneration = errors.New("code generation not supported for version v0")
 )
 
+// ClientOpts represents options to the codegen Client.
+type ClientOpts struct {
+	// Force causes existing file to be overwritten.
+	Force bool
+	// Quiet prevents warning messages from being printed
+	Quiet bool
+}
+
 // Client represents a codegen client.
 type Client struct {
 	PkgName string
@@ -25,13 +33,13 @@ type Client struct {
 	CustTypesTests         string
 
 	// internal fields used by the code generator:
-	force      bool
+	opts       ClientOpts
 	numStructs int
 }
 
 // New returns a new codegen `Client` for either "go" or "mbt" and the
 // provided plugin with the given package name.
-func New(language, packageName string, plugin *schema.Plugin, force bool) (*Client, error) {
+func New(language, packageName string, plugin *schema.Plugin, opts *ClientOpts) (*Client, error) {
 	if plugin == nil {
 		return nil, errors.New("plugin cannot be nil")
 	}
@@ -49,7 +57,9 @@ func New(language, packageName string, plugin *schema.Plugin, force bool) (*Clie
 		PkgName: packageName,
 		Lang:    language,
 		Plugin:  plugin,
-		force:   force,
+	}
+	if opts != nil {
+		c.opts = *opts
 	}
 
 	if err := c.genCustomTypes(); err != nil {

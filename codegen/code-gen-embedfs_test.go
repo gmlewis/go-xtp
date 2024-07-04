@@ -55,7 +55,7 @@ func runEmbedFSTest(t *testing.T, tests []*embedFSTest) {
 				t.Fatal(err)
 			}
 
-			c, err := New(tt.lang, tt.pkgName, plugin, false)
+			c, err := New(tt.lang, tt.pkgName, plugin, nil)
 			if err != nil {
 				t.Fatal(err)
 			}
