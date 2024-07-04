@@ -11,7 +11,7 @@
 //
 //	xtp2code \
 //	 -lang=[go|mbt] \
-//	 -pkg=<packageName> \
+//	 [-pkg=<packageName>] \
 //	 [-q ] \
 //	 [-appid=<id> | -yaml=<filename>] \
 //	 [-force] \
@@ -25,6 +25,7 @@ import (
 	"fmt"
 	"log"
 	"os"
+	"strings"
 
 	"github.com/gmlewis/go-xtp/api"
 	"github.com/gmlewis/go-xtp/codegen"
@@ -34,7 +35,7 @@ import (
 var (
 	// Required:
 	lang    = flag.String("lang", "", "Target language for generated code ('go' or 'mbt').")
-	pkgName = flag.String("pkg", "", "Set name of generated package code.")
+	pkgName = flag.String("pkg", "", "Set name of generated package code when using -yaml option.")
 	// Optional:
 	appID     = flag.String("appid", "", "XTP App ID to generate code from.")
 	force     = flag.Bool("force", false, "Force overwrite of any existing files.")
@@ -43,7 +44,7 @@ var (
 	quiet     = flag.Bool("q", false, "Do not print warnings.")
 	typesDir  = flag.String("types", "", "Output dirname to generate simple types code.")
 	version   = flag.Bool("v", false, "Print version and quit.")
-	yamlFile  = flag.String("yaml", "", "Input schema.yaml file to generate code from.")
+	yamlFile  = flag.String("yaml", "", "Input schema.yaml file to generate code from. (Must also provide -pkg with this option.)")
 )
 
 func main() {
@@ -71,8 +72,8 @@ func main() {
 		log.Fatal("Must specify either -lang=go or -lang=mbt")
 	}
 
-	if *pkgName == "" {
-		log.Fatal("Must specify -pkg=<packageName>")
+	if *pkgName == "" && *yamlFile != "" {
+		log.Fatal("Must specify -pkg=<packageName> when using -yaml option")
 	}
 
 	var plugins []*schema.Plugin
@@ -87,6 +88,7 @@ func main() {
 		if err != nil {
 			log.Fatalf("schema.Parse: %v", err)
 		}
+		p.PkgName = *pkgName
 		plugins = append(plugins, p)
 	case *appID != "":
 		c := api.New()
@@ -98,6 +100,11 @@ func main() {
 			p, err := schema.ParseStr(ep.SchemaYaml)
 			if err != nil {
 				log.Fatalf("schema.Parse: %v", err)
+			}
+			p.PkgName = strings.TrimSuffix(ep.Name, ".yaml")
+			if *pkgName != "" {
+				log.Printf("WARNING: Overriding PkgName=%q from API name %q", *pkgName, p.PkgName)
+				p.PkgName = *pkgName
 			}
 			plugins = append(plugins, p)
 		}
@@ -116,7 +123,7 @@ func main() {
 
 func processPlugin(plugin *schema.Plugin) error {
 	opts := &codegen.ClientOpts{Force: *force, Quiet: *quiet}
-	c, err := codegen.New(*lang, *pkgName, plugin, opts)
+	c, err := codegen.New(*lang, plugin, opts)
 	if err != nil {
 		return err
 	}

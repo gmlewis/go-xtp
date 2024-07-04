@@ -39,7 +39,7 @@ type Client struct {
 
 // New returns a new codegen `Client` for either "go" or "mbt" and the
 // provided plugin with the given package name.
-func New(language, packageName string, plugin *schema.Plugin, opts *ClientOpts) (*Client, error) {
+func New(language string, plugin *schema.Plugin, opts *ClientOpts) (*Client, error) {
 	if plugin == nil {
 		return nil, errors.New("plugin cannot be nil")
 	}
@@ -49,12 +49,12 @@ func New(language, packageName string, plugin *schema.Plugin, opts *ClientOpts) 
 	if language != "go" && language != "mbt" {
 		return nil, errors.New("language must be 'go' or 'mbt'")
 	}
-	if packageName == "" {
-		return nil, errors.New("packageName must be provided")
+	if plugin.PkgName == "" {
+		return nil, errors.New("plugin.PkgName must be provided")
 	}
 
 	c := &Client{
-		PkgName: packageName,
+		PkgName: plugin.PkgName,
 		Lang:    language,
 		Plugin:  plugin,
 	}
