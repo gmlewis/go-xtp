@@ -123,6 +123,7 @@ package main
 
 import (
 	"encoding/json"
+	"fmt"
 
 	"github.com/extism/go-pdk"
 )
@@ -135,17 +136,23 @@ func {{ $name }}() int {
 
 	buf, err := json.Marshal(output)
 	if err != nil {
-		pdk.Log(pdk.LogError, err.Error())
+		pdk.Log(pdk.LogError, fmt.Errorf("unable to json.Marshal output: %v", err))
 		return 1 // failure
 	}
 
 	pdk.OutputString(string(buf)){{ end -}}
 {{ if . | inputIsReferenceType }}	input := pdk.InputString()
-	output := {{ $name | uppercaseFirst }}({{ inputReferenceTypeName . }}(input))
+	v, err := Parse{{ inputReferenceTypeName . }}(input)
+	if err != nil {
+		pdk.Log(pdk.LogError, fmt.Errorf("unable to Parse{{ inputReferenceTypeName . }} input: %v, input:\n%v\n", err, input))
+		return 1 // failure
+	}
+
+	output := {{ $name | uppercaseFirst }}(v)
 
 	buf, err := json.Marshal(output)
 	if err != nil {
-		pdk.Log(pdk.LogError, err.Error())
+		pdk.Log(pdk.LogError, fmt.Errorf("unable to json.Marshal output: %v", err))
 		return 1 // failure
 	}
 

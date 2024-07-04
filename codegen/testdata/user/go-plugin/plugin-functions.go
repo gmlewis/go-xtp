@@ -4,6 +4,7 @@ package main
 
 import (
 	"encoding/json"
+	"fmt"
 
 	"github.com/extism/go-pdk"
 )
@@ -11,11 +12,17 @@ import (
 //export processUser
 func processUser() int {
 	input := pdk.InputString()
-	output := ProcessUser(User(input))
+	v, err := ParseUser(input)
+	if err != nil {
+		pdk.Log(pdk.LogError, fmt.Errorf("unable to ParseUser input: %v, input:\n%v\n", err, input))
+		return 1 // failure
+	}
+
+	output := ProcessUser(v)
 
 	buf, err := json.Marshal(output)
 	if err != nil {
-		pdk.Log(pdk.LogError, err.Error())
+		pdk.Log(pdk.LogError, fmt.Errorf("unable to json.Marshal output: %v", err))
 		return 1 // failure
 	}
 
