@@ -12,7 +12,6 @@ echo GENERATING fruit for MoonBit
 go run ../../cmd/xtp2code/main.go \
     -lang=mbt \
     -pkg=fruit \
-    -host=mbt-host \
     -plugin=mbt-plugin \
     -types=mbt-types \
     -yaml=schema.yaml \
