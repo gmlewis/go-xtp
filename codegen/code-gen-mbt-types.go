@@ -93,12 +93,13 @@ func (c *Client) genMbtEnum(ct *schema.CustomType) (string, error) {
 	return buf.String(), nil
 }
 
-var enumMbtTemplateStr = `{{ $name := .Name }}/// ` + "`" + `{{ $name }}` + "`" + ` represents {{ .Description | downcaseFirst | multilineComment }}.
+var enumMbtTemplateStr = "{{ $name := .Name }}/// `{{ $name }}` represents {{ .Description | downcaseFirst | multilineComment }}." + `
 pub enum {{ $name }} {
 {{range .Enum}}  {{ . | uppercaseFirst }}
 {{ end -}}
 } derive(Debug, Eq)
 
+` + "/// `{{ $name }}::parse` parses a JSON string and returns the value." + `
 pub fn {{ $name }}::parse(s : String) -> {{ $name }}!String {
   match s {
 {{range .Enum}}    "{{ . }}" => {{ . | uppercaseFirst }}
@@ -137,18 +138,18 @@ func (c *Client) genTestMbtStruct(ct *schema.CustomType) (string, error) {
 	return buf.String(), nil
 }
 
-var mbtXTPSchemaMap = `// XTPSchema describes the values and types of an XTP object
-// in a language-agnostic format.
+var mbtXTPSchemaMap = "/// `XTPSchema` describes the values and types of an XTP object" + `
+/// in a language-agnostic format.
 type XTPSchema Map[String, String]
 `
 
-var structMbtTemplateStr = `{{ $name := .Name }}{{ $top := . }}/// ` + "`" + `{{ $name }}` + "`" + ` represents {{ .Description | downcaseFirst }}.
+var structMbtTemplateStr = "{{ $name := .Name }}{{ $top := . }}/// `{{ $name }}` represents {{ .Description | downcaseFirst }}." + `
 pub struct {{ $name }} {
 {{range .Properties}}  {{ .Description | optionalMbtMultilineComment }}{{ .Name | lowerSnakeCase }} : {{ getMbtType . }}
 {{ end -}}
 } derive(Debug, Eq)
 
-/// ` + "`" + `{{ $name }}::new` + "`" + ` returns a new struct with default values.
+` + "/// `{{ $name }}::new` returns a new struct with default values." + `
 pub fn {{ $name }}::new() -> {{ $name }} {
   {
 {{range .Properties}}    {{ .Name | lowerSnakeCase }}: {{ defaultMbtValue . }},
@@ -169,7 +170,7 @@ pub impl @jsonutil.ToJson for {{ $name }} with to_json(self) {
 {{ "  @jsonutil.from_entries(fields)" }}
 }
 
-/// ` + "`{{ $name }}::from_json` transforms a `@json.JsonValue`" + ` to a value.
+` + "/// `{{ $name }}::from_json` transforms a `@json.JsonValue` to a value." + `
 pub fn {{ $name }}::from_json(value : @json.JsonValue) -> {{ $name }}? {
   match value {
     @json.JsonValue::Object({
@@ -188,7 +189,7 @@ pub fn {{ $name }}::from_json(value : @json.JsonValue) -> {{ $name }}? {
   }
 }
 
-/// ` + "`{{ $name }}::parse` parses a JSON string and returns the value." + `
+` + "/// `{{ $name }}::parse` parses a JSON string and returns the value." + `
 pub fn {{ $name }}::parse(s : String) -> {{ $name }}!String {
   match @json.parse(s) {
     Ok(jv) =>
@@ -204,7 +205,7 @@ pub fn {{ $name }}::parse(s : String) -> {{ $name }}!String {
   }
 }
 
-/// ` + "`get_schema` returns an `XTPSchema` for the `{{ $name }}`" + `.
+` + "/// `get_schema` returns an `XTPSchema` for the `{{ $name }}`." + `
 pub fn get_schema(self : {{ $name }}) -> XTPSchema {
   {
 {{range .Properties}}    "{{ .Name }}": "{{ getExtismType . $top }}",

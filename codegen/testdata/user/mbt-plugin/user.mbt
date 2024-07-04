@@ -139,6 +139,6 @@ pub fn get_schema(self : User) -> XTPSchema {
   }
 }
 
-// XTPSchema describes the values and types of an XTP object
-// in a language-agnostic format.
+/// `XTPSchema` describes the values and types of an XTP object
+/// in a language-agnostic format.
 type XTPSchema Map[String, String]
