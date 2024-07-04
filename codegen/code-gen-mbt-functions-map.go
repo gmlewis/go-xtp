@@ -195,6 +195,12 @@ func mbtConvertFromJSONValue(prop *schema.Property) string {
 	if prop.Ref != "" {
 		parts := strings.Split(prop.Ref, "/")
 		refName := parts[len(parts)-1]
+		if !prop.IsRequired {
+			return fmt.Sprintf(`match %v {
+    Some(jv) => %v::from_json(jv)
+    None => None
+  }`, valueGet, refName)
+		}
 		return fmt.Sprintf("%v |> %v::from_json()", valueGet, refName)
 	}
 
@@ -216,8 +222,8 @@ func mbtConvertFromJSONValue(prop *schema.Property) string {
 	if !prop.IsRequired {
 		switch prop.Type {
 		case "integer":
-			return fmt.Sprintf(`match %v.as_number() {
-    Some(n) => Some(n.to_int())
+			return fmt.Sprintf(`match %v {
+    Some(jv) => json_as_integer(jv)
     None => None
   }`, valueGet)
 		default:
@@ -230,10 +236,7 @@ func mbtConvertFromJSONValue(prop *schema.Property) string {
 
 	switch prop.Type {
 	case "integer":
-		return fmt.Sprintf(`match %v.as_number() {
-    Some(n) => Some(n.to_int())
-    None => None
-  }`, valueGet)
+		return fmt.Sprintf("json_as_integer(%v)", valueGet)
 	default:
 		return valueGet + asType
 	}

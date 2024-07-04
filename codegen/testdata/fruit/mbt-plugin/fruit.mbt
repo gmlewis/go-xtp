@@ -146,10 +146,7 @@ pub fn ComplexObject::from_json(value : @json.JsonValue) -> ComplexObject? {
   let ghost = value.get("ghost")? |> GhostGang::from_json()
   let a_boolean = value.get("aBoolean")?.as_bool()
   let a_string = value.get("aString")?.as_string()
-  let an_int = match value.get("anInt")?.as_number() {
-    Some(n) => Some(n.to_int())
-    None => None
-  }
+  let an_int = json_as_integer(value.get("anInt")?)
   let an_optional_date = match value.get("anOptionalDate") {
     Some(jv) => jv.as_string()
     None => None
