@@ -43,7 +43,7 @@ xtp2code \
 
 [Go]: https://go.dev
 
-## Build
+## Build Examples
 
 To build all of the examples, `cd` to the `examples` directory and run:
 
@@ -55,6 +55,23 @@ To build one of the examples, `cd` to that example subdirectory and run:
 
 ```bash
 $ ./build.sh
+```
+
+## Build from XTP API
+
+To generate code for XTP Extension Plugins directly from the XTP API,
+first find the app ID by typing `xtp app list`.
+
+Then run the following to generate Go code:
+
+```bash
+$ xtp2code -lang=go -host=api-go-host -plugin=api-go-plugin -types=api-go-types -appid=app_01j1b1mek5frq9x7ymk52m7bw5
+```
+
+or run the following to generate MoonBit code:
+
+```bash
+$ xtp2code -lang=mbt -plugin=api-mbt-plugin -types=api-mbt-types -appid=app_01j1b1mek5frq9x7ymk52m7bw5
 ```
 
 ## Push and Bind Plugin

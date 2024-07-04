@@ -25,6 +25,7 @@ import (
 	"fmt"
 	"log"
 	"os"
+	"path/filepath"
 	"strings"
 
 	"github.com/gmlewis/go-xtp/api"
@@ -76,8 +77,6 @@ func main() {
 		log.Fatal("Must specify -pkg=<packageName> when using -yaml option")
 	}
 
-	var plugins []*schema.Plugin
-
 	switch {
 	case *yamlFile != "":
 		buf, err := os.ReadFile(*yamlFile)
@@ -89,7 +88,16 @@ func main() {
 			log.Fatalf("schema.Parse: %v", err)
 		}
 		p.PkgName = *pkgName
-		plugins = append(plugins, p)
+
+		if p.Version == "v0" {
+			if !*quiet {
+				log.Printf("Skipping v0 plugin")
+			}
+		} else {
+			if err := processPlugin("", p); err != nil {
+				log.Fatalf("processPlugin: %v", err)
+			}
+		}
 	case *appID != "":
 		c := api.New()
 		resp, err := c.GetAppsExtensionPoints(*appID)
@@ -106,13 +114,17 @@ func main() {
 				log.Printf("WARNING: Overriding PkgName=%q from API name %q", *pkgName, p.PkgName)
 				p.PkgName = *pkgName
 			}
-			plugins = append(plugins, p)
-		}
-	}
 
-	for _, plugin := range plugins {
-		if err := processPlugin(plugin); err != nil {
-			log.Fatalf("processPlugin: %v", err)
+			if p.Version == "v0" {
+				if !*quiet {
+					log.Printf("Skipping v0 plugin")
+				}
+				continue
+			}
+
+			if err := processPlugin(p.PkgName, p); err != nil {
+				log.Fatalf("processPlugin: %v", err)
+			}
 		}
 	}
 
@@ -121,7 +133,7 @@ func main() {
 	}
 }
 
-func processPlugin(plugin *schema.Plugin) error {
+func processPlugin(rootDir string, plugin *schema.Plugin) error {
 	opts := &codegen.ClientOpts{Force: *force, Quiet: *quiet}
 	c, err := codegen.New(*lang, plugin, opts)
 	if err != nil {
@@ -129,19 +141,31 @@ func processPlugin(plugin *schema.Plugin) error {
 	}
 
 	if *typesDir != "" {
-		if err := c.GenTypesDir(*typesDir); err != nil {
+		dirName := *typesDir
+		if rootDir != "" {
+			dirName = filepath.Join(rootDir, dirName)
+		}
+		if err := c.GenTypesDir(dirName); err != nil {
 			return err
 		}
 	}
 
 	if *hostDir != "" {
-		if err := c.GenHostDir(*hostDir); err != nil {
+		dirName := *hostDir
+		if rootDir != "" {
+			dirName = filepath.Join(rootDir, dirName)
+		}
+		if err := c.GenHostDir(dirName); err != nil {
 			return err
 		}
 	}
 
 	if *pluginDir != "" {
-		if err := c.GenPluginDir(*pluginDir); err != nil {
+		dirName := *pluginDir
+		if rootDir != "" {
+			dirName = filepath.Join(rootDir, dirName)
+		}
+		if err := c.GenPluginDir(dirName); err != nil {
 			return err
 		}
 	}
