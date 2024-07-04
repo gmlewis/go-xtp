@@ -25,9 +25,8 @@ pub fn Address::from_json(value : @json.JsonValue) -> Address? {
   match (
     street,
   ) {
-    (
-      Some(street),
-    ) => Some({
+      Some(street)
+    => Some({
       street,
     })
     _ => None

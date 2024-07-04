@@ -234,12 +234,12 @@ pub fn {{ $name }}::from_json(value : @json.JsonValue) -> {{ $name }}? {
 {{ "  match (" }}
 {{range .Properties}}    {{ .Name | lowerSnakeCase }},
 {{ end -}}
-{{ "  ) {" }}
-{{ if len .Properties | lt 1 }}    ({{ end }}
-{{range .Properties}}{{ if .IsRequired }}      Some({{ .Name | lowerSnakeCase }}),
-{{ end }}{{ if .IsRequired | not }}      {{ .Name | lowerSnakeCase }},
+{{ "  ) {" }}{{ if len .Properties | lt 1 }}
+    ({{ end }}
+{{range .Properties}}{{ if .IsRequired }}      Some({{ .Name | lowerSnakeCase }}){{ if len $top.Properties | lt 1 }}{{ "," }}{{ end }}
+{{ end }}{{ if .IsRequired | not }}      {{ .Name | lowerSnakeCase }}{{ if len $top.Properties | lt 1 }}{{ "," }}{{ end }}
 {{ end }}{{ end -}}
-{{ if len .Properties | lt 1 }}{{"    ) => Some({" }}{{ else }}{{"      => Some({" }}{{ end }}
+{{ if len .Properties | lt 1 }}{{"    ) => Some({" }}{{ else }}{{"    => Some({" }}{{ end }}
 {{range .Properties}}      {{ .Name | lowerSnakeCase }},
 {{ end -}}
 {{ "    })" }}
