@@ -6,6 +6,17 @@ pub enum Fruit {
   Strawberry
 } derive(Debug, Eq)
 
+/// `Fruit::from_json` transforms a `@json.JsonValue` to a value.
+pub fn Fruit::from_json(value : @json.JsonValue) -> Fruit? {
+  match value.to_string() {
+    "apple" => Some(Apple)
+    "orange" => Some(Orange)
+    "banana" => Some(Banana)
+    "strawberry" => Some(Strawberry)
+    _ => None
+  }
+}
+
 /// `Fruit::parse` parses a JSON string and returns the value.
 pub fn Fruit::parse(s : String) -> Fruit!String {
   match s {
@@ -35,6 +46,17 @@ pub enum GhostGang {
   Inky
   Clyde
 } derive(Debug, Eq)
+
+/// `GhostGang::from_json` transforms a `@json.JsonValue` to a value.
+pub fn GhostGang::from_json(value : @json.JsonValue) -> GhostGang? {
+  match value.to_string() {
+    "blinky" => Some(Blinky)
+    "pinky" => Some(Pinky)
+    "inky" => Some(Inky)
+    "clyde" => Some(Clyde)
+    _ => None
+  }
+}
 
 /// `GhostGang::parse` parses a JSON string and returns the value.
 pub fn GhostGang::parse(s : String) -> GhostGang!String {
@@ -100,23 +122,26 @@ pub impl @jsonutil.ToJson for ComplexObject with to_json(self) {
 
 /// `ComplexObject::from_json` transforms a `@json.JsonValue` to a value.
 pub fn ComplexObject::from_json(value : @json.JsonValue) -> ComplexObject? {
-  match value {
-    @json.JsonValue::Object({
-      "ghost": Some(@json.JsonValue::String(ghost)),
-      "aBoolean": Some(@json.JsonValue::String(a_boolean)),
-      "aString": Some(@json.JsonValue::String(a_string)),
-      "anInt": Some(@json.JsonValue::String(an_int)),
-      "anOptionalDate": an_optional_date,
-    }) => Some({
-      ghost: ghost,
-      a_boolean: a_boolean,
-      a_string: a_string,
-      an_int: an_int,
-      an_optional_date: match an_optional_date {
-        Some(@json.JsonValue::String(s)) => Some(s.to_string())
-        _ => None
-      },
-    })
+  let value = value.as_object()?
+  let ghost = value.get("ghost")? |> GhostGang::from_json()
+  let a_boolean = value.get("aBoolean")?.as_bool()
+  let a_string = value.get("aString")?.as_string()
+  let an_int = match value.get("anInt")?.as_number() {
+    Some(n) => Some(n.to_int())
+    None => None
+  }
+  let an_optional_date = match value.get("anOptionalDate") {
+    Some(jv) => jv.as_string()
+    None => None
+  }
+  match (ghost, a_boolean, a_string, an_int, an_optional_date) {
+    (
+      Some(ghost),
+      Some(a_boolean),
+      Some(a_string),
+      Some(an_int),
+      an_optional_date,
+    ) => Some({ ghost, a_boolean, a_string, an_int, an_optional_date })
     _ => None
   }
 }
