@@ -6,13 +6,23 @@ pub enum Fruit {
   Strawberry
 } derive(Debug, Eq)
 
+/// `Fruit.to_string` implements the Show trait.
+pub fn to_string(self : Fruit) -> String {
+  match self {
+    Apple => "apple"
+    Orange => "orange"
+    Banana => "banana"
+    Strawberry => "strawberry"
+  }
+}
+
 /// `Fruit::from_json` transforms a `@json.JsonValue` to a value.
 pub fn Fruit::from_json(value : @json.JsonValue) -> Fruit? {
-  match value.to_string() {
-    "apple" => Some(Apple)
-    "orange" => Some(Orange)
-    "banana" => Some(Banana)
-    "strawberry" => Some(Strawberry)
+  match value {
+    @json.JsonValue::String("apple") => Some(Apple)
+    @json.JsonValue::String("orange") => Some(Orange)
+    @json.JsonValue::String("banana") => Some(Banana)
+    @json.JsonValue::String("strawberry") => Some(Strawberry)
     _ => None
   }
 }
@@ -47,13 +57,23 @@ pub enum GhostGang {
   Clyde
 } derive(Debug, Eq)
 
+/// `GhostGang.to_string` implements the Show trait.
+pub fn to_string(self : GhostGang) -> String {
+  match self {
+    Blinky => "blinky"
+    Pinky => "pinky"
+    Inky => "inky"
+    Clyde => "clyde"
+  }
+}
+
 /// `GhostGang::from_json` transforms a `@json.JsonValue` to a value.
 pub fn GhostGang::from_json(value : @json.JsonValue) -> GhostGang? {
-  match value.to_string() {
-    "blinky" => Some(Blinky)
-    "pinky" => Some(Pinky)
-    "inky" => Some(Inky)
-    "clyde" => Some(Clyde)
+  match value {
+    @json.JsonValue::String("blinky") => Some(Blinky)
+    @json.JsonValue::String("pinky") => Some(Pinky)
+    @json.JsonValue::String("inky") => Some(Inky)
+    @json.JsonValue::String("clyde") => Some(Clyde)
     _ => None
   }
 }
@@ -134,14 +154,26 @@ pub fn ComplexObject::from_json(value : @json.JsonValue) -> ComplexObject? {
     Some(jv) => jv.as_string()
     None => None
   }
-  match (ghost, a_boolean, a_string, an_int, an_optional_date) {
+  match (
+    ghost,
+    a_boolean,
+    a_string,
+    an_int,
+    an_optional_date,
+  ) {
     (
       Some(ghost),
       Some(a_boolean),
       Some(a_string),
       Some(an_int),
       an_optional_date,
-    ) => Some({ ghost, a_boolean, a_string, an_int, an_optional_date })
+    ) => Some({
+      ghost,
+      a_boolean,
+      a_string,
+      an_int,
+      an_optional_date,
+    })
     _ => None
   }
 }

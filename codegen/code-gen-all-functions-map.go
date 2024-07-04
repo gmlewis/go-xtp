@@ -88,6 +88,7 @@ var funcMap = map[string]any{
 	"jsonOutputAsMbtType":               jsonOutputAsMbtType,
 	"leftJustify":                       leftJustify,
 	"lowerSnakeCase":                    lowerSnakeCase,
+	"mbtConvertFromJSONValue":           mbtConvertFromJSONValue,
 	"mbtFromJSONMatchKey":               mbtFromJSONMatchKey,
 	"mbtFromJSONMatchValue":             mbtFromJSONMatchValue,
 	"mbtMultilineComment":               mbtMultilineComment,

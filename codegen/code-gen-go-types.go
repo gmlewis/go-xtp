@@ -80,7 +80,7 @@ func (c *Client) genGoCustomType(ct *schema.CustomType) (string, error) {
 	}
 }
 
-// genTestGoCustomType generates Go source code for a single custom datatype.
+// genTestGoCustomType generates Go test source code for a single custom datatype.
 func (c *Client) genTestGoCustomType(ct *schema.CustomType) (string, error) {
 	if ct == nil {
 		return "", errors.New("unexpected nil CustomType")
@@ -136,7 +136,7 @@ func (c *Client) genGoStruct(ct *schema.CustomType) (string, error) {
 	return buf.String(), nil
 }
 
-// getTestGoStruct generates Go source code for a single struct custom datatype.
+// getTestGoStruct generates Go test source code for a single struct custom datatype.
 func (c *Client) genTestGoStruct(ct *schema.CustomType) (string, error) {
 	var buf bytes.Buffer
 	if err := structTestGoTemplate.Execute(&buf, ct); err != nil {

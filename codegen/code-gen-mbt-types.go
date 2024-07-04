@@ -12,6 +12,7 @@ import (
 
 var (
 	enumMbtTemplate       = template.Must(template.New("code-gen-mbt-types.go:enumMbtTemplateStr").Funcs(funcMap).Parse(enumMbtTemplateStr))
+	enumTestMbtTemplate   = template.Must(template.New("code-gen-mbt-types.go:enumTestMbtTemplateStr").Funcs(funcMap).Parse(enumTestMbtTemplateStr))
 	structMbtTemplate     = template.Must(template.New("code-gen-mbt-types.go:structMbtTemplateStr").Funcs(funcMap).Parse(structMbtTemplateStr))
 	structTestMbtTemplate = template.Must(template.New("code-gen-mbt-types.go:structTestMbtTemplateStr").Funcs(funcMap).Parse(structTestMbtTemplateStr))
 )
@@ -75,7 +76,7 @@ func (c *Client) genTestMbtCustomType(ct *schema.CustomType) (string, error) {
 
 	switch {
 	case len(ct.Enum) > 0:
-		return "", nil // no enum tests written yet... possibly not necessary.
+		return c.getTestMbtEnum(ct)
 	case len(ct.Properties) > 0:
 		return c.genTestMbtStruct(ct)
 	default:
@@ -83,10 +84,20 @@ func (c *Client) genTestMbtCustomType(ct *schema.CustomType) (string, error) {
 	}
 }
 
-// getGoEnum generates MoonBit source code for a single enum custom datatype.
+// getMbtEnum generates MoonBit source code for a single enum custom datatype.
 func (c *Client) genMbtEnum(ct *schema.CustomType) (string, error) {
 	var buf bytes.Buffer
 	if err := enumMbtTemplate.Execute(&buf, ct); err != nil {
+		return "", err
+	}
+
+	return buf.String(), nil
+}
+
+// getTestMbtEnum generates MoonBit test source code for a single enum custom datatype.
+func (c *Client) getTestMbtEnum(ct *schema.CustomType) (string, error) {
+	var buf bytes.Buffer
+	if err := enumTestMbtTemplate.Execute(&buf, ct); err != nil {
 		return "", err
 	}
 
@@ -98,6 +109,23 @@ pub enum {{ $name }} {
 {{range .Enum}}  {{ . | uppercaseFirst }}
 {{ end -}}
 } derive(Debug, Eq)
+
+` + "/// `{{ $name }}.to_string` implements the Show trait." + `
+pub fn to_string(self : {{ $name }}) -> String {
+  match self {
+  {{range .Enum}}  {{ . | uppercaseFirst }} => "{{ . }}"
+  {{ end -}}
+  }
+}
+
+` + "/// `{{ $name }}::from_json` transforms a `@json.JsonValue` to a value." + `
+pub fn {{ $name }}::from_json(value : @json.JsonValue) -> {{ $name }}? {
+  match value {
+    {{range .Enum}}@json.JsonValue::String("{{ . }}") => Some({{ . | uppercaseFirst }})
+    {{ end -}}
+    _ => None
+  }
+}
 
 ` + "/// `{{ $name }}::parse` parses a JSON string and returns the value." + `
 pub fn {{ $name }}::parse(s : String) -> {{ $name }}!String {
@@ -118,7 +146,35 @@ pub impl @jsonutil.ToJson for {{ $name }} with to_json(self) {
 }
 `
 
-// getGoStruct generates MoonBit source code for a single struct custom datatype.
+var enumTestMbtTemplateStr = `{{ $name := .Name }}test "{{ $name }}" {
+  let first = {{ $name }}::{{ index .Enum 0 | uppercaseFirst }}
+  let got = first.to_string()
+  let want = "{{ index .Enum 0 }}"
+  @test.eq(got, want)!
+  //
+  let got_parse = {{ $name }}::parse(want)!
+  @test.eq(got_parse, first)!
+  //
+  let mut threw_error = false
+  let _ = try {
+    {{ $name }}::parse("")!
+  } catch {
+    _ => {
+      threw_error = true
+      {{ $name }}::{{ index .Enum 0 | uppercaseFirst }}
+    }
+  }
+  @test.is_true(threw_error)!
+  //
+  let got_parse = {{ $name }}::from_json(@json.JsonValue::String(want)).unwrap()
+  @test.eq(got_parse, first)!
+  //
+  let want_none = {{ $name }}::from_json(@json.JsonValue::String(""))
+  @test.eq(want_none, None)!
+}
+`
+
+// getMbtStruct generates MoonBit source code for a single struct custom datatype.
 func (c *Client) genMbtStruct(ct *schema.CustomType) (string, error) {
 	var buf bytes.Buffer
 	if err := structMbtTemplate.Execute(&buf, ct); err != nil {
@@ -128,7 +184,7 @@ func (c *Client) genMbtStruct(ct *schema.CustomType) (string, error) {
 	return buf.String(), nil
 }
 
-// getTestGoStruct generates MoonBit source code for a single struct custom datatype.
+// getTestMbtStruct generates MoonBit test source code for a single struct custom datatype.
 func (c *Client) genTestMbtStruct(ct *schema.CustomType) (string, error) {
 	var buf bytes.Buffer
 	if err := structTestMbtTemplate.Execute(&buf, ct); err != nil {
@@ -172,18 +228,20 @@ pub impl @jsonutil.ToJson for {{ $name }} with to_json(self) {
 
 ` + "/// `{{ $name }}::from_json` transforms a `@json.JsonValue` to a value." + `
 pub fn {{ $name }}::from_json(value : @json.JsonValue) -> {{ $name }}? {
-  match value {
-    @json.JsonValue::Object({
-{{range .Properties}}{{ if .IsRequired }}      "{{ .Name }}": Some(@json.JsonValue::String({{ .Name | lowerSnakeCase }})),
-{{ end }}{{ if .IsRequired | not }}      "{{ .Name }}": {{ .Name | lowerSnakeCase }},
+  let value = value.as_object()?
+{{range .Properties}}  let {{ .Name | lowerSnakeCase }} = {{ mbtConvertFromJSONValue . }}
+{{ end -}}
+{{ "  match (" }}
+{{range .Properties}}    {{ .Name | lowerSnakeCase }},
+{{ end -}}
+{{ "  ) {" }}
+{{ if len .Properties | lt 1 }}    ({{ end }}
+{{range .Properties}}{{ if .IsRequired }}      Some({{ .Name | lowerSnakeCase }}),
+{{ end }}{{ if .IsRequired | not }}      {{ .Name | lowerSnakeCase }},
 {{ end }}{{ end -}}
-{{ "    }) => Some({" }}
-{{range .Properties}}{{ if .IsRequired }}      {{ .Name | lowerSnakeCase }}: {{ .Name | lowerSnakeCase }},
-{{ end }}{{ if .IsRequired | not }}      {{ .Name | lowerSnakeCase }}: match {{ .Name | lowerSnakeCase }} {
-        Some({{ mbtFromJSONMatchKey . }}) => {{ mbtFromJSONMatchValue . }}
-        _ => None
-      },
-{{ end }}{{ end -}}
+{{ if len .Properties | lt 1 }}{{"    ) => Some({" }}{{ else }}{{"      => Some({" }}{{ end }}
+{{range .Properties}}      {{ .Name | lowerSnakeCase }},
+{{ end -}}
 {{ "    })" }}
     _ => None
   }

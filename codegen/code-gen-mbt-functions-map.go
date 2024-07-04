@@ -186,6 +186,59 @@ func jsonOutputAsMbtType(output *schema.Output) string {
 	}
 }
 
+func mbtConvertFromJSONValue(prop *schema.Property) string {
+	valueGet := fmt.Sprintf("value.get(%q)", prop.Name)
+	if prop.IsRequired {
+		valueGet += "?" // fail shortcut if not Some()
+	}
+
+	if prop.Ref != "" {
+		parts := strings.Split(prop.Ref, "/")
+		refName := parts[len(parts)-1]
+		return fmt.Sprintf("%v |> %v::from_json()", valueGet, refName)
+	}
+
+	var asType string
+	switch prop.Type {
+	case "integer":
+		asType = ".as_number()"
+	case "string":
+		asType = ".as_string()"
+	case "number":
+		asType = ".as_number()"
+	case "boolean":
+		asType = ".as_bool()"
+	default:
+		log.Printf("WARNING: unknown property type %q", prop.Type)
+		return `"unknown"`
+	}
+
+	if !prop.IsRequired {
+		switch prop.Type {
+		case "integer":
+			return fmt.Sprintf(`match %v.as_number() {
+    Some(n) => Some(n.to_int())
+    None => None
+  }`, valueGet)
+		default:
+			return fmt.Sprintf(`match %v {
+    Some(jv) => jv%v
+    None => None
+  }`, valueGet, asType)
+		}
+	}
+
+	switch prop.Type {
+	case "integer":
+		return fmt.Sprintf(`match %v.as_number() {
+    Some(n) => Some(n.to_int())
+    None => None
+  }`, valueGet)
+	default:
+		return valueGet + asType
+	}
+}
+
 func mbtFromJSONMatchKey(prop *schema.Property) string {
 	if prop.Ref != "" {
 		// parts := strings.Split(prop.Ref, "/")

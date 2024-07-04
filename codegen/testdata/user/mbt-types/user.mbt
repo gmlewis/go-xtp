@@ -20,11 +20,15 @@ pub impl @jsonutil.ToJson for Address with to_json(self) {
 
 /// `Address::from_json` transforms a `@json.JsonValue` to a value.
 pub fn Address::from_json(value : @json.JsonValue) -> Address? {
-  match value {
-    @json.JsonValue::Object({
-      "street": Some(@json.JsonValue::String(street)),
-    }) => Some({
-      street: street,
+  let value = value.as_object()?
+  let street = value.get("street")?.as_string()
+  match (
+    street,
+  ) {
+    (
+      Some(street),
+    ) => Some({
+      street,
     })
     _ => None
   }
@@ -91,24 +95,29 @@ pub impl @jsonutil.ToJson for User with to_json(self) {
 
 /// `User::from_json` transforms a `@json.JsonValue` to a value.
 pub fn User::from_json(value : @json.JsonValue) -> User? {
-  match value {
-    @json.JsonValue::Object({
-      "age": age,
-      "email": email,
-      "address": address,
-    }) => Some({
-      age: match age {
-        Some(@json.JsonValue::Number(n)) => Some(n.to_int())
-        _ => None
-      },
-      email: match email {
-        Some(@json.JsonValue::String(s)) => Some(s.to_string())
-        _ => None
-      },
-      address: match address {
-        Some(v) => Address::from_json(v)
-        _ => None
-      },
+  let value = value.as_object()?
+  let age = match value.get("age").as_number() {
+    Some(n) => Some(n.to_int())
+    None => None
+  }
+  let email = match value.get("email") {
+    Some(jv) => jv.as_string()
+    None => None
+  }
+  let address = value.get("address") |> Address::from_json()
+  match (
+    age,
+    email,
+    address,
+  ) {
+    (
+      age,
+      email,
+      address,
+    ) => Some({
+      age,
+      email,
+      address,
     })
     _ => None
   }
