@@ -1,6 +1,12 @@
 # go-xtp/examples
 
-To build the examples, `cd` to one of the example directories and run:
+To build all of the examples, `cd` to this directory and run:
+
+```bash
+$ ./build-all.sh
+```
+
+To build one of the examples, `cd` to that example directory and run:
 
 ```bash
 $ ./build.sh
