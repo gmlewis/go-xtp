@@ -6,6 +6,7 @@ pub enum Fruit {
   Strawberry
 } derive(Debug, Eq)
 
+/// `Fruit::parse` parses a JSON string and returns the value.
 pub fn Fruit::parse(s : String) -> Fruit!String {
   match s {
     "apple" => Apple
@@ -35,6 +36,7 @@ pub enum GhostGang {
   Clyde
 } derive(Debug, Eq)
 
+/// `GhostGang::parse` parses a JSON string and returns the value.
 pub fn GhostGang::parse(s : String) -> GhostGang!String {
   match s {
     "blinky" => Blinky
@@ -146,6 +148,6 @@ pub fn get_schema(self : ComplexObject) -> XTPSchema {
   }
 }
 
-// XTPSchema describes the values and types of an XTP object
-// in a language-agnostic format.
+/// `XTPSchema` describes the values and types of an XTP object
+/// in a language-agnostic format.
 type XTPSchema Map[String, String]
