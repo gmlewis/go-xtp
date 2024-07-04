@@ -8,11 +8,11 @@ pub enum Fruit {
 
 /// `Fruit::from_json` transforms a `@json.JsonValue` to a value.
 pub fn Fruit::from_json(value : @json.JsonValue) -> Fruit? {
-  match value.to_string() {
-    "apple" => Some(Apple)
-    "orange" => Some(Orange)
-    "banana" => Some(Banana)
-    "strawberry" => Some(Strawberry)
+  match value {
+    @json.JsonValue::String("apple") => Some(Apple)
+    @json.JsonValue::String("orange") => Some(Orange)
+    @json.JsonValue::String("banana") => Some(Banana)
+    @json.JsonValue::String("strawberry") => Some(Strawberry)
     _ => None
   }
 }
@@ -49,11 +49,11 @@ pub enum GhostGang {
 
 /// `GhostGang::from_json` transforms a `@json.JsonValue` to a value.
 pub fn GhostGang::from_json(value : @json.JsonValue) -> GhostGang? {
-  match value.to_string() {
-    "blinky" => Some(Blinky)
-    "pinky" => Some(Pinky)
-    "inky" => Some(Inky)
-    "clyde" => Some(Clyde)
+  match value {
+    @json.JsonValue::String("blinky") => Some(Blinky)
+    @json.JsonValue::String("pinky") => Some(Pinky)
+    @json.JsonValue::String("inky") => Some(Inky)
+    @json.JsonValue::String("clyde") => Some(Clyde)
     _ => None
   }
 }

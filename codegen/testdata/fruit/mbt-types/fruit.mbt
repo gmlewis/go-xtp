@@ -18,11 +18,11 @@ pub fn to_string(self : Fruit) -> String {
 
 /// `Fruit::from_json` transforms a `@json.JsonValue` to a value.
 pub fn Fruit::from_json(value : @json.JsonValue) -> Fruit? {
-  match value.to_string() {
-    "apple" => Some(Apple)
-    "orange" => Some(Orange)
-    "banana" => Some(Banana)
-    "strawberry" => Some(Strawberry)
+  match value {
+    @json.JsonValue::String("apple") => Some(Apple)
+    @json.JsonValue::String("orange") => Some(Orange)
+    @json.JsonValue::String("banana") => Some(Banana)
+    @json.JsonValue::String("strawberry") => Some(Strawberry)
     _ => None
   }
 }
@@ -69,11 +69,11 @@ pub fn to_string(self : GhostGang) -> String {
 
 /// `GhostGang::from_json` transforms a `@json.JsonValue` to a value.
 pub fn GhostGang::from_json(value : @json.JsonValue) -> GhostGang? {
-  match value.to_string() {
-    "blinky" => Some(Blinky)
-    "pinky" => Some(Pinky)
-    "inky" => Some(Inky)
-    "clyde" => Some(Clyde)
+  match value {
+    @json.JsonValue::String("blinky") => Some(Blinky)
+    @json.JsonValue::String("pinky") => Some(Pinky)
+    @json.JsonValue::String("inky") => Some(Inky)
+    @json.JsonValue::String("clyde") => Some(Clyde)
     _ => None
   }
 }
@@ -142,9 +142,7 @@ pub impl @jsonutil.ToJson for ComplexObject with to_json(self) {
 
 /// `ComplexObject::from_json` transforms a `@json.JsonValue` to a value.
 pub fn ComplexObject::from_json(value : @json.JsonValue) -> ComplexObject? {
-  println(value)
   let value = value.as_object()?
-  println(value)
   let ghost = value.get("ghost")? |> GhostGang::from_json()
   let a_boolean = value.get("aBoolean")?.as_bool()
   let a_string = value.get("aString")?.as_string()
@@ -156,7 +154,6 @@ pub fn ComplexObject::from_json(value : @json.JsonValue) -> ComplexObject? {
     Some(jv) => jv.as_string()
     None => None
   }
-  println(ghost)
   match (ghost, a_boolean, a_string, an_int, an_optional_date) {
     (
       Some(ghost),
