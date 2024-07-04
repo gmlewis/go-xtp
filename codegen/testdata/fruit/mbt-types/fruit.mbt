@@ -6,6 +6,16 @@ pub enum Fruit {
   Strawberry
 } derive(Debug, Eq)
 
+/// `Fruit.to_string` implements the Show trait.
+pub fn to_string(self : Fruit) -> String {
+  match self {
+    Apple => "apple"
+    Orange => "orange"
+    Banana => "banana"
+    Strawberry => "strawberry"
+  }
+}
+
 /// `Fruit::from_json` transforms a `@json.JsonValue` to a value.
 pub fn Fruit::from_json(value : @json.JsonValue) -> Fruit? {
   match value.to_string() {
@@ -46,6 +56,16 @@ pub enum GhostGang {
   Inky
   Clyde
 } derive(Debug, Eq)
+
+/// `GhostGang.to_string` implements the Show trait.
+pub fn to_string(self : GhostGang) -> String {
+  match self {
+    Blinky => "blinky"
+    Pinky => "pinky"
+    Inky => "inky"
+    Clyde => "clyde"
+  }
+}
 
 /// `GhostGang::from_json` transforms a `@json.JsonValue` to a value.
 pub fn GhostGang::from_json(value : @json.JsonValue) -> GhostGang? {
@@ -122,7 +142,9 @@ pub impl @jsonutil.ToJson for ComplexObject with to_json(self) {
 
 /// `ComplexObject::from_json` transforms a `@json.JsonValue` to a value.
 pub fn ComplexObject::from_json(value : @json.JsonValue) -> ComplexObject? {
+  println(value)
   let value = value.as_object()?
+  println(value)
   let ghost = value.get("ghost")? |> GhostGang::from_json()
   let a_boolean = value.get("aBoolean")?.as_bool()
   let a_string = value.get("aString")?.as_string()
@@ -134,6 +156,7 @@ pub fn ComplexObject::from_json(value : @json.JsonValue) -> ComplexObject? {
     Some(jv) => jv.as_string()
     None => None
   }
+  println(ghost)
   match (ghost, a_boolean, a_string, an_int, an_optional_date) {
     (
       Some(ghost),
