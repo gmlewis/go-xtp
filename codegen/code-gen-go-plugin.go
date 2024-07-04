@@ -38,10 +38,13 @@ func (c *Client) genGoPluginPDK() (GeneratedFiles, error) {
 		"build.sh":               buildShScript,
 		c.CustTypesFilename:      "package main\n\n" + c.CustTypes,
 		c.CustTypesTestsFilename: "package main\n\n" + c.CustTypesTests,
-		"host-functions.go":      hostFunctionsStr.String(),
 		"main.go":                mainStr.String(),
 		"plugin-functions.go":    pluginFunctionsStr.String(),
 		"xtp.toml":               xtpTomlStr.String(),
+	}
+
+	if len(c.Plugin.Imports) > 0 {
+		m["host-functions.go"] = hostFunctionsStr.String()
 	}
 
 	return m, nil

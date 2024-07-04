@@ -18,17 +18,19 @@ pub impl @jsonutil.ToJson for Address with to_json(self) {
   @jsonutil.from_entries(fields)
 }
 
+/// `Address::from_json` transforms a `@json.JsonValue` to a value.
 pub fn Address::from_json(value : @json.JsonValue) -> Address? {
   match value {
     @json.JsonValue::Object({
-      "street": Some(@json.JsonValue::String(s)),
+      "street": Some(@json.JsonValue::String(street)),
     }) => Some({
-      street: s,
+      street: street,
     })
     _ => None
   }
 }
 
+/// `Address::parse` parses a JSON string and returns the value.
 pub fn Address::parse(s : String) -> Address!String {
   match @json.parse(s) {
     Ok(jv) =>
@@ -87,6 +89,7 @@ pub impl @jsonutil.ToJson for User with to_json(self) {
   @jsonutil.from_entries(fields)
 }
 
+/// `User::from_json` transforms a `@json.JsonValue` to a value.
 pub fn User::from_json(value : @json.JsonValue) -> User? {
   match value {
     @json.JsonValue::Object({
@@ -111,6 +114,7 @@ pub fn User::from_json(value : @json.JsonValue) -> User? {
   }
 }
 
+/// `User::parse` parses a JSON string and returns the value.
 pub fn User::parse(s : String) -> User!String {
   match @json.parse(s) {
     Ok(jv) =>

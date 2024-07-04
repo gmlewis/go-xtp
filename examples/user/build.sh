@@ -5,14 +5,16 @@ go run ../../cmd/xtp2code/main.go \
     -host=go-host \
     -plugin=go-plugin \
     -types=go-types \
-    -yaml=schema.yaml
+    -yaml=schema.yaml \
+    "$@"
 go run ../../cmd/xtp2code/main.go \
     -lang=mbt \
     -pkg=user \
     -host=mbt-host \
     -plugin=mbt-plugin \
     -types=mbt-types \
-    -yaml=schema.yaml
+    -yaml=schema.yaml \
+    "$@"
 
 for i in $(echo */build.sh); do
     pushd ${i%"build.sh"} && ./build.sh && popd

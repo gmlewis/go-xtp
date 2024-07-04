@@ -6,6 +6,9 @@ test "ComplexObject" {
     #|{"ghost":"blinky","aBoolean":false,"aString":"","anInt":0}
   @test.eq(got, want)!
   //
+  let got_parse = ComplexObject::parse(want)!
+  @test.eq(got_parse, default_object)!
+  //
   let required_fields : ComplexObject = {
     ghost: Blinky,
     a_boolean: true,
@@ -19,6 +22,9 @@ test "ComplexObject" {
     #|{"ghost":"blinky","aBoolean":true,"aString":"aString","anInt":0}
   @test.eq(got, want)!
   //
+  let got_parse = ComplexObject::parse(want)!
+  @test.eq(got_parse, required_fields)!
+  //
   let optional_fields : ComplexObject = {
     ..required_fields,
     an_optional_date: Some("anOptionalDate"),
@@ -28,4 +34,7 @@ test "ComplexObject" {
   let want =
     #|{"ghost":"blinky","aBoolean":true,"aString":"aString","anInt":0,"anOptionalDate":"anOptionalDate"}
   @test.eq(got, want)!
+  //
+  let got_parse = ComplexObject::parse(want)!
+  @test.eq(got_parse, optional_fields)!
 }

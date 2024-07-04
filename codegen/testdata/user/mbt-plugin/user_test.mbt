@@ -6,6 +6,9 @@ test "Address" {
     #|{"street":""}
   @test.eq(got, want)!
   //
+  let got_parse = Address::parse(want)!
+  @test.eq(got_parse, default_object)!
+  //
   let required_fields : Address = {
     street: "street",
   }
@@ -14,6 +17,9 @@ test "Address" {
   let want =
     #|{"street":"street"}
   @test.eq(got, want)!
+  //
+  let got_parse = Address::parse(want)!
+  @test.eq(got_parse, required_fields)!
 }
 
 test "User" {
@@ -23,6 +29,9 @@ test "User" {
   let want =
     #|{}
   @test.eq(got, want)!
+  //
+  let got_parse = User::parse(want)!
+  @test.eq(got_parse, default_object)!
   //
   let required_fields : User = {
     age: None,
@@ -35,6 +44,9 @@ test "User" {
     #|{}
   @test.eq(got, want)!
   //
+  let got_parse = User::parse(want)!
+  @test.eq(got_parse, required_fields)!
+  //
   let optional_fields : User = {
     ..required_fields,
     age: Some(0),
@@ -46,4 +58,7 @@ test "User" {
   let want =
     #|{"age":0,"email":"email","address":{"street":""}}
   @test.eq(got, want)!
+  //
+  let got_parse = User::parse(want)!
+  @test.eq(got_parse, optional_fields)!
 }

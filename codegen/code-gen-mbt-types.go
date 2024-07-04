@@ -169,14 +169,15 @@ pub impl @jsonutil.ToJson for {{ $name }} with to_json(self) {
 {{ "  @jsonutil.from_entries(fields)" }}
 }
 
+/// ` + "`{{ $name }}::from_json` transforms a `@json.JsonValue`" + ` to a value.
 pub fn {{ $name }}::from_json(value : @json.JsonValue) -> {{ $name }}? {
   match value {
     @json.JsonValue::Object({
-{{range .Properties}}{{ if .IsRequired }}      "{{ .Name }}": Some(@json.JsonValue::String(s)),
+{{range .Properties}}{{ if .IsRequired }}      "{{ .Name }}": Some(@json.JsonValue::String({{ .Name | lowerSnakeCase }})),
 {{ end }}{{ if .IsRequired | not }}      "{{ .Name }}": {{ .Name | lowerSnakeCase }},
 {{ end }}{{ end -}}
 {{ "    }) => Some({" }}
-{{range .Properties}}{{ if .IsRequired }}      {{ .Name | lowerSnakeCase }}: s,
+{{range .Properties}}{{ if .IsRequired }}      {{ .Name | lowerSnakeCase }}: {{ .Name | lowerSnakeCase }},
 {{ end }}{{ if .IsRequired | not }}      {{ .Name | lowerSnakeCase }}: match {{ .Name | lowerSnakeCase }} {
         Some({{ mbtFromJSONMatchKey . }}) => {{ mbtFromJSONMatchValue . }}
         _ => None
@@ -187,6 +188,7 @@ pub fn {{ $name }}::from_json(value : @json.JsonValue) -> {{ $name }}? {
   }
 }
 
+/// ` + "`{{ $name }}::parse` parses a JSON string and returns the value." + `
 pub fn {{ $name }}::parse(s : String) -> {{ $name }}!String {
   match @json.parse(s) {
     Ok(jv) =>
@@ -202,7 +204,7 @@ pub fn {{ $name }}::parse(s : String) -> {{ $name }}!String {
   }
 }
 
-/// ` + "`" + `get_schema` + "`" + ` returns an ` + "`" + `XTPSchema` + "`" + ` for the ` + "`" + `{{ $name }}` + "`" + `.
+/// ` + "`get_schema` returns an `XTPSchema` for the `{{ $name }}`" + `.
 pub fn get_schema(self : {{ $name }}) -> XTPSchema {
   {
 {{range .Properties}}    "{{ .Name }}": "{{ getExtismType . $top }}",

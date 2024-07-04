@@ -96,19 +96,20 @@ pub impl @jsonutil.ToJson for ComplexObject with to_json(self) {
   @jsonutil.from_entries(fields)
 }
 
+/// `ComplexObject::from_json` transforms a `@json.JsonValue` to a value.
 pub fn ComplexObject::from_json(value : @json.JsonValue) -> ComplexObject? {
   match value {
     @json.JsonValue::Object({
-      "ghost": Some(@json.JsonValue::String(s)),
-      "aBoolean": Some(@json.JsonValue::String(s)),
-      "aString": Some(@json.JsonValue::String(s)),
-      "anInt": Some(@json.JsonValue::String(s)),
+      "ghost": Some(@json.JsonValue::String(ghost)),
+      "aBoolean": Some(@json.JsonValue::String(a_boolean)),
+      "aString": Some(@json.JsonValue::String(a_string)),
+      "anInt": Some(@json.JsonValue::String(an_int)),
       "anOptionalDate": an_optional_date,
     }) => Some({
-      ghost: s,
-      a_boolean: s,
-      a_string: s,
-      an_int: s,
+      ghost: ghost,
+      a_boolean: a_boolean,
+      a_string: a_string,
+      an_int: an_int,
       an_optional_date: match an_optional_date {
         Some(@json.JsonValue::String(s)) => Some(s.to_string())
         _ => None
@@ -118,6 +119,7 @@ pub fn ComplexObject::from_json(value : @json.JsonValue) -> ComplexObject? {
   }
 }
 
+/// `ComplexObject::parse` parses a JSON string and returns the value.
 pub fn ComplexObject::parse(s : String) -> ComplexObject!String {
   match @json.parse(s) {
     Ok(jv) =>

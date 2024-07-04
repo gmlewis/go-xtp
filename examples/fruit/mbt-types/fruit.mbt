@@ -4,7 +4,7 @@ pub enum Fruit {
   Orange
   Banana
   Strawberry
-}
+} derive(Debug, Eq)
 
 pub fn Fruit::parse(s : String) -> Fruit!String {
   match s {
@@ -33,7 +33,7 @@ pub enum GhostGang {
   Pinky
   Inky
   Clyde
-}
+} derive(Debug, Eq)
 
 pub fn GhostGang::parse(s : String) -> GhostGang!String {
   match s {
@@ -69,7 +69,7 @@ pub struct ComplexObject {
   /// A datetime object, we will automatically serialize and deserialize
   /// this for you.
   an_optional_date : String?
-}
+} derive(Debug, Eq)
 
 /// `ComplexObject::new` returns a new struct with default values.
 pub fn ComplexObject::new() -> ComplexObject {
@@ -94,6 +94,43 @@ pub impl @jsonutil.ToJson for ComplexObject with to_json(self) {
     None => ()
   }
   @jsonutil.from_entries(fields)
+}
+
+pub fn ComplexObject::from_json(value : @json.JsonValue) -> ComplexObject? {
+  match value {
+    @json.JsonValue::Object({
+      "ghost": Some(@json.JsonValue::String(s)),
+      "aBoolean": Some(@json.JsonValue::String(s)),
+      "aString": Some(@json.JsonValue::String(s)),
+      "anInt": Some(@json.JsonValue::String(s)),
+      "anOptionalDate": an_optional_date,
+    }) => Some({
+      ghost: s,
+      a_boolean: s,
+      a_string: s,
+      an_int: s,
+      an_optional_date: match an_optional_date {
+        Some(@json.JsonValue::String(s)) => Some(s.to_string())
+        _ => None
+      },
+    })
+    _ => None
+  }
+}
+
+pub fn ComplexObject::parse(s : String) -> ComplexObject!String {
+  match @json.parse(s) {
+    Ok(jv) =>
+      match ComplexObject::from_json(jv) {
+        Some(value) => value
+        None => {
+          raise "unable to parse ComplexObject \(s)"
+        }
+      }
+    Err(e) => {
+      raise "unable to parse ComplexObject \(s): \(e)"
+    }
+  }
 }
 
 /// `get_schema` returns an `XTPSchema` for the `ComplexObject`.

@@ -32,12 +32,23 @@ func TestGenGoPluginPDK(t *testing.T) {
 			embedFS:     wantFruitGoPluginFS,
 			genFunc:     func(c *Client) (GeneratedFiles, error) { return c.genGoPluginPDK() },
 		},
-		// {
-		// 	name:     "user",
-		// 	yamlStr:  userYaml,
-		// 	wantSrc:  wantUserGo,
-		// 	wantTest: wantUserTestGo
-		// },
+		{
+			name:    "user",
+			lang:    "go",
+			pkgName: "user",
+			yamlStr: userYaml,
+			files: []string{
+				"build.sh",
+				"user.go",
+				"user_test.go",
+				"main.go",
+				"plugin-functions.go",
+				"xtp.toml",
+			},
+			embedSubdir: "testdata/user/go-plugin",
+			embedFS:     wantUserGoPluginFS,
+			genFunc:     func(c *Client) (GeneratedFiles, error) { return c.genGoPluginPDK() },
+		},
 	}
 
 	runEmbedFSTest(t, tests)

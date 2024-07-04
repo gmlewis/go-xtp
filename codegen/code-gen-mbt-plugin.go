@@ -2,6 +2,7 @@ package codegen
 
 import (
 	"bytes"
+	"strings"
 	"text/template"
 )
 
@@ -40,11 +41,14 @@ func (c *Client) genMbtPluginPDK() (GeneratedFiles, error) {
 		"build.sh":               buildShScript,
 		c.CustTypesFilename:      c.CustTypes,
 		c.CustTypesTestsFilename: c.CustTypesTests,
-		"host-functions.mbt":     hostFunctionsStr.String(),
 		"main.mbt":               mainStr.String(),
 		"moon.pkg.json":          moonPkgJSONStr.String(),
 		"plugin-functions.mbt":   pluginFunctionsStr.String(),
 		"xtp.toml":               xtpTomlStr.String(),
+	}
+
+	if strings.TrimSpace(hostFunctionsStr.String()) != "" {
+		m["host-functions.mbt"] = hostFunctionsStr.String()
 	}
 
 	return m, nil
