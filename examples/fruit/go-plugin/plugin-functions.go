@@ -4,6 +4,7 @@ package main
 
 import (
 	"encoding/json"
+	"fmt"
 
 	"github.com/extism/go-pdk"
 )
@@ -21,7 +22,7 @@ func primitiveTypeFunc() int {
 
 	buf, err := json.Marshal(output)
 	if err != nil {
-		pdk.Log(pdk.LogError, err.Error())
+		pdk.Log(pdk.LogError, fmt.Sprintf("unable to json.Marshal output: %v", err))
 		return 1 // failure
 	}
 
@@ -32,11 +33,17 @@ func primitiveTypeFunc() int {
 //export referenceTypeFunc
 func referenceTypeFunc() int {
 	input := pdk.InputString()
-	output := ReferenceTypeFunc(Fruit(input))
+	v, err := ParseFruit(input)
+	if err != nil {
+		pdk.Log(pdk.LogError, fmt.Sprintf("unable to ParseFruit input: %v, input:\n%v\n", err, input))
+		return 1 // failure
+	}
+
+	output := ReferenceTypeFunc(v)
 
 	buf, err := json.Marshal(output)
 	if err != nil {
-		pdk.Log(pdk.LogError, err.Error())
+		pdk.Log(pdk.LogError, fmt.Sprintf("unable to json.Marshal output: %v", err))
 		return 1 // failure
 	}
 

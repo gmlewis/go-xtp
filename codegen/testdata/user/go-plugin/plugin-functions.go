@@ -14,7 +14,7 @@ func processUser() int {
 	input := pdk.InputString()
 	v, err := ParseUser(input)
 	if err != nil {
-		pdk.Log(pdk.LogError, fmt.Errorf("unable to ParseUser input: %v, input:\n%v\n", err, input))
+		pdk.Log(pdk.LogError, fmt.Sprintf("unable to ParseUser input: %v, input:\n%v\n", err, input))
 		return 1 // failure
 	}
 
@@ -22,7 +22,7 @@ func processUser() int {
 
 	buf, err := json.Marshal(output)
 	if err != nil {
-		pdk.Log(pdk.LogError, fmt.Errorf("unable to json.Marshal output: %v", err))
+		pdk.Log(pdk.LogError, fmt.Sprintf("unable to json.Marshal output: %v", err))
 		return 1 // failure
 	}
 
