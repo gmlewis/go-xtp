@@ -22,6 +22,7 @@ package main
 
 import (
 	"flag"
+	"fmt"
 	"log"
 	"os"
 
@@ -41,11 +42,17 @@ var (
 	pluginDir = flag.String("plugin", "", "Output dirname to generate Plugin PDK code.")
 	quiet     = flag.Bool("q", false, "Do not print warnings.")
 	typesDir  = flag.String("types", "", "Output dirname to generate simple types code.")
+	version   = flag.Bool("v", false, "Print version and quit.")
 	yamlFile  = flag.String("yaml", "", "Input schema.yaml file to generate code from.")
 )
 
 func main() {
 	flag.Parse()
+
+	if *version {
+		fmt.Printf("xtp2code version v%v\n", codegen.VERSION)
+		return
+	}
 
 	if (*appID == "" && *yamlFile == "") || (*appID != "" && *yamlFile != "") {
 		log.Fatal("Must specify either '-appid=<id>' or '-yaml=<filename>' but not both.")
