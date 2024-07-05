@@ -1,7 +1,6 @@
 package api
 
 import (
-	"encoding/json"
 	"fmt"
 	"io"
 	"net/http"
@@ -80,7 +79,7 @@ func (c *Client) GetAppsExtensionPoints(appID string) (*AppsExtensionPointsRespo
 	}
 
 	resp := &AppsExtensionPointsResponse{}
-	if err := json.Unmarshal(body, &resp); err != nil {
+	if err := jsoncomp.Unmarshal(body, &resp); err != nil {
 		return nil, err
 	}
 

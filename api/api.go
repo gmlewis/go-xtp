@@ -4,6 +4,8 @@ package api
 import (
 	"errors"
 	"os"
+
+	jsoniter "github.com/json-iterator/go"
 )
 
 const (
@@ -15,6 +17,8 @@ const (
 
 var (
 	ErrXTPTokenEnvVarNotSet = errors.New("env var XTP_TOKEN not set")
+
+	jsoncomp = jsoniter.ConfigCompatibleWithStandardLibrary
 )
 
 // Client represents an XTP API client.
