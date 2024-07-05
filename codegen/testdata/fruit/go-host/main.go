@@ -5,10 +5,13 @@
 package main
 
 import (
+	"context"
 	"fmt"
 	"log"
 	"sort"
+	"strings"
 
+	extism "github.com/extism/go-sdk"
 	"github.com/gmlewis/go-xtp/api"
 	jsoniter "github.com/json-iterator/go"
 )
@@ -43,17 +46,97 @@ func main() {
 	}
 	sort.Strings(sortedBindings)
 
-	// Now, download and call each binding.
+	ctx := context.Background()
+
+	// Now, download and call each plugin function.
 	for _, name := range sortedBindings {
-		log.Printf("Downloading plugin %v", name)
-		b, _ := allBindings[name]
-		wasmBytes, err := c.GetContent(b.ContentAddress)
-		if err != nil {
-			log.Fatalf("GetContent(): %v", err)
+		binding, ok := allBindings[name]
+		if !ok {
+			log.Fatalf("programming error - lookup of name %v failed", name)
+		}
+		extID := strings.Split(binding.ID, "/")[0]
+
+		log.Printf("Calling plugin: %v (extension point ID: %v)", name, extID)
+
+		manifest := extism.Manifest{
+			Wasm: []extism.Wasm{
+				extism.WasmUrl{
+					Url: c.GetURL(binding.ContentAddress),
+				},
+			},
 		}
 
-		log.Printf("Got %v bytes for %v.wasm", len(wasmBytes), name)
+		config := extism.PluginConfig{}
+		plugin, err := extism.NewPlugin(ctx, manifest, config, hostFunctions)
+		if err != nil {
+			log.Fatalf("Failed to initialize plugin %q: %v\n", name, err)
+		}
 
-		// TODO: Instantiate and call the plugin via Extism SDK.
+		if err := exercisePlugin(extID, plugin); err != nil {
+			log.Fatalf("Error calling plugin %v (extension point ID: %v): %v", name, extID, err)
+		}
 	}
 }
+
+var hostFunctions = []extism.HostFunction{
+	eatAFruit,
+}
+
+var eatAFruit = extism.NewHostFunctionWithStack(
+	"eatAFruit",
+	func(ctx context.Context, plugin *extism.CurrentPlugin, stack []uint64) {
+		buf, err := plugin.ReadBytes(stack[0])
+		if err != nil {
+			log.Printf("eatAFruit: ReadBytes err: %v", err)
+			return
+		}
+
+		var input Fruit
+		if err := jsoncomp.Unmarshal(buf, &input); err != nil {
+			log.Printf("eatAFruit: Unmarshal err: %v", err)
+			return
+		}
+
+		result := EatAFruit(input)
+
+		buf, err = jsoncomp.Marshal(result)
+		if err != nil {
+			log.Printf("eatAFruit: Marshal err: %v", err)
+			return
+		}
+
+		mem, err := plugin.WriteBytes(buf)
+		if err != nil {
+			log.Printf("eatAFruit: WriteBytes err: %v", err)
+			return
+		}
+
+		stack[0] = mem
+	},
+	[]extism.ValueType{extism.ValueTypeI64},
+	[]extism.ValueType{extism.ValueTypeI64},
+)
+
+func exercisePlugin(extID string, plugin *extism.Plugin) error {
+	switch extID {
+	case "ext_01j1gszkhmenz9ecq0cbvmm9mt":
+		return exercisePluginFruit(plugin)
+	case "ext_01j1gt0mmdez5teegkpwqtbv9q":
+		return exercisePluginUser(plugin)
+	default:
+		return fmt.Errorf("unknown extension plugin id: %v", extID)
+	}
+	return nil
+}
+
+func exercisePluginFruit(plugin *extism.Plugin) error {
+	return nil
+}
+
+func exercisePluginUser(plugin *extism.Plugin) error {
+	return nil
+}
+
+// XTPSchema describes the values and types of an XTP object
+// in a language-agnostic format.
+type XTPSchema map[string]string

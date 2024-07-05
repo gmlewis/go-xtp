@@ -6,10 +6,6 @@ import (
 	"github.com/google/go-cmp/cmp"
 )
 
-func boolPtr(b bool) *bool       { return &b }
-func intPtr(i int) *int          { return &i }
-func stringPtr(s string) *string { return &s }
-
 func TestComplexObjectMarshal(t *testing.T) {
 	t.Parallel()
 	tests := []struct {

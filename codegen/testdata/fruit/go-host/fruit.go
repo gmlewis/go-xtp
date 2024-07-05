@@ -91,7 +91,3 @@ func (c *ComplexObject) GetSchema() XTPSchema {
 		"anOptionalDate": "?Date",
 	}
 }
-
-// XTPSchema describes the values and types of an XTP object
-// in a language-agnostic format.
-type XTPSchema map[string]string
