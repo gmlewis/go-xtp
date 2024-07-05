@@ -47,8 +47,13 @@ func main() {
 	for _, name := range sortedBindings {
 		log.Printf("Downloading plugin %v", name)
 		b, _ := allBindings[name]
-		if _, err := c.GetContent(b.ContentAddress); err != nil {
+		wasmBytes, err := c.GetContent(b.ContentAddress)
+		if err != nil {
 			log.Fatalf("GetContent(): %v", err)
 		}
+
+		log.Printf("Got %v bytes for %v.wasm", len(wasmBytes), name)
+
+		// TODO: Instantiate and call the plugin via Extism SDK.
 	}
 }

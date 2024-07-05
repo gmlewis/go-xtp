@@ -6,7 +6,6 @@ import (
 	"log"
 	"net/http"
 	"net/url"
-	"os"
 )
 
 const (
@@ -14,7 +13,7 @@ const (
 )
 
 // GetContent gets the content at the provided address.
-func (c *Client) GetContent(address string) (*string, error) {
+func (c *Client) GetContent(address string) ([]byte, error) {
 	if c.xtpToken == "" {
 		return nil, ErrXTPTokenEnvVarNotSet
 	}
@@ -43,9 +42,5 @@ func (c *Client) GetContent(address string) (*string, error) {
 		return nil, nil
 	}
 
-	if err := os.WriteFile(address+".wasm", body, 0644); err != nil {
-		return nil, err
-	}
-
-	return nil, nil
+	return body, nil
 }
