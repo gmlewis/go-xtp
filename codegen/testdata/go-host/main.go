@@ -56,21 +56,29 @@ func main() {
 		}
 		extID := strings.Split(binding.ID, "/")[0]
 
+		log.Printf("Calling plugin: %v (extension point ID: %v)", name, extID)
+
 		url := c.GetURL(binding.ContentAddress)
-		log.Printf("Calling plugin: %v (extension point ID: %v) from url %v", name, extID, url)
+		wasmData, err := c.GetContent(binding.ContentAddress)
+		if err != nil {
+			log.Fatalf("Unable to download wasm plugin from URL %v: %v", url, err)
+		}
 
 		manifest := extism.Manifest{
 			Wasm: []extism.Wasm{
-				extism.WasmUrl{
-					Url: url,
-				},
+				// extism.WasmUrl{Url: url},  // Could not get this to work.
+				extism.WasmData{Data: wasmData},
 			},
 		}
 
-		config := extism.PluginConfig{}
+		config := extism.PluginConfig{
+			EnableWasi: true,
+			LogLevel:   extism.LogLevelTrace,
+		}
 		plugin, err := extism.NewPlugin(ctx, manifest, config, hostFunctions)
 		if err != nil {
-			log.Fatalf("Failed to initialize plugin %q: %v\n", name, err)
+			log.Printf("Failed to initialize plugin %q (skipped): %v\n", name, err)
+			continue
 		}
 
 		if err := exercisePlugin(extID, plugin); err != nil {
