@@ -123,11 +123,16 @@ var mbtPluginMoonPkgJSONTemplateStr = `{
   }
 }`
 
+// TODO: support primitives other than Strings.
 var mbtPluginPluginFunctionsTemplateStr = `{{range $index, $export := .Plugin.Exports }}{{ $name := .Name }}{{ if $index | lt 0 }}
 {{ end }}/// Exported: {{ $name }}
 pub fn exported_{{ $name | lowerSnakeCase }}() -> Int {
 {{ if . | inputIsVoidType }}  {{ $name | lowerSnakeCase }}(){{ end -}}
-{{ if . | inputIsPrimitiveType }}  let input = @host.input_string()
+{{ if . | inputIsPrimitiveType }}  let result = @json.parse(@host.input_string())
+  let input = match result {
+    Ok(String(s)) => s
+    _ => return 1 // failure
+  }
   let output = {{ $name | lowerSnakeCase }}(input) |> @jsonutil.to_json()
   @host.output_json_value(output){{ end -}}
 {{ if . | inputIsReferenceType }}  {{ inputReferenceTypeName . }}::parse(@host.input_string())!!.unwrap()

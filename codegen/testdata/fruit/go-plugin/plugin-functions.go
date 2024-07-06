@@ -17,7 +17,12 @@ func voidFunc() int {
 
 //export primitiveTypeFunc
 func primitiveTypeFunc() int {
-	input := pdk.InputString()
+	var input string
+	if err := json.Unmarshal([]byte(pdk.InputString()), &input); err != nil {
+		pdk.Log(pdk.LogError, fmt.Sprintf("unable to json.Unmarshal input: %v", err))
+		return 1 // failure
+	}
+
 	output := PrimitiveTypeFunc(input)
 
 	buf, err := json.Marshal(output)

@@ -121,6 +121,7 @@ func {{ $name | uppercaseFirst }}({{ .Input | inputToGoType }}){{ if .Output }} 
 func main() {}
 `
 
+// TODO: support primitive types other than string.
 var goPluginPluginFunctionsTemplateStr = `//go:build tinygo
 
 package main
@@ -135,7 +136,12 @@ import (
 //export {{ $name }}
 func {{ $name }}() int {
 {{ if . | inputIsVoidType }}	{{ $name | uppercaseFirst }}(){{ end -}}
-{{ if . | inputIsPrimitiveType }}	input := pdk.InputString()
+{{ if . | inputIsPrimitiveType }}	var input string
+	if err := json.Unmarshal([]byte(pdk.InputString()), &input); err != nil {
+		pdk.Log(pdk.LogError, fmt.Sprintf("unable to json.Unmarshal input: %v", err))
+		return 1 // failure
+	}
+
 	output := {{ $name | uppercaseFirst }}(input)
 
 	buf, err := json.Marshal(output)
