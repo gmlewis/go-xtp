@@ -130,12 +130,56 @@ func exercisePlugin(extID string, plugin *extism.Plugin) error {
 }
 
 func exercisePluginFruit(plugin *extism.Plugin) error {
+	{
+		log.Printf("Calling fruit voidFunc()")
+		success, outBuf, err := plugin.Call("voidFunc", nil)
+		log.Printf("voidFunc returned: (%v, '%s', %v)", success, outBuf, err)
+	}
+
+	{
+		log.Printf("Calling fruit primitiveTypeFunc(`'yo'`)")
+		success, outBuf, err := plugin.Call("primitiveTypeFunc", []byte(`"yo"`))
+		log.Printf("primitiveTypeFunc returned: (%v, '%s', %v)", success, outBuf, err)
+	}
+
+	{
+		fruit := FruitEnumApple
+		inBuf, err := jsoncomp.Marshal(fruit)
+		if err != nil {
+			return err
+		}
+		log.Printf("Calling fruit referenceTypeFunc(`%s`)", inBuf)
+		success, outBuf, err := plugin.Call("referenceTypeFunc", inBuf)
+		log.Printf("referenceTypeFunc returned: (%v, '%s', %v)", success, outBuf, err)
+	}
+
 	return nil
 }
 
 func exercisePluginUser(plugin *extism.Plugin) error {
+	{
+		user := User{
+			Age:   intPtr(0),
+			Email: stringPtr("email"),
+			Address: &Address{
+				Street: "street",
+			},
+		}
+		inBuf, err := jsoncomp.Marshal(user)
+		if err != nil {
+			return err
+		}
+		log.Printf("Calling user processUser(`%s`)", inBuf)
+		success, buf, err := plugin.Call("processUser", inBuf)
+		log.Printf("processUser returned: (%v, '%s', %v)", success, buf, err)
+	}
+
 	return nil
 }
+
+func boolPtr(b bool) *bool       { return &b }
+func intPtr(i int) *int          { return &i }
+func stringPtr(s string) *string { return &s }
 
 // XTPSchema describes the values and types of an XTP object
 // in a language-agnostic format.
