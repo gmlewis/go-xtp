@@ -18,11 +18,11 @@ pub fn to_string(self : Fruit) -> String {
 
 /// `Fruit::from_json` transforms a `@json.JsonValue` to a value.
 pub fn Fruit::from_json(value : @json.JsonValue) -> Fruit? {
-  match value {
-    @json.JsonValue::String("apple") => Some(Apple)
-    @json.JsonValue::String("orange") => Some(Orange)
-    @json.JsonValue::String("banana") => Some(Banana)
-    @json.JsonValue::String("strawberry") => Some(Strawberry)
+  match value.as_string() {
+    Some("apple") => Some(Apple)
+    Some("orange") => Some(Orange)
+    Some("banana") => Some(Banana)
+    Some("strawberry") => Some(Strawberry)
     _ => None
   }
 }
@@ -30,10 +30,10 @@ pub fn Fruit::from_json(value : @json.JsonValue) -> Fruit? {
 /// `Fruit::parse` parses a JSON string and returns the value.
 pub fn Fruit::parse(s : String) -> Fruit!String {
   match s {
-    "apple" => Apple
-    "orange" => Orange
-    "banana" => Banana
-    "strawberry" => Strawberry
+    "\"apple\"" => Apple
+    "\"orange\"" => Orange
+    "\"banana\"" => Banana
+    "\"strawberry\"" => Strawberry
     _ => {
       raise "not a Fruit: \(s)"
     }
@@ -69,11 +69,11 @@ pub fn to_string(self : GhostGang) -> String {
 
 /// `GhostGang::from_json` transforms a `@json.JsonValue` to a value.
 pub fn GhostGang::from_json(value : @json.JsonValue) -> GhostGang? {
-  match value {
-    @json.JsonValue::String("blinky") => Some(Blinky)
-    @json.JsonValue::String("pinky") => Some(Pinky)
-    @json.JsonValue::String("inky") => Some(Inky)
-    @json.JsonValue::String("clyde") => Some(Clyde)
+  match value.as_string() {
+    Some("blinky") => Some(Blinky)
+    Some("pinky") => Some(Pinky)
+    Some("inky") => Some(Inky)
+    Some("clyde") => Some(Clyde)
     _ => None
   }
 }
@@ -81,10 +81,10 @@ pub fn GhostGang::from_json(value : @json.JsonValue) -> GhostGang? {
 /// `GhostGang::parse` parses a JSON string and returns the value.
 pub fn GhostGang::parse(s : String) -> GhostGang!String {
   match s {
-    "blinky" => Blinky
-    "pinky" => Pinky
-    "inky" => Inky
-    "clyde" => Clyde
+    "\"blinky\"" => Blinky
+    "\"pinky\"" => Pinky
+    "\"inky\"" => Inky
+    "\"clyde\"" => Clyde
     _ => {
       raise "not a GhostGang: \(s)"
     }
