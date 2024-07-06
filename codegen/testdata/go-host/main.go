@@ -56,12 +56,13 @@ func main() {
 		}
 		extID := strings.Split(binding.ID, "/")[0]
 
-		log.Printf("Calling plugin: %v (extension point ID: %v)", name, extID)
+		url := c.GetURL(binding.ContentAddress)
+		log.Printf("Calling plugin: %v (extension point ID: %v) from url %v", name, extID, url)
 
 		manifest := extism.Manifest{
 			Wasm: []extism.Wasm{
 				extism.WasmUrl{
-					Url: c.GetURL(binding.ContentAddress),
+					Url: url,
 				},
 			},
 		}

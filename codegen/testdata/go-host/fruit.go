@@ -1,7 +1,6 @@
 package main
 
 import (
-	"encoding/json" // jsoniter/jsoncomp are not compatible with tinygo.
 	"fmt"
 )
 
@@ -74,7 +73,7 @@ type ComplexObject struct {
 
 // ParseComplexObject parses a JSON string and returns the value.
 func ParseComplexObject(s string) (value ComplexObject, err error) {
-	if err := json.Unmarshal([]byte(s), &value); err != nil {
+	if err := jsoncomp.Unmarshal([]byte(s), &value); err != nil {
 		return value, err
 	}
 

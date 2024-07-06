@@ -1,9 +1,5 @@
 package main
 
-import (
-	"encoding/json" // jsoniter/jsoncomp are not compatible with tinygo.
-)
-
 // Address represents a users address.
 type Address struct {
 	// Street address
@@ -12,7 +8,7 @@ type Address struct {
 
 // ParseAddress parses a JSON string and returns the value.
 func ParseAddress(s string) (value Address, err error) {
-	if err := json.Unmarshal([]byte(s), &value); err != nil {
+	if err := jsoncomp.Unmarshal([]byte(s), &value); err != nil {
 		return value, err
 	}
 
@@ -37,7 +33,8 @@ type User struct {
 
 // ParseUser parses a JSON string and returns the value.
 func ParseUser(s string) (value User, err error) {
-	if err := json.Unmarshal([]byte(s), &value); err != nil {
+
+	if err := jsoncomp.Unmarshal([]byte(s), &value); err != nil {
 		return value, err
 	}
 
