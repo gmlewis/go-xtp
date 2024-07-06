@@ -4,6 +4,8 @@ test "Fruit" {
   let want = "apple"
   @test.eq(got, want)!
   //
+  let want =
+    #|"apple"
   let got_parse = Fruit::parse(want)!
   @test.eq(got_parse, first)!
   //
@@ -18,7 +20,11 @@ test "Fruit" {
   }
   @test.is_true(threw_error)!
   //
-  let got_parse = Fruit::from_json(@json.JsonValue::String(want)).unwrap()
+  let json_value = @jsonutil.to_json(first)
+  let got = json_value.stringify()
+  @test.eq(got, want)!
+  //
+  let got_parse = Fruit::from_json(json_value).unwrap()
   @test.eq(got_parse, first)!
   //
   let want_none = Fruit::from_json(@json.JsonValue::String(""))
@@ -31,6 +37,8 @@ test "GhostGang" {
   let want = "blinky"
   @test.eq(got, want)!
   //
+  let want =
+    #|"blinky"
   let got_parse = GhostGang::parse(want)!
   @test.eq(got_parse, first)!
   //
@@ -45,7 +53,11 @@ test "GhostGang" {
   }
   @test.is_true(threw_error)!
   //
-  let got_parse = GhostGang::from_json(@json.JsonValue::String(want)).unwrap()
+  let json_value = @jsonutil.to_json(first)
+  let got = json_value.stringify()
+  @test.eq(got, want)!
+  //
+  let got_parse = GhostGang::from_json(json_value).unwrap()
   @test.eq(got_parse, first)!
   //
   let want_none = GhostGang::from_json(@json.JsonValue::String(""))

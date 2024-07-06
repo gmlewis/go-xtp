@@ -19,13 +19,13 @@ const (
 // ParseFruit parses a JSON string and returns the value.
 func ParseFruit(s string) (value Fruit, err error) {
 	switch s {
-	case "apple":
+	case `"apple"`:
 		return FruitEnumApple, nil
-	case "orange":
+	case `"orange"`:
 		return FruitEnumOrange, nil
-	case "banana":
+	case `"banana"`:
 		return FruitEnumBanana, nil
-	case "strawberry":
+	case `"strawberry"`:
 		return FruitEnumStrawberry, nil
 	default:
 		return value, fmt.Errorf("not a Fruit: %v", s)
@@ -45,13 +45,13 @@ const (
 // ParseGhostGang parses a JSON string and returns the value.
 func ParseGhostGang(s string) (value GhostGang, err error) {
 	switch s {
-	case "blinky":
+	case `"blinky"`:
 		return GhostGangEnumBlinky, nil
-	case "pinky":
+	case `"pinky"`:
 		return GhostGangEnumPinky, nil
-	case "inky":
+	case `"inky"`:
 		return GhostGangEnumInky, nil
-	case "clyde":
+	case `"clyde"`:
 		return GhostGangEnumClyde, nil
 	default:
 		return value, fmt.Errorf("not a GhostGang: %v", s)

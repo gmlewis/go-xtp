@@ -122,8 +122,8 @@ pub fn to_string(self : {{ $name }}) -> String {
 
 ` + "/// `{{ $name }}::from_json` transforms a `@json.JsonValue` to a value." + `
 pub fn {{ $name }}::from_json(value : @json.JsonValue) -> {{ $name }}? {
-  match value {
-    {{range .Enum}}@json.JsonValue::String("{{ . }}") => Some({{ . | uppercaseFirst }})
+  match value.as_string() {
+    {{range .Enum}}Some("{{ . }}") => Some({{ . | uppercaseFirst }})
     {{ end -}}
     _ => None
   }
@@ -132,7 +132,7 @@ pub fn {{ $name }}::from_json(value : @json.JsonValue) -> {{ $name }}? {
 ` + "/// `{{ $name }}::parse` parses a JSON string and returns the value." + `
 pub fn {{ $name }}::parse(s : String) -> {{ $name }}!String {
   match s {
-{{range .Enum}}    "{{ . }}" => {{ . | uppercaseFirst }}
+{{range .Enum}}    "\"{{ . }}\"" => {{ . | uppercaseFirst }}
 {{ end -}}
 {{ "    _ => {" }}
       raise "not a {{ $name }}: \(s)"
@@ -154,6 +154,8 @@ var enumTestMbtTemplateStr = `{{ $name := .Name }}test "{{ $name }}" {
   let want = "{{ index .Enum 0 }}"
   @test.eq(got, want)!
   //
+  let want =
+    #|"{{ index .Enum 0 }}"
   let got_parse = {{ $name }}::parse(want)!
   @test.eq(got_parse, first)!
   //
@@ -168,7 +170,11 @@ var enumTestMbtTemplateStr = `{{ $name := .Name }}test "{{ $name }}" {
   }
   @test.is_true(threw_error)!
   //
-  let got_parse = {{ $name }}::from_json(@json.JsonValue::String(want)).unwrap()
+  let json_value = @jsonutil.to_json(first)
+  let got = json_value.stringify()
+  @test.eq(got, want)!
+  //
+  let got_parse = {{ $name }}::from_json(json_value).unwrap()
   @test.eq(got_parse, first)!
   //
   let want_none = {{ $name }}::from_json(@json.JsonValue::String(""))

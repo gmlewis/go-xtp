@@ -13,6 +13,7 @@ import (
 
 var (
 	enumGoTemplate       = template.Must(template.New("code-gen-go-types.go:enumGoTemplateStr").Funcs(funcMap).Parse(enumGoTemplateStr))
+	enumTestGoTemplate   = template.Must(template.New("code-gen-go-types.go:enumTestGoTemplateStr").Funcs(funcMap).Parse(enumTestGoTemplateStr))
 	structGoTemplate     = template.Must(template.New("code-gen-go-types.go:structGoTemplateStr").Funcs(funcMap).Parse(structGoTemplateStr))
 	structTestGoTemplate = template.Must(template.New("code-gen-go-types.go:structTestGoTemplateStr").Funcs(funcMap).Parse(structTestGoTemplateStr))
 )
@@ -88,7 +89,7 @@ func (c *Client) genTestGoCustomType(ct *schema.CustomType) (string, error) {
 
 	switch {
 	case len(ct.Enum) > 0:
-		return "", nil // no enum tests written yet... possibly not necessary.
+		return c.genTestGoEnum(ct)
 	case len(ct.Properties) > 0:
 		return c.genTestGoStruct(ct)
 	default:
@@ -106,6 +107,16 @@ func (c *Client) genGoEnum(ct *schema.CustomType) (string, error) {
 	return buf.String(), nil
 }
 
+// getTestGoEnum generates Go test source code for a single enum custom datatype.
+func (c *Client) genTestGoEnum(ct *schema.CustomType) (string, error) {
+	var buf bytes.Buffer
+	if err := enumTestGoTemplate.Execute(&buf, ct); err != nil {
+		return "", err
+	}
+
+	return buf.String(), nil
+}
+
 var enumGoTemplateStr = `{{ $name := .Name }}// {{ $name }} represents {{ .Description | downcaseFirst | multilineComment }}.
 type {{ $name }} string
 
@@ -117,11 +128,35 @@ const (
 // Parse{{ $name }} parses a JSON string and returns the value.
 func Parse{{ $name }}(s string) (value {{ $name }}, err error) {
 	switch s {
-{{range .Enum}}	case "{{ . }}":
+` + "{{range .Enum}}	case `\"{{ . }}\"`:" + `
 		return {{ $name }}Enum{{ . | uppercaseFirst }}, nil
 {{ end -}}
 	default:
 		return value, fmt.Errorf("not a {{ $name }}: %v", s)
+	}
+}
+`
+
+var enumTestGoTemplateStr = `{{ $name := .Name }}{{ $top := . }}func TestParse{{ $name }}(t *testing.T) {
+	t.Parallel()
+
+	{{ $name | downcaseFirst }} := {{ $name }}Enum{{ index .Enum 0 | uppercaseFirst }}
+	buf, err := jsoncomp.Marshal({{ $name | downcaseFirst }})
+	if err != nil {
+		t.Fatal(err)
+	}
+
+` + "	want := `\"{{ index .Enum 0 }}\"`" + `
+	if got := string(buf); got != want {
+		t.Errorf("Marshal = '%v', want '%v'", got, want)
+	}
+
+	got, err := Parse{{ $name }}(want)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if got != {{ $name | downcaseFirst }} {
+		t.Errorf("Parse{{ $name }} = '%v', want '%v'", got, {{ $name | downcaseFirst }})
 	}
 }
 `
