@@ -26,7 +26,7 @@ pub fn Address::from_json(value : @json.JsonValue) -> Address? {
 
 /// `Address::parse` parses a JSON string and returns the value.
 pub fn Address::parse(s : String) -> Address!String {
-  match @json.parse(s) {
+  match @json.parse(s)!! {
     Ok(jv) =>
       match Address::from_json(jv) {
         Some(value) => value
@@ -99,7 +99,7 @@ pub fn User::from_json(value : @json.JsonValue) -> User? {
 
 /// `User::parse` parses a JSON string and returns the value.
 pub fn User::parse(s : String) -> User!String {
-  match @json.parse(s) {
+  match @json.parse(s)!! {
     Ok(jv) =>
       match User::from_json(jv) {
         Some(value) => value

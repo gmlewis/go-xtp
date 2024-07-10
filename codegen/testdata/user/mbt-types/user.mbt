@@ -6,15 +6,11 @@ pub struct Address {
 
 /// `Address::new` returns a new struct with default values.
 pub fn Address::new() -> Address {
-  {
-    street: "",
-  }
+  { street: "" }
 }
 
 pub impl @jsonutil.ToJson for Address with to_json(self) {
-  let fields : Array[(String, @jsonutil.ToJson)] = [
-    ("street", self.street),
-  ]
+  let fields : Array[(String, @jsonutil.ToJson)] = [("street", self.street)]
   @jsonutil.from_entries(fields)
 }
 
@@ -22,20 +18,15 @@ pub impl @jsonutil.ToJson for Address with to_json(self) {
 pub fn Address::from_json(value : @json.JsonValue) -> Address? {
   let value = value.as_object()?
   let street = value.get("street")?.as_string()
-  match (
-    street,
-  ) {
-      Some(street)
-    => Some({
-      street,
-    })
+  match street {
+    Some(street) => Some({ street, })
     _ => None
   }
 }
 
 /// `Address::parse` parses a JSON string and returns the value.
 pub fn Address::parse(s : String) -> Address!String {
-  match @json.parse(s) {
+  match @json.parse(s)!! {
     Ok(jv) =>
       match Address::from_json(jv) {
         Some(value) => value
@@ -51,9 +42,7 @@ pub fn Address::parse(s : String) -> Address!String {
 
 /// `get_schema` returns an `XTPSchema` for the `Address`.
 pub fn get_schema(self : Address) -> XTPSchema {
-  {
-    "street": "string",
-  }
+  { "street": "string" }
 }
 
 /// `User` represents a user object in our system..
@@ -67,16 +56,11 @@ pub struct User {
 
 /// `User::new` returns a new struct with default values.
 pub fn User::new() -> User {
-  {
-    age: None,
-    email: None,
-    address: None,
-  }
+  { age: None, email: None, address: None }
 }
 
 pub impl @jsonutil.ToJson for User with to_json(self) {
-  let fields : Array[(String, @jsonutil.ToJson)] = [
-  ]
+  let fields : Array[(String, @jsonutil.ToJson)] = []
   match self.age {
     Some(value) => fields.append([("age", value)])
     None => ()
@@ -107,27 +91,12 @@ pub fn User::from_json(value : @json.JsonValue) -> User? {
     Some(jv) => Address::from_json(jv)
     None => None
   }
-  match (
-    age,
-    email,
-    address,
-  ) {
-    (
-      age,
-      email,
-      address,
-    ) => Some({
-      age,
-      email,
-      address,
-    })
-    _ => None
-  }
+  Some({ age, email, address })
 }
 
 /// `User::parse` parses a JSON string and returns the value.
 pub fn User::parse(s : String) -> User!String {
-  match @json.parse(s) {
+  match @json.parse(s)!! {
     Ok(jv) =>
       match User::from_json(jv) {
         Some(value) => value
@@ -143,11 +112,7 @@ pub fn User::parse(s : String) -> User!String {
 
 /// `get_schema` returns an `XTPSchema` for the `User`.
 pub fn get_schema(self : User) -> XTPSchema {
-  {
-    "age": "?integer",
-    "email": "?string",
-    "address": "?Address",
-  }
+  { "age": "?integer", "email": "?string", "address": "?Address" }
 }
 
 /// `XTPSchema` describes the values and types of an XTP object

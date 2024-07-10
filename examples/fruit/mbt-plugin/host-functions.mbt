@@ -7,7 +7,7 @@ pub fn eat_a_fruit(input : Fruit) -> Bool!String {
   let mem = @host.Memory::allocate_json_value(json)
   let ptr = host_eat_a_fruit(mem.offset)
   let buf = @host.find_memory(ptr).to_string()
-  let out = @json.parse(buf)
+  let out = @json.parse(buf)!!
   match out {
     Ok(jv) =>
       match jv.as_bool() {

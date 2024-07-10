@@ -165,7 +165,7 @@ pub fn ComplexObject::from_json(value : @json.JsonValue) -> ComplexObject? {
 
 /// `ComplexObject::parse` parses a JSON string and returns the value.
 pub fn ComplexObject::parse(s : String) -> ComplexObject!String {
-  match @json.parse(s) {
+  match @json.parse(s)!! {
     Ok(jv) =>
       match ComplexObject::from_json(jv) {
         Some(value) => value
