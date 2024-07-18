@@ -257,7 +257,7 @@ pub fn {{ $name }}::from_json(value : @json.JsonValue) -> {{ $name }}? {
 
 ` + "/// `{{ $name }}::parse` parses a JSON string and returns the value." + `
 pub fn {{ $name }}::parse(s : String) -> {{ $name }}!String {
-  match @json.parse(s) {
+  match @json.parse(s)!! {
     Ok(jv) =>
       match {{ $name }}::from_json(jv) {
         Some(value) => value

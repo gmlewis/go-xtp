@@ -270,9 +270,6 @@ func uppercaseFirst(s string) string {
 
 const defaultMoonPkgJSONFile = `{
   "import": [
-    {
-      "path": "gmlewis/json",
-      "alias": "jsonutil"
-    }
+    "gmlewis/jsonutil"
   ]
 }`

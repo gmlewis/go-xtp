@@ -75,7 +75,7 @@ pub fn {{ $name | lowerSnakeCase }}({{ .Input | inputToMbtType }}) -> {{ .Output
   let mem = @host.Memory::allocate_json_value(json)
   let ptr = host_{{ $name | lowerSnakeCase }}(mem.offset)
   let buf = @host.find_memory(ptr).to_string()
-  let out = @json.parse(buf)
+  let out = @json.parse(buf)!!
   match out {
     Ok(jv) =>
       match jv.{{ .Output | jsonOutputAsMbtType }}() {
@@ -107,11 +107,8 @@ pub fn {{ $name | lowerSnakeCase }}({{ .Input | inputToMbtType }}) -> {{ .Output
 var mbtPluginMoonPkgJSONTemplateStr = `{
   "is-main": true,
   "import": [
-    "gmlewis/moonbit-pdk/pdk/host",
-    {
-      "path": "gmlewis/json",
-      "alias": "jsonutil"
-    }
+    "gmlewis/jsonutil",
+    "gmlewis/moonbit-pdk/pdk/host"
   ],
   "link": {
     "wasm": {
@@ -128,10 +125,15 @@ var mbtPluginPluginFunctionsTemplateStr = `{{range $index, $export := .Plugin.Ex
 {{ end }}/// Exported: {{ $name }}
 pub fn exported_{{ $name | lowerSnakeCase }}() -> Int {
 {{ if . | inputIsVoidType }}  {{ $name | lowerSnakeCase }}(){{ end -}}
-{{ if . | inputIsPrimitiveType }}  let result = @json.parse(@host.input_string())
+{{ if . | inputIsPrimitiveType }}  let result = @json.parse(@host.input_string())!!
   let input = match result {
     Ok(String(s)) => s
-    _ => return 1 // failure
+    _ => {
+      @host.set_error(
+        "exported_primitive_type_func: unable to parse JSON input",
+      )
+      return 1 // failure
+    }
   }
   let output = {{ $name | lowerSnakeCase }}(input) |> @jsonutil.to_json()
   @host.output_json_value(output){{ end -}}

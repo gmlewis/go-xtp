@@ -1,8 +1,5 @@
 {
   "import": [
-    {
-      "path": "gmlewis/json",
-      "alias": "jsonutil"
-    }
+    "gmlewis/jsonutil"
   ]
 }

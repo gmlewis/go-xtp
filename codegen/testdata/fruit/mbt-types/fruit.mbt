@@ -151,14 +151,26 @@ pub fn ComplexObject::from_json(value : @json.JsonValue) -> ComplexObject? {
     Some(jv) => jv.as_string()
     None => None
   }
-  match (ghost, a_boolean, a_string, an_int, an_optional_date) {
+  match (
+    ghost,
+    a_boolean,
+    a_string,
+    an_int,
+    an_optional_date,
+  ) {
     (
       Some(ghost),
       Some(a_boolean),
       Some(a_string),
       Some(an_int),
       an_optional_date,
-    ) => Some({ ghost, a_boolean, a_string, an_int, an_optional_date })
+    ) => Some({
+      ghost,
+      a_boolean,
+      a_string,
+      an_int,
+      an_optional_date,
+    })
     _ => None
   }
 }
