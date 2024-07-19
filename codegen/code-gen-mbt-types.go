@@ -47,7 +47,7 @@ func (c *Client) genMbtCustomTypes() error {
 	c.CustTypesFilename = fmt.Sprintf("%v.%v", c.PkgName, c.Lang)
 	c.CustTypes = src
 	testSrc := strings.Join(testBlocks, "\n")
-	c.CustTypesTestsFilename = fmt.Sprintf("%v_test.%v", c.PkgName, c.Lang)
+	c.CustTypesTestsFilename = fmt.Sprintf("%v_bbtest.%v", c.PkgName, c.Lang)
 	c.CustTypesTests = testSrc
 
 	return nil

@@ -23,7 +23,6 @@ func TestGenMbtPluginPDK(t *testing.T) {
 			files: []string{
 				"build.sh",
 				"fruit.mbt",
-				"fruit_test.mbt",
 				"host-functions.mbt",
 				"main.mbt",
 				"moon.pkg.json",
@@ -42,7 +41,6 @@ func TestGenMbtPluginPDK(t *testing.T) {
 			files: []string{
 				"build.sh",
 				"user.mbt",
-				"user_test.mbt",
 				"main.mbt",
 				"moon.pkg.json",
 				"plugin-functions.mbt",

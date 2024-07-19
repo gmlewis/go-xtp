@@ -38,13 +38,12 @@ func (c *Client) genMbtPluginPDK() (GeneratedFiles, error) {
 	}
 
 	m := GeneratedFiles{
-		"build.sh":               buildShScript,
-		c.CustTypesFilename:      c.CustTypes,
-		c.CustTypesTestsFilename: c.CustTypesTests,
-		"main.mbt":               mainStr.String(),
-		"moon.pkg.json":          moonPkgJSONStr.String(),
-		"plugin-functions.mbt":   pluginFunctionsStr.String(),
-		"xtp.toml":               xtpTomlStr.String(),
+		"build.sh":             buildShScript,
+		c.CustTypesFilename:    c.CustTypes,
+		"main.mbt":             mainStr.String(),
+		"moon.pkg.json":        moonPkgJSONStr.String(),
+		"plugin-functions.mbt": pluginFunctionsStr.String(),
+		"xtp.toml":             xtpTomlStr.String(),
 	}
 
 	if strings.TrimSpace(hostFunctionsStr.String()) != "" {

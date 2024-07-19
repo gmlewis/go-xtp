@@ -23,7 +23,7 @@ func TestGenMbtCustomTypes(t *testing.T) {
 			yamlStr: fruitYaml,
 			files: []string{
 				"fruit.mbt",
-				"fruit_test.mbt",
+				"fruit_bbtest.mbt",
 				"moon.pkg.json",
 			},
 			embedSubdir: "testdata/fruit/mbt-types",
@@ -37,7 +37,7 @@ func TestGenMbtCustomTypes(t *testing.T) {
 			yamlStr: userYaml,
 			files: []string{
 				"user.mbt",
-				"user_test.mbt",
+				"user_bbtest.mbt",
 				"moon.pkg.json",
 			},
 			embedSubdir: "testdata/user/mbt-types",
