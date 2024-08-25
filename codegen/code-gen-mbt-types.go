@@ -135,7 +135,7 @@ pub fn {{ $name }}::parse(s : String) -> {{ $name }}!String {
 {{range .Enum}}    "\"{{ . }}\"" => {{ . | uppercaseFirst }}
 {{ end -}}
 {{ "    _ => {" }}
-      raise "not a {{ $name }}: \(s)"
+      raise "not a {{ $name }}: \{s}"
     }
   }
 }
@@ -262,11 +262,11 @@ pub fn {{ $name }}::parse(s : String) -> {{ $name }}!String {
       match {{ $name }}::from_json(jv) {
         Some(value) => value
         None => {
-          raise "unable to parse {{ $name }} \(s)"
+          raise "unable to parse {{ $name }} \{s}"
         }
       }
     Err(e) => {
-      raise "unable to parse {{ $name }} \(s): \(e)"
+      raise "unable to parse {{ $name }} \{s}: \{e}"
     }
   }
 }

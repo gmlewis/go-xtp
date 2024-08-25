@@ -6,8 +6,8 @@ pub enum Fruit {
   Strawberry
 } derive(Show, Eq)
 
-/// `Fruit.to_string` implements the Show trait.
-pub fn to_string(self : Fruit) -> String {
+/// `Fruit.output` implements the Show trait.
+pub fn output(self : Fruit) -> String {
   match self {
     Apple => "apple"
     Orange => "orange"
@@ -16,36 +16,26 @@ pub fn to_string(self : Fruit) -> String {
   }
 }
 
-/// `Fruit::from_json` transforms a `Json` to a value.
-pub fn Fruit::from_json(value : Json) -> Fruit? {
-  match value.as_string() {
-    Some("apple") => Some(Apple)
-    Some("orange") => Some(Orange)
-    Some("banana") => Some(Banana)
-    Some("strawberry") => Some(Strawberry)
-    _ => None
-  }
-}
-
-/// `Fruit::parse` parses a JSON string and returns the value.
-pub fn Fruit::parse(s : String) -> Fruit!String {
-  match s {
-    "\"apple\"" => Apple
-    "\"orange\"" => Orange
-    "\"banana\"" => Banana
-    "\"strawberry\"" => Strawberry
-    _ => {
-      raise "not a Fruit: \(s)"
-    }
-  }
-}
-
-pub impl @jsonutil.ToJson for Fruit with to_json(self) {
+pub fn to_json(self : Fruit) -> Json {
   match self {
-    Apple => @jsonutil.to_json("apple")
-    Orange => @jsonutil.to_json("orange")
-    Banana => @jsonutil.to_json("banana")
-    Strawberry => @jsonutil.to_json("strawberry")
+    Apple => "apple".to_json()
+    Orange => "orange".to_json()
+    Banana => "banana".to_json()
+    Strawberry => "strawberry".to_json()
+  }
+}
+
+/// `Fruit::from_json` transforms a `Json` to a value.
+pub impl @json.FromJson for Fruit with from_json(json, path) {
+  match json {
+    String("apple") => Apple
+    String("orange") => Orange
+    String("banana") => Banana
+    String("strawberry") => Strawberry
+    s =>
+      raise @json.JsonDecodeError(
+        (path, "Fruit::from_json expected a Fruit, got \{s}"),
+      )
   }
 }
 
@@ -57,8 +47,8 @@ pub enum GhostGang {
   Clyde
 } derive(Show, Eq)
 
-/// `GhostGang.to_string` implements the Show trait.
-pub fn to_string(self : GhostGang) -> String {
+/// `GhostGang.output` implements the Show trait.
+pub fn output(self : GhostGang) -> String {
   match self {
     Blinky => "blinky"
     Pinky => "pinky"
@@ -67,36 +57,26 @@ pub fn to_string(self : GhostGang) -> String {
   }
 }
 
-/// `GhostGang::from_json` transforms a `Json` to a value.
-pub fn GhostGang::from_json(value : Json) -> GhostGang? {
-  match value.as_string() {
-    Some("blinky") => Some(Blinky)
-    Some("pinky") => Some(Pinky)
-    Some("inky") => Some(Inky)
-    Some("clyde") => Some(Clyde)
-    _ => None
-  }
-}
-
-/// `GhostGang::parse` parses a JSON string and returns the value.
-pub fn GhostGang::parse(s : String) -> GhostGang!String {
-  match s {
-    "\"blinky\"" => Blinky
-    "\"pinky\"" => Pinky
-    "\"inky\"" => Inky
-    "\"clyde\"" => Clyde
-    _ => {
-      raise "not a GhostGang: \(s)"
-    }
-  }
-}
-
-pub impl @jsonutil.ToJson for GhostGang with to_json(self) {
+pub fn to_json(self : GhostGang) -> Json {
   match self {
-    Blinky => @jsonutil.to_json("blinky")
-    Pinky => @jsonutil.to_json("pinky")
-    Inky => @jsonutil.to_json("inky")
-    Clyde => @jsonutil.to_json("clyde")
+    Blinky => "blinky".to_json()
+    Pinky => "pinky".to_json()
+    Inky => "inky".to_json()
+    Clyde => "clyde".to_json()
+  }
+}
+
+/// `GhostGang::from_json` transforms a `Json` to a value.
+pub impl @json.FromJson for GhostGang with from_json(json, path) {
+  match json {
+    String("blinky") => Blinky
+    String("pinky") => Pinky
+    String("inky") => Inky
+    String("clyde") => Clyde
+    s =>
+      raise @json.JsonDecodeError(
+        (path, "GhostGang::from_json expected a GhostGang, got \{s}"),
+      )
   }
 }
 
@@ -126,69 +106,69 @@ pub fn ComplexObject::new() -> ComplexObject {
   }
 }
 
-pub impl @jsonutil.ToJson for ComplexObject with to_json(self) {
-  let fields : Array[(String, @jsonutil.ToJson)] = [
-    ("ghost", self.ghost),
-    ("aBoolean", self.a_boolean),
-    ("aString", self.a_string),
-    ("anInt", self.an_int),
-  ]
+pub fn to_json(self : ComplexObject) -> Json {
+  let json : Map[String, Json] = {  }
+  json["ghost"] = self.ghost.to_json()
+  json["a_boolean"] = self.a_boolean.to_json()
+  json["a_string"] = self.a_string.to_json()
+  json["an_int"] = self.an_int.to_json()
   match self.an_optional_date {
-    Some(value) => fields.append([("anOptionalDate", value)])
-    None => ()
+    Some(an_optional_date) =>
+      json["an_optional_date"] = an_optional_date.to_json()
+    _ => ()
   }
-  @jsonutil.from_entries(fields)
+  json.to_json()
 }
 
 /// `ComplexObject::from_json` transforms a `Json` to a value.
-pub fn ComplexObject::from_json(value : Json) -> ComplexObject? {
-  let value = value.as_object()?
-  let ghost = value.get("ghost")? |> GhostGang::from_json()
-  let a_boolean = value.get("aBoolean")?.as_bool()
-  let a_string = value.get("aString")?.as_string()
-  let an_int = json_as_integer(value.get("anInt")?)
-  let an_optional_date = match value.get("anOptionalDate") {
-    Some(jv) => jv.as_string()
-    None => None
+pub impl @json.FromJson for ComplexObject with from_json(json, path) {
+  let json = match json.as_object() {
+    Some(json) => json
+    _ =>
+      raise @json.JsonDecodeError(
+        (path, "ComplexObject::from_json: expected object"),
+      )
   }
-  match (
-    ghost,
-    a_boolean,
-    a_string,
-    an_int,
-    an_optional_date,
-  ) {
-    (
-      Some(ghost),
-      Some(a_boolean),
-      Some(a_string),
-      Some(an_int),
-      an_optional_date,
-    ) => Some({
-      ghost,
-      a_boolean,
-      a_string,
-      an_int,
-      an_optional_date,
-    })
-    _ => None
+  let ghost : GhostGang = match json.get("ghost") {
+    Some(ghost) => @json.from_json!(ghost)
+    _ =>
+      raise @json.JsonDecodeError(
+        (path, "ComplextObject::from_json:ghost: expected GhostGang"),
+      )
   }
-}
-
-/// `ComplexObject::parse` parses a JSON string and returns the value.
-pub fn ComplexObject::parse(s : String) -> ComplexObject!String {
-  match @json.parse(s)!! {
-    Ok(jv) =>
-      match ComplexObject::from_json(jv) {
-        Some(value) => value
-        None => {
-          raise "unable to parse ComplexObject \(s)"
-        }
-      }
-    Err(e) => {
-      raise "unable to parse ComplexObject \(s): \(e)"
-    }
+  let a_boolean : Bool = match json.get("a_boolean") {
+    Some(True) => true
+    Some(False) => false
+    _ =>
+      raise @json.JsonDecodeError(
+        (path, "ComplextObject::from_json:a_boolean expected Bool"),
+      )
   }
+  let a_string : String = match json.get("a_string") {
+    Some(String(a_string)) => a_string
+    _ =>
+      raise @json.JsonDecodeError(
+        (path, "ComplextObject::from_json:a_string: expected String"),
+      )
+  }
+  let an_int : Int = match json.get("an_int") {
+    Some(Number(an_int)) => an_int.to_int()
+    _ =>
+      raise @json.JsonDecodeError(
+        (path, "ComplextObject::from_json:an_int expected Int"),
+      )
+  }
+  let an_optional_date : String? = match json.get("an_optional_date") {
+    Some(String(an_optional_date)) => Some(an_optional_date)
+    Some(Null) | None => None
+    _ =>
+      raise @json.JsonDecodeError(
+        (
+          path, "ComplextObject::from_json:an_optional_date expected String or Null",
+        ),
+      )
+  }
+  { ghost, a_boolean, a_string, an_int, an_optional_date }
 }
 
 /// `get_schema` returns an `XTPSchema` for the `ComplexObject`.
@@ -205,11 +185,3 @@ pub fn get_schema(self : ComplexObject) -> XTPSchema {
 /// `XTPSchema` describes the values and types of an XTP object
 /// in a language-agnostic format.
 type XTPSchema Map[String, String]
-
-// https://github.com/moonbitlang/core/issues/651
-fn json_as_integer(value : Json) -> Int? {
-  match value.as_number() {
-    Some(n) => Some(n.to_int())
-    None => None
-  }
-}

@@ -40,11 +40,11 @@ pub fn Address::parse(s : String) -> Address!String {
       match Address::from_json(jv) {
         Some(value) => value
         None => {
-          raise "unable to parse Address \(s)"
+          raise "unable to parse Address \{s}"
         }
       }
     Err(e) => {
-      raise "unable to parse Address \(s): \(e)"
+      raise "unable to parse Address \{s}: \{e}"
     }
   }
 }
@@ -132,11 +132,11 @@ pub fn User::parse(s : String) -> User!String {
       match User::from_json(jv) {
         Some(value) => value
         None => {
-          raise "unable to parse User \(s)"
+          raise "unable to parse User \{s}"
         }
       }
     Err(e) => {
-      raise "unable to parse User \(s): \(e)"
+      raise "unable to parse User \{s}: \{e}"
     }
   }
 }

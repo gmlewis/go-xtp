@@ -80,11 +80,11 @@ pub fn {{ $name | lowerSnakeCase }}({{ .Input | inputToMbtType }}) -> {{ .Output
       match jv.{{ .Output | jsonOutputAsMbtType }}() {
         Some(v) => v
         None => {
-          raise "unable to parse \(buf)"
+          raise "unable to parse \{buf}"
         }
       }
     Err(e) => {
-      raise "unable to parse \(buf): \(e)"
+      raise "unable to parse \{buf}: \{e}"
     }
   }
 }{{ end }}

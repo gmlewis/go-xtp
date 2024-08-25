@@ -35,7 +35,7 @@ pub fn Fruit::parse(s : String) -> Fruit!String {
     "\"banana\"" => Banana
     "\"strawberry\"" => Strawberry
     _ => {
-      raise "not a Fruit: \(s)"
+      raise "not a Fruit: \{s}"
     }
   }
 }
@@ -86,7 +86,7 @@ pub fn GhostGang::parse(s : String) -> GhostGang!String {
     "\"inky\"" => Inky
     "\"clyde\"" => Clyde
     _ => {
-      raise "not a GhostGang: \(s)"
+      raise "not a GhostGang: \{s}"
     }
   }
 }
@@ -170,11 +170,11 @@ pub fn ComplexObject::parse(s : String) -> ComplexObject!String {
       match ComplexObject::from_json(jv) {
         Some(value) => value
         None => {
-          raise "unable to parse ComplexObject \(s)"
+          raise "unable to parse ComplexObject \{s}"
         }
       }
     Err(e) => {
-      raise "unable to parse ComplexObject \(s): \(e)"
+      raise "unable to parse ComplexObject \{s}: \{e}"
     }
   }
 }

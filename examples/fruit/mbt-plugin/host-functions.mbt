@@ -13,11 +13,11 @@ pub fn eat_a_fruit(input : Fruit) -> Bool!String {
       match jv.as_bool() {
         Some(v) => v
         None => {
-          raise "unable to parse \(buf)"
+          raise "unable to parse \{buf}"
         }
       }
     Err(e) => {
-      raise "unable to parse \(buf): \(e)"
+      raise "unable to parse \{buf}: \{e}"
     }
   }
 }
