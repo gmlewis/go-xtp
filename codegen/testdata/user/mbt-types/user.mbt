@@ -2,7 +2,7 @@
 pub struct Address {
   /// Street address
   street : String
-} derive(Debug, Eq)
+} derive(Show, Eq)
 
 /// `Address::new` returns a new struct with default values.
 pub fn Address::new() -> Address {
@@ -18,8 +18,8 @@ pub impl @jsonutil.ToJson for Address with to_json(self) {
   @jsonutil.from_entries(fields)
 }
 
-/// `Address::from_json` transforms a `@json.JsonValue` to a value.
-pub fn Address::from_json(value : @json.JsonValue) -> Address? {
+/// `Address::from_json` transforms a `Json` to a value.
+pub fn Address::from_json(value : Json) -> Address? {
   let value = value.as_object()?
   let street = value.get("street")?.as_string()
   match (
@@ -63,7 +63,7 @@ pub struct User {
   /// The user's email, of course
   email : String?
   address : Address?
-} derive(Debug, Eq)
+} derive(Show, Eq)
 
 /// `User::new` returns a new struct with default values.
 pub fn User::new() -> User {
@@ -92,8 +92,8 @@ pub impl @jsonutil.ToJson for User with to_json(self) {
   @jsonutil.from_entries(fields)
 }
 
-/// `User::from_json` transforms a `@json.JsonValue` to a value.
-pub fn User::from_json(value : @json.JsonValue) -> User? {
+/// `User::from_json` transforms a `Json` to a value.
+pub fn User::from_json(value : Json) -> User? {
   let value = value.as_object()?
   let age = match value.get("age") {
     Some(jv) => json_as_integer(jv)
@@ -155,7 +155,7 @@ pub fn get_schema(self : User) -> XTPSchema {
 type XTPSchema Map[String, String]
 
 // https://github.com/moonbitlang/core/issues/651
-fn json_as_integer(value : @json.JsonValue) -> Int? {
+fn json_as_integer(value : Json) -> Int? {
   match value.as_number() {
     Some(n) => Some(n.to_int())
     None => None

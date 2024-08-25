@@ -4,7 +4,7 @@ pub enum Fruit {
   Orange
   Banana
   Strawberry
-} derive(Debug, Eq)
+} derive(Show, Eq)
 
 /// `Fruit.to_string` implements the Show trait.
 pub fn to_string(self : Fruit) -> String {
@@ -16,8 +16,8 @@ pub fn to_string(self : Fruit) -> String {
   }
 }
 
-/// `Fruit::from_json` transforms a `@json.JsonValue` to a value.
-pub fn Fruit::from_json(value : @json.JsonValue) -> Fruit? {
+/// `Fruit::from_json` transforms a `Json` to a value.
+pub fn Fruit::from_json(value : Json) -> Fruit? {
   match value.as_string() {
     Some("apple") => Some(Apple)
     Some("orange") => Some(Orange)
@@ -55,7 +55,7 @@ pub enum GhostGang {
   Pinky
   Inky
   Clyde
-} derive(Debug, Eq)
+} derive(Show, Eq)
 
 /// `GhostGang.to_string` implements the Show trait.
 pub fn to_string(self : GhostGang) -> String {
@@ -67,8 +67,8 @@ pub fn to_string(self : GhostGang) -> String {
   }
 }
 
-/// `GhostGang::from_json` transforms a `@json.JsonValue` to a value.
-pub fn GhostGang::from_json(value : @json.JsonValue) -> GhostGang? {
+/// `GhostGang::from_json` transforms a `Json` to a value.
+pub fn GhostGang::from_json(value : Json) -> GhostGang? {
   match value.as_string() {
     Some("blinky") => Some(Blinky)
     Some("pinky") => Some(Pinky)
@@ -113,7 +113,7 @@ pub struct ComplexObject {
   /// A datetime object, we will automatically serialize and deserialize
   /// this for you.
   an_optional_date : String?
-} derive(Debug, Eq)
+} derive(Show, Eq)
 
 /// `ComplexObject::new` returns a new struct with default values.
 pub fn ComplexObject::new() -> ComplexObject {
@@ -140,8 +140,8 @@ pub impl @jsonutil.ToJson for ComplexObject with to_json(self) {
   @jsonutil.from_entries(fields)
 }
 
-/// `ComplexObject::from_json` transforms a `@json.JsonValue` to a value.
-pub fn ComplexObject::from_json(value : @json.JsonValue) -> ComplexObject? {
+/// `ComplexObject::from_json` transforms a `Json` to a value.
+pub fn ComplexObject::from_json(value : Json) -> ComplexObject? {
   let value = value.as_object()?
   let ghost = value.get("ghost")? |> GhostGang::from_json()
   let a_boolean = value.get("aBoolean")?.as_bool()
@@ -195,7 +195,7 @@ pub fn get_schema(self : ComplexObject) -> XTPSchema {
 type XTPSchema Map[String, String]
 
 // https://github.com/moonbitlang/core/issues/651
-fn json_as_integer(value : @json.JsonValue) -> Int? {
+fn json_as_integer(value : Json) -> Int? {
   match value.as_number() {
     Some(n) => Some(n.to_int())
     None => None

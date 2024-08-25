@@ -10,10 +10,7 @@ require (
 )
 
 require (
-	github.com/extism/go-sdk v1.3.0 // indirect
-	github.com/gobwas/glob v0.2.3 // indirect
 	github.com/modern-go/concurrent v0.0.0-20180228061459-e0a39a4cb421 // indirect
 	github.com/modern-go/reflect2 v1.0.2 // indirect
 	github.com/stretchr/testify v1.8.4 // indirect
-	github.com/tetratelabs/wazero v1.7.3 // indirect
 )

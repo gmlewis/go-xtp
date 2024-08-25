@@ -2,8 +2,7 @@
   "name": "gmlewis/go-xtp",
   "version": "0.1.0",
   "deps": {
-    "gmlewis/jsonutil": "0.17.0",
-    "gmlewis/moonbit-pdk": "0.27.0"
+    "gmlewis/moonbit-pdk": "0.39.0"
   },
   "readme": "README.md",
   "repository": "https://github.com/gmlewis/go-xtp",

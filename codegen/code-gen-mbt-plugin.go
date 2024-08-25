@@ -106,7 +106,6 @@ pub fn {{ $name | lowerSnakeCase }}({{ .Input | inputToMbtType }}) -> {{ .Output
 var mbtPluginMoonPkgJSONTemplateStr = `{
   "is-main": true,
   "import": [
-    "gmlewis/jsonutil",
     "gmlewis/moonbit-pdk/pdk/host"
   ],
   "link": {

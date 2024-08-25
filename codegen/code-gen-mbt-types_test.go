@@ -2,7 +2,6 @@ package codegen
 
 import (
 	"embed"
-	_ "embed"
 	"testing"
 )
 

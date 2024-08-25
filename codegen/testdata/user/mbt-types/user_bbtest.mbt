@@ -1,37 +1,37 @@
 test "Address" {
   let default_object = Address::new()
   let got = @jsonutil.to_json(default_object)
-    |> @jsonutil.stringify(spaces=0, newline=false)
+    |> @json.stringify()
   let want =
     #|{"street":""}
-  @test.eq(got, want)!
+  assert_eq!(got, want)!
   //
   let got_parse = Address::parse(want)!
-  @test.eq(got_parse, default_object)!
+  assert_eq!(got_parse, default_object)!
   //
   let required_fields : Address = {
     street: "street",
   }
   let got = @jsonutil.to_json(required_fields)
-    |> @jsonutil.stringify(spaces=0, newline=false)
+    |> @json.stringify()
   let want =
     #|{"street":"street"}
-  @test.eq(got, want)!
+  assert_eq!(got, want)!
   //
   let got_parse = Address::parse(want)!
-  @test.eq(got_parse, required_fields)!
+  assert_eq!(got_parse, required_fields)!
 }
 
 test "User" {
   let default_object = User::new()
   let got = @jsonutil.to_json(default_object)
-    |> @jsonutil.stringify(spaces=0, newline=false)
+    |> @json.stringify()
   let want =
     #|{}
-  @test.eq(got, want)!
+  assert_eq!(got, want)!
   //
   let got_parse = User::parse(want)!
-  @test.eq(got_parse, default_object)!
+  assert_eq!(got_parse, default_object)!
   //
   let required_fields : User = {
     age: None,
@@ -39,13 +39,13 @@ test "User" {
     address: None,
   }
   let got = @jsonutil.to_json(required_fields)
-    |> @jsonutil.stringify(spaces=0, newline=false)
+    |> @json.stringify()
   let want =
     #|{}
-  @test.eq(got, want)!
+  assert_eq!(got, want)!
   //
   let got_parse = User::parse(want)!
-  @test.eq(got_parse, required_fields)!
+  assert_eq!(got_parse, required_fields)!
   //
   let optional_fields : User = {
     ..required_fields,
@@ -54,11 +54,11 @@ test "User" {
     address: Some(Address::new()),
   }
   let got = @jsonutil.to_json(optional_fields)
-    |> @jsonutil.stringify(spaces=0, newline=false)
+    |> @json.stringify()
   let want =
     #|{"age":0,"email":"email","address":{"street":""}}
-  @test.eq(got, want)!
+  assert_eq!(got, want)!
   //
   let got_parse = User::parse(want)!
-  @test.eq(got_parse, optional_fields)!
+  assert_eq!(got_parse, optional_fields)!
 }

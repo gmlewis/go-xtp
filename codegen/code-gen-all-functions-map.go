@@ -10,7 +10,7 @@ import (
 )
 
 var (
-	unreachable = errors.New("unreachable")
+	errUnreachable = errors.New("unreachable")
 )
 
 func (c *Client) GenCustomTypes() (GeneratedFiles, error) {
@@ -38,7 +38,7 @@ func (c *Client) genCustomTypes() error {
 	case "mbt":
 		return c.genMbtCustomTypes()
 	}
-	return unreachable
+	return errUnreachable
 }
 
 // GenHostSDK generates Host SDK code to call the extension plugin.
@@ -49,7 +49,7 @@ func (c *Client) GenHostSDK() (GeneratedFiles, error) {
 	case "mbt":
 		return c.genMbtHostSDK()
 	}
-	return GeneratedFiles{}, unreachable
+	return GeneratedFiles{}, errUnreachable
 }
 
 // GenPluginPDK generates Plugin PDK code to process plugin calls.
@@ -60,7 +60,7 @@ func (c *Client) GenPluginPDK() (GeneratedFiles, error) {
 	case "mbt":
 		return c.genMbtPluginPDK()
 	}
-	return GeneratedFiles{}, unreachable
+	return GeneratedFiles{}, errUnreachable
 }
 
 var funcMap = map[string]any{
@@ -191,7 +191,6 @@ func inputIsPrimitiveType(export *schema.Export) bool {
 		log.Printf("WARNING: unknown export input type %q", export.Input.Type)
 		return false
 	}
-	return false
 }
 
 func inputIsReferenceType(export *schema.Export) bool {
@@ -268,8 +267,4 @@ func uppercaseFirst(s string) string {
 	return strings.ToUpper(s[0:1]) + s[1:]
 }
 
-const defaultMoonPkgJSONFile = `{
-  "import": [
-    "gmlewis/jsonutil"
-  ]
-}`
+const defaultMoonPkgJSONFile = `{}`

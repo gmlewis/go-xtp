@@ -110,7 +110,7 @@ var enumMbtTemplateStr = "{{ $name := .Name }}/// `{{ $name }}` represents {{ .D
 pub enum {{ $name }} {
 {{range .Enum}}  {{ . | uppercaseFirst }}
 {{ end -}}
-} derive(Debug, Eq)
+} derive(Show, Eq)
 
 ` + "/// `{{ $name }}.to_string` implements the Show trait." + `
 pub fn to_string(self : {{ $name }}) -> String {
@@ -120,8 +120,8 @@ pub fn to_string(self : {{ $name }}) -> String {
   }
 }
 
-` + "/// `{{ $name }}::from_json` transforms a `@json.JsonValue` to a value." + `
-pub fn {{ $name }}::from_json(value : @json.JsonValue) -> {{ $name }}? {
+` + "/// `{{ $name }}::from_json` transforms a `Json` to a value." + `
+pub fn {{ $name }}::from_json(value : Json) -> {{ $name }}? {
   match value.as_string() {
     {{range .Enum}}Some("{{ . }}") => Some({{ . | uppercaseFirst }})
     {{ end -}}
@@ -152,12 +152,12 @@ var enumTestMbtTemplateStr = `{{ $name := .Name }}test "{{ $name }}" {
   let first = {{ $name }}::{{ index .Enum 0 | uppercaseFirst }}
   let got = first.to_string()
   let want = "{{ index .Enum 0 }}"
-  @test.eq(got, want)!
+  assert_eq!(got, want)!
   //
   let want =
     #|"{{ index .Enum 0 }}"
   let got_parse = {{ $name }}::parse(want)!
-  @test.eq(got_parse, first)!
+  assert_eq!(got_parse, first)!
   //
   let mut threw_error = false
   let _ = try {
@@ -172,13 +172,13 @@ var enumTestMbtTemplateStr = `{{ $name := .Name }}test "{{ $name }}" {
   //
   let json_value = @jsonutil.to_json(first)
   let got = json_value.stringify()
-  @test.eq(got, want)!
+  assert_eq!(got, want)!
   //
   let got_parse = {{ $name }}::from_json(json_value).unwrap()
-  @test.eq(got_parse, first)!
+  assert_eq!(got_parse, first)!
   //
-  let want_none = {{ $name }}::from_json(@json.JsonValue::String(""))
-  @test.eq(want_none, None)!
+  let want_none = {{ $name }}::from_json(Json::String(""))
+  assert_eq!(want_none, None)!
 }
 `
 
@@ -211,7 +211,7 @@ var structMbtTemplateStr = "{{ $name := .Name }}{{ $top := . }}/// `{{ $name }}`
 pub struct {{ $name }} {
 {{range .Properties}}  {{ .Description | optionalMbtMultilineComment }}{{ .Name | lowerSnakeCase }} : {{ getMbtType . }}
 {{ end -}}
-} derive(Debug, Eq)
+} derive(Show, Eq)
 
 ` + "/// `{{ $name }}::new` returns a new struct with default values." + `
 pub fn {{ $name }}::new() -> {{ $name }} {
@@ -234,8 +234,8 @@ pub impl @jsonutil.ToJson for {{ $name }} with to_json(self) {
 {{ "  @jsonutil.from_entries(fields)" }}
 }
 
-` + "/// `{{ $name }}::from_json` transforms a `@json.JsonValue` to a value." + `
-pub fn {{ $name }}::from_json(value : @json.JsonValue) -> {{ $name }}? {
+` + "/// `{{ $name }}::from_json` transforms a `Json` to a value." + `
+pub fn {{ $name }}::from_json(value : Json) -> {{ $name }}? {
   let value = value.as_object()?
 {{range .Properties}}  let {{ .Name | lowerSnakeCase }} = {{ mbtConvertFromJSONValue . }}
 {{ end -}}
@@ -283,26 +283,26 @@ pub fn get_schema(self : {{ $name }}) -> XTPSchema {
 var structTestMbtTemplateStr = `{{ $name := .Name }}{{ $top := . }}test "{{ $name }}" {
   let default_object = {{ $name }}::new()
   let got = @jsonutil.to_json(default_object)
-    |> @jsonutil.stringify(spaces=0, newline=false)
+    |> @json.stringify()
   let want =
 {{ "    #|{" }}{{range $index, $prop := .Properties}}{{ if .IsRequired }}"{{ .Name }}":{{ defaultMbtJSONValue . $top }}{{ showJSONCommaForRequired $index $top }}{{ end }}{{ end -}}{{ "}" }}
-  @test.eq(got, want)!
+  assert_eq!(got, want)!
   //
   let got_parse = {{ $name }}::parse(want)!
-  @test.eq(got_parse, default_object)!
+  assert_eq!(got_parse, default_object)!
   //
   let required_fields : {{ $name }} = {
 {{range .Properties}}    {{ .Name | lowerSnakeCase }}: {{ requiredMbtValue . }},
 {{ end -}}
 {{ "  }" }}
   let got = @jsonutil.to_json(required_fields)
-    |> @jsonutil.stringify(spaces=0, newline=false)
+    |> @json.stringify()
   let want =
 {{ "    #|{" }}{{range $index, $prop := .Properties}}{{ if .IsRequired }}"{{ .Name }}":{{ requiredMbtJSONValue . $top }}{{ showJSONCommaForRequired $index $top }}{{ end }}{{ end -}}{{ "}" }}
-  @test.eq(got, want)!
+  assert_eq!(got, want)!
   //
   let got_parse = {{ $name }}::parse(want)!
-  @test.eq(got_parse, required_fields)!
+  assert_eq!(got_parse, required_fields)!
 {{ if hasOptionalFields .}}  //
   let optional_fields : {{ $name }} = {
     ..required_fields,
@@ -310,19 +310,19 @@ var structTestMbtTemplateStr = `{{ $name := .Name }}{{ $top := . }}test "{{ $nam
 {{ end }}{{ end -}}
 {{ "  }" }}
   let got = @jsonutil.to_json(optional_fields)
-    |> @jsonutil.stringify(spaces=0, newline=false)
+    |> @json.stringify()
   let want =
 {{ "    #|{" }}{{ $propLen := .Properties | len }}{{range $index, $prop := .Properties}}"{{ .Name }}":{{ requiredMbtJSONValue . $top }}{{ showJSONCommaForOptional $index $propLen }}{{ end -}}{{ "}" }}
-  @test.eq(got, want)!
+  assert_eq!(got, want)!
   //
   let got_parse = {{ $name }}::parse(want)!
-  @test.eq(got_parse, optional_fields)!
+  assert_eq!(got_parse, optional_fields)!
 {{ end -}}
 }
 `
 
 var mbtJSONWorkaround = `// https://github.com/moonbitlang/core/issues/651
-fn json_as_integer(value : @json.JsonValue) -> Int? {
+fn json_as_integer(value : Json) -> Int? {
   match value.as_number() {
     Some(n) => Some(n.to_int())
     None => None

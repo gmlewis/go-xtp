@@ -261,11 +261,11 @@ func mbtFromJSONMatchKey(prop *schema.Property) string {
 
 	switch prop.Type {
 	case "integer", "number":
-		return "@json.JsonValue::Number(n)"
+		return "Json::Number(n)"
 	case "string":
-		return "@json.JsonValue::String(s)"
+		return "Json::String(s)"
 	case "boolean":
-		return "@json.JsonValue::Boolean(v)"
+		return "Json::Boolean(v)"
 	case "object":
 		return "{}" // TODO - what to do with this?
 	case "array":
