@@ -1,0 +1,39 @@
+{{ $name := .Name }}{{ $top := . }}test "{{ $name }}" {
+  let default_object = {{ $name }}::new()
+  let got = @jsonutil.to_json(default_object)
+    |> @json.stringify()
+  let want =
+{{ "    #|{" }}{{range $index, $prop := .Properties}}{{ if .IsRequired }}"{{ .Name }}":{{ defaultMbtJSONValue . $top }}{{ showJSONCommaForRequired $index $top }}{{ end }}{{ end -}}{{ "}" }}
+  assert_eq!(got, want)!
+  //
+  let got_parse = {{ $name }}::parse(want)!
+  assert_eq!(got_parse, default_object)!
+  //
+  let required_fields : {{ $name }} = {
+{{range .Properties}}    {{ .Name | lowerSnakeCase }}: {{ requiredMbtValue . }},
+{{ end -}}
+{{ "  }" }}
+  let got = @jsonutil.to_json(required_fields)
+    |> @json.stringify()
+  let want =
+{{ "    #|{" }}{{range $index, $prop := .Properties}}{{ if .IsRequired }}"{{ .Name }}":{{ requiredMbtJSONValue . $top }}{{ showJSONCommaForRequired $index $top }}{{ end }}{{ end -}}{{ "}" }}
+  assert_eq!(got, want)!
+  //
+  let got_parse = {{ $name }}::parse(want)!
+  assert_eq!(got_parse, required_fields)!
+{{ if hasOptionalFields .}}  //
+  let optional_fields : {{ $name }} = {
+    ..required_fields,
+{{range $index, $prop := .Properties}}{{ if .IsRequired | not}}    {{ .Name | lowerSnakeCase }}: {{ optionalMbtValue . }},
+{{ end }}{{ end -}}
+{{ "  }" }}
+  let got = @jsonutil.to_json(optional_fields)
+    |> @json.stringify()
+  let want =
+{{ "    #|{" }}{{ $propLen := .Properties | len }}{{range $index, $prop := .Properties}}"{{ .Name }}":{{ requiredMbtJSONValue . $top }}{{ showJSONCommaForOptional $index $propLen }}{{ end -}}{{ "}" }}
+  assert_eq!(got, want)!
+  //
+  let got_parse = {{ $name }}::parse(want)!
+  assert_eq!(got_parse, optional_fields)!
+{{ end -}}
+}

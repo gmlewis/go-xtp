@@ -4,15 +4,22 @@ pub enum Fruit {
   Orange
   Banana
   Strawberry
-} derive(Show, Eq)
+} derive(Eq)
+
+// Why is `Fruit.to_string` necessary when the `Show` trait is implemented below?
+pub fn to_string(self : Fruit) -> String {
+  let buf = Buffer::new()
+  Show::output(self, buf)
+  buf.to_string()
+}
 
 /// `Fruit.output` implements the Show trait.
-pub fn output(self : Fruit) -> String {
+pub impl Show for Fruit with output(self, logger) {
   match self {
-    Apple => "apple"
-    Orange => "orange"
-    Banana => "banana"
-    Strawberry => "strawberry"
+    Apple => logger.write_string("apple")
+    Orange => logger.write_string("orange")
+    Banana => logger.write_string("banana")
+    Strawberry => logger.write_string("strawberry")
   }
 }
 
@@ -45,15 +52,22 @@ pub enum GhostGang {
   Pinky
   Inky
   Clyde
-} derive(Show, Eq)
+} derive(Eq)
+
+// Why is `GhostGang.to_string` necessary when the `Show` trait is implemented below?
+pub fn to_string(self : GhostGang) -> String {
+  let buf = Buffer::new()
+  Show::output(self, buf)
+  buf.to_string()
+}
 
 /// `GhostGang.output` implements the Show trait.
-pub fn output(self : GhostGang) -> String {
+pub impl Show for GhostGang with output(self, logger) {
   match self {
-    Blinky => "blinky"
-    Pinky => "pinky"
-    Inky => "inky"
-    Clyde => "clyde"
+    Blinky => logger.write_string("blinky")
+    Pinky => logger.write_string("pinky")
+    Inky => logger.write_string("inky")
+    Clyde => logger.write_string("clyde")
   }
 }
 
@@ -109,12 +123,12 @@ pub fn ComplexObject::new() -> ComplexObject {
 pub fn to_json(self : ComplexObject) -> Json {
   let json : Map[String, Json] = {  }
   json["ghost"] = self.ghost.to_json()
-  json["a_boolean"] = self.a_boolean.to_json()
-  json["a_string"] = self.a_string.to_json()
-  json["an_int"] = self.an_int.to_json()
+  json["aBoolean"] = self.a_boolean.to_json()
+  json["aString"] = self.a_string.to_json()
+  json["anInt"] = self.an_int.to_json()
   match self.an_optional_date {
     Some(an_optional_date) =>
-      json["an_optional_date"] = an_optional_date.to_json()
+      json["anOptionalDate"] = an_optional_date.to_json()
     _ => ()
   }
   json.to_json()
@@ -124,9 +138,9 @@ pub fn to_json(self : ComplexObject) -> Json {
 pub impl @json.FromJson for ComplexObject with from_json(json, path) {
   let json = match json.as_object() {
     Some(json) => json
-    _ =>
+    e =>
       raise @json.JsonDecodeError(
-        (path, "ComplexObject::from_json: expected object"),
+        (path, "ComplexObject::from_json: expected object, got \{e}"),
       )
   }
   let ghost : GhostGang = match json.get("ghost") {
@@ -136,7 +150,7 @@ pub impl @json.FromJson for ComplexObject with from_json(json, path) {
         (path, "ComplextObject::from_json:ghost: expected GhostGang"),
       )
   }
-  let a_boolean : Bool = match json.get("a_boolean") {
+  let a_boolean : Bool = match json.get("aBoolean") {
     Some(True) => true
     Some(False) => false
     _ =>
@@ -144,21 +158,21 @@ pub impl @json.FromJson for ComplexObject with from_json(json, path) {
         (path, "ComplextObject::from_json:a_boolean expected Bool"),
       )
   }
-  let a_string : String = match json.get("a_string") {
+  let a_string : String = match json.get("aString") {
     Some(String(a_string)) => a_string
     _ =>
       raise @json.JsonDecodeError(
         (path, "ComplextObject::from_json:a_string: expected String"),
       )
   }
-  let an_int : Int = match json.get("an_int") {
+  let an_int : Int = match json.get("anInt") {
     Some(Number(an_int)) => an_int.to_int()
     _ =>
       raise @json.JsonDecodeError(
         (path, "ComplextObject::from_json:an_int expected Int"),
       )
   }
-  let an_optional_date : String? = match json.get("an_optional_date") {
+  let an_optional_date : String? = match json.get("anOptionalDate") {
     Some(String(an_optional_date)) => Some(an_optional_date)
     Some(Null) | None => None
     _ =>
@@ -171,8 +185,8 @@ pub impl @json.FromJson for ComplexObject with from_json(json, path) {
   { ghost, a_boolean, a_string, an_int, an_optional_date }
 }
 
-/// `get_schema` returns an `XTPSchema` for the `ComplexObject`.
-pub fn get_schema(self : ComplexObject) -> XTPSchema {
+/// `ComplexObject::get_schema` returns an `XTPSchema` for the `ComplexObject`.
+pub fn ComplexObject::get_schema() -> XTPSchema {
   {
     "ghost": "GhostGang",
     "aBoolean": "boolean",

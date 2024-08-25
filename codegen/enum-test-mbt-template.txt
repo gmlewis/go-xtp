@@ -1,0 +1,35 @@
+{{ $name := .Name }}test "{{ $name }}.to_string() works as expected" {
+  let first = {{ $name }}::{{ index .Enum 0 | uppercaseFirst }}
+  let got = first.to_string()
+  let want = "{{ index .Enum 0 }}"
+  assert_eq!(got, want)
+}
+
+test "{{ $name }}.to_json() works as expected" {
+  let first = {{ $name }}::{{ index .Enum 0 | uppercaseFirst }}
+  let json_value = first.to_json()
+  let got = json_value.stringify(escape_slash=false)
+  let want =
+    #|"{{ index .Enum 0 }}"
+  assert_eq!(got, want)
+  //
+  let got_parse : {{ $name }} = @json.from_json!(@json.parse!(want))
+  assert_eq!(got_parse, first)
+}
+
+test "{{ $name }}::from_json() works as expected" {
+  let got_parse : {{ $name }} = @json.from_json!("{{ index .Enum 0 }}".to_json())
+  let want = {{ $name }}::{{ index .Enum 0 | uppercaseFirst }}
+  assert_eq!(got_parse, want)
+  //
+  let mut threw_error = false
+  let _ = try {
+    @json.from_json!("")
+  } catch {
+    _ => {
+      threw_error = true
+      {{ $name }}::{{ index .Enum 0 | uppercaseFirst }}
+    }
+  }
+  assert_true!(threw_error)
+}

@@ -5,6 +5,18 @@ test "Fruit.to_string() works as expected" {
   assert_eq!(got, want)
 }
 
+test "Fruit.to_json() works as expected" {
+  let first = Fruit::Apple
+  let json_value = first.to_json()
+  let got = json_value.stringify(escape_slash=false)
+  let want =
+    #|"apple"
+  assert_eq!(got, want)
+  //
+  let got_parse : Fruit = @json.from_json!(@json.parse!(want))
+  assert_eq!(got_parse, first)
+}
+
 test "Fruit::from_json() works as expected" {
   let got_parse : Fruit = @json.from_json!("apple".to_json())
   let want = Fruit::Apple
@@ -22,23 +34,23 @@ test "Fruit::from_json() works as expected" {
   assert_true!(threw_error)
 }
 
-test "Fruit::to_json() works as expected" {
-  let first = Fruit::Apple
-  let json_value = first.to_json()
-  let got = json_value.stringify(escape_slash=false)
-  let want =
-    #|"apple"
-  assert_eq!(got, want)
-  //
-  let got_parse : Fruit = @json.from_json!(@json.parse!(want))
-  assert_eq!(got_parse, first)
-}
-
 test "GhostGang.to_string() works as expected" {
   let first = GhostGang::Blinky
   let got = first.to_string()
   let want = "blinky"
   assert_eq!(got, want)
+}
+
+test "GhostGang.to_json() works as expected" {
+  let first = GhostGang::Blinky
+  let json_value = first.to_json()
+  let got = json_value.stringify(escape_slash=false)
+  let want =
+    #|"blinky"
+  assert_eq!(got, want)
+  //
+  let got_parse : GhostGang = @json.from_json!(@json.parse!(want))
+  assert_eq!(got_parse, first)
 }
 
 test "GhostGang::from_json() works as expected" {
@@ -56,18 +68,6 @@ test "GhostGang::from_json() works as expected" {
     }
   }
   assert_true!(threw_error)
-}
-
-test "GhostGang::to_json() works as expected" {
-  let first = GhostGang::Blinky
-  let json_value = first.to_json()
-  let got = json_value.stringify(escape_slash=false)
-  let want =
-    #|"blinky"
-  assert_eq!(got, want)
-  //
-  let got_parse : GhostGang = @json.from_json!(@json.parse!(want))
-  assert_eq!(got_parse, first)
 }
 
 test "ComplexObject.to_json and .from_json work as expected on default object" {
