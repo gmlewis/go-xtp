@@ -46,6 +46,8 @@ pub impl @json.FromJson for {{ $name }} with from_json(json, path) {
 {{- else if mbtTypeIs . "Int64"}}    Some(Number({{ .Name | lowerSnakeCase }})) => {{ .Name | lowerSnakeCase }}.to_int64()
 {{- else if mbtTypeIs . "Int64?"}}    Some(Number({{ .Name | lowerSnakeCase }})) => Some({{ .Name | lowerSnakeCase }}.to_int64())
     Some(Null) | None => None
+{{- else if mbtTypeIsOptional .}}    Some(Object({{ .Name | lowerSnakeCase }})) => Some(@json.from_json!({{ .Name | lowerSnakeCase }}.to_json()))
+    Some(Null) | None => None
 {{- else }}    Some({{ .Name | lowerSnakeCase }}) => @json.from_json!({{ .Name | lowerSnakeCase }})
 {{- end }}
     _ =>

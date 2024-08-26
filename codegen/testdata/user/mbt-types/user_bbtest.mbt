@@ -72,7 +72,7 @@ test "User.to_json and .from_json work as expected on object with optional field
   }
   let got = optional_fields.to_json() |> @json.stringify(escape_slash=false)
   let want =
-    #|{"age":42,"email":"email","address":"address"}
+    #|{"age":42,"email":"email","address":{"street":"street"}}
   assert_eq!(got, want)
   //
   let got_parse : User = @json.from_json!(@json.parse!(want))
