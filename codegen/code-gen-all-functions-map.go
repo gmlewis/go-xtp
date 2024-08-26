@@ -94,6 +94,7 @@ var funcMap = map[string]any{
 	"mbtMultilineComment":               mbtMultilineComment,
 	"multilineComment":                  multilineComment,
 	"optionalGoMultilineComment":        optionalGoMultilineComment,
+	"optionalMbtJSONValue":              optionalMbtJSONValue,
 	"optionalMbtMultilineComment":       optionalMbtMultilineComment,
 	"optionalMbtValue":                  optionalMbtValue,
 	"outputToGoExampleLiteral":          outputToGoExampleLiteral,

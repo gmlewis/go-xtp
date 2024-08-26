@@ -324,6 +324,46 @@ func mbtMultilineComment(s string) string {
 	return "/// " + strings.ReplaceAll(strings.TrimSpace(s), "\n", "\n  /// ")
 }
 
+func optionalMbtJSONValue(prop *schema.Property, ct *schema.CustomType) string {
+	if !prop.IsRequired {
+		return fmt.Sprintf("%q", prop.Name)
+	}
+
+	if prop.Ref != "" {
+		if prop.RefCustomType != nil {
+			// populate all the required fields recursively:
+			requiredProps := prop.RefCustomType.GetRequiredProps()
+			fields := make([]string, 0, len(requiredProps))
+			for _, p2 := range requiredProps {
+				// NOTE: This calls `defaultMbtJSONValue` recursively, not _THIS_ function recursively!
+				fields = append(fields, fmt.Sprintf("%q:%v", p2.Name, defaultMbtJSONValue(p2, prop.RefCustomType)))
+			}
+			return fmt.Sprintf("{%v}", strings.Join(fields, ","))
+		}
+		return fmt.Sprintf("%q", prop.FirstEnumValue)
+	}
+
+	switch prop.Type {
+	case "integer":
+		return "0"
+	case "string":
+		return `""`
+	case "number":
+		return "0.0"
+	case "boolean":
+		return "false"
+	case "object":
+		return "{}" // TODO - what should this be?
+	case "array":
+		return "[]" // TODO - what should this be?
+	case "buffer":
+		return "Buffer" // TODO - what should this be?
+	default:
+		log.Printf("WARNING: unknown property type %q", prop.Type)
+		return `""`
+	}
+}
+
 func optionalMbtMultilineComment(s string) string {
 	s = strings.TrimSpace(s)
 	if s == "" {
