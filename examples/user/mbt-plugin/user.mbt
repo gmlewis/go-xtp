@@ -44,8 +44,8 @@ pub fn Address::parse(s : String) -> Address!AddressError {
   }
 }
 
-/// `get_schema` returns an `XTPSchema` for the `Address`.
-pub fn get_schema(self : Address) -> XTPSchema {
+/// `Address::get_schema` returns an `XTPSchema` for the `Address`.
+pub fn Address::get_schema() -> XTPSchema {
   { "street": "string" }
 }
 
@@ -115,8 +115,8 @@ pub fn User::parse(s : String) -> User!UserError {
   }
 }
 
-/// `get_schema` returns an `XTPSchema` for the `User`.
-pub fn get_schema(self : User) -> XTPSchema {
+/// `User::get_schema` returns an `XTPSchema` for the `User`.
+pub fn User::get_schema() -> XTPSchema {
   { "age": "?integer", "email": "?string", "address": "?Address" }
 }
 

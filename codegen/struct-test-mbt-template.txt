@@ -9,6 +9,8 @@
   assert_eq!(got_parse, default_object)
 }
 
+{{- if hasOptionalFields . }}
+
 test "{{ $name }}.to_json and .from_json work as expected on object only containing required fields" {
   let required_fields : {{ $name }} = {
 {{range .Properties}}    {{ .Name | lowerSnakeCase }}: {{ requiredMbtValue . }},
@@ -26,7 +28,7 @@ test "{{ $name }}.to_json and .from_json work as expected on object only contain
 test "{{ $name }}.to_json and .from_json work as expected on object with optional fields" {
   let optional_fields : {{ $name }} = {
     ..{{ $name }}::new(),
-{{ range $index, $prop := .Properties }}{{ if .IsRequired | not }}    {{ .Name | lowerSnakeCase }}: Some("{{ .Name }}"),
+{{ range $index, $prop := .Properties }}{{ if .IsRequired | not }}    {{ .Name | lowerSnakeCase }}: {{ optionalMbtValue . $top }},
 {{ end }}{{ end -}}
 {{ "  }" }}
   let got = optional_fields.to_json() |> @json.stringify(escape_slash=false)
@@ -37,3 +39,4 @@ test "{{ $name }}.to_json and .from_json work as expected on object with optiona
   let got_parse : {{ $name }} = @json.from_json!(@json.parse!(want))
   assert_eq!(got_parse, optional_fields)
 }
+{{- end }}

@@ -353,44 +353,22 @@ func mbtTypeIsOptional(prop *schema.Property) bool {
 	return strings.HasSuffix(mbtType, "?")
 }
 
+// This function's output values matches the output from optionalMbtValue.
 func optionalMbtJSONValue(prop *schema.Property, ct *schema.CustomType) string {
-	if !prop.IsRequired {
-		return fmt.Sprintf("%q", prop.Name)
-	}
-
 	if prop.Ref != "" {
 		if prop.RefCustomType != nil {
 			// populate all the required fields recursively:
 			requiredProps := prop.RefCustomType.GetRequiredProps()
 			fields := make([]string, 0, len(requiredProps))
 			for _, p2 := range requiredProps {
-				// NOTE: This calls `defaultMbtJSONValue` recursively, not _THIS_ function recursively!
-				fields = append(fields, fmt.Sprintf("%q:%v", p2.Name, defaultMbtJSONValue(p2, prop.RefCustomType)))
+				fields = append(fields, fmt.Sprintf("%q:%v", p2.Name, optionalMbtJSONValue(p2, prop.RefCustomType)))
 			}
 			return fmt.Sprintf("{%v}", strings.Join(fields, ","))
 		}
 		return fmt.Sprintf("%q", prop.FirstEnumValue)
 	}
 
-	switch prop.Type {
-	case "integer":
-		return "0"
-	case "string":
-		return `""`
-	case "number":
-		return "0.0"
-	case "boolean":
-		return "false"
-	case "object":
-		return "{}" // TODO - what should this be?
-	case "array":
-		return "[]" // TODO - what should this be?
-	case "buffer":
-		return "Buffer" // TODO - what should this be?
-	default:
-		log.Printf("WARNING: unknown property type %q", prop.Type)
-		return `""`
-	}
+	return mbtTypeTestValue(prop.Type, prop.Name, prop.IsRequired)
 }
 
 func optionalMbtMultilineComment(s string) string {
@@ -401,37 +379,64 @@ func optionalMbtMultilineComment(s string) string {
 	return "/// " + strings.ReplaceAll(strings.TrimSpace(s), "\n", "\n  /// ") + "\n  "
 }
 
-func optionalMbtValue(prop *schema.Property) string {
+// If a property is required, use that type's default value, otherwise return a non-default value.
+func mbtTypeTestValue(propType, propName string, isRequired bool) string {
+	switch propType {
+	case "integer":
+		if isRequired {
+			return "0"
+		}
+		return "42"
+	case "string":
+		if isRequired {
+			return `""`
+		}
+		return fmt.Sprintf("%q", propName)
+	case "number":
+		if isRequired {
+			return "0.0"
+		}
+		return "42.0"
+	case "boolean":
+		if isRequired {
+			return "false"
+		}
+		return "true"
+	case "object":
+		return "{}" // TODO - what should this be?
+	case "array":
+		return "[]" // TODO - what should this be?
+	case "buffer":
+		return "Buffer" // TODO - what should this be?
+	default:
+		log.Printf("WARNING: unknown property type %q", propType)
+		return fmt.Sprintf("%q", propName)
+	}
+}
+
+// This function's output values matches the output from optionalMbtJSONValue.
+func optionalMbtValue(prop *schema.Property, ct *schema.CustomType) string {
 	if prop.Ref != "" {
-		parts := strings.Split(prop.Ref, "/")
-		refName := parts[len(parts)-1]
-		if !prop.IsRequired && prop.RefCustomType != nil {
-			return fmt.Sprintf("Some(%v::new())", refName)
+		if prop.RefCustomType != nil {
+			// populate all the required fields recursively:
+			requiredProps := prop.RefCustomType.GetRequiredProps()
+			fields := make([]string, 0, len(requiredProps))
+			for _, p2 := range requiredProps {
+				fields = append(fields, fmt.Sprintf("%v: %v", p2.Name, optionalMbtValue(p2, prop.RefCustomType)))
+			}
+			if !prop.IsRequired {
+				return fmt.Sprintf("Some({%v})", strings.Join(fields, ","))
+			}
+			return fmt.Sprintf("{%v}", strings.Join(fields, ","))
 		}
-		if prop.FirstEnumValue != "" {
-			return fmt.Sprintf("Some(%v)", uppercaseFirst(prop.FirstEnumValue))
-		}
+		return fmt.Sprintf("%q", prop.FirstEnumValue)
 	}
 
-	switch prop.Type {
-	case "integer":
-		return "Some(0)"
-	case "string":
-		return fmt.Sprintf("Some(%q)", prop.Name)
-	case "number":
-		return "Some(0.0)"
-	case "boolean":
-		return "Some(true)"
-	case "object":
-		return "Some({})" // TODO - what should this be?
-	case "array":
-		return "Some([])" // TODO - what should this be?
-	case "buffer":
-		return "Some(Buffer)" // TODO - what should this be?
-	default:
-		log.Printf("WARNING: unknown property type %q", prop.Type)
-		return fmt.Sprintf("Some(%q)", prop.Name)
+	value := mbtTypeTestValue(prop.Type, prop.Name, prop.IsRequired)
+	if prop.IsRequired {
+		return value
 	}
+	return fmt.Sprintf("Some(%v)", value)
 }
 
 func outputToMbtExampleLiteral(output *schema.Output) string {

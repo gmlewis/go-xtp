@@ -179,8 +179,8 @@ pub fn ComplexObject::parse(s : String) -> ComplexObject!String {
   }
 }
 
-/// `get_schema` returns an `XTPSchema` for the `ComplexObject`.
-pub fn get_schema(self : ComplexObject) -> XTPSchema {
+/// `ComplexObject::get_schema` returns an `XTPSchema` for the `ComplexObject`.
+pub fn ComplexObject::get_schema() -> XTPSchema {
   {
     "ghost": "GhostGang",
     "aBoolean": "boolean",
