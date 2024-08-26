@@ -26,8 +26,9 @@ test "{{ $name }}.to_json and .from_json work as expected on object only contain
 test "{{ $name }}.to_json and .from_json work as expected on object with optional fields" {
   let optional_fields : {{ $name }} = {
     ..{{ $name }}::new(),
-    an_optional_date: Some("anOptionalDate"),
-  }
+{{ range $index, $prop := .Properties }}{{ if .IsRequired | not }}    {{ .Name | lowerSnakeCase }}: Some("{{ .Name }}"),
+{{ end }}{{ end -}}
+{{ "  }" }}
   let got = optional_fields.to_json() |> @json.stringify(escape_slash=false)
   let want =
 {{ "    #|{" }}{{ $propLen := .Properties | len }}{{range $index, $prop := .Properties}}"{{ .Name }}":{{ optionalMbtJSONValue . $top }}{{ showJSONCommaForOptional $index $propLen }}{{ end -}}{{ "}" }}

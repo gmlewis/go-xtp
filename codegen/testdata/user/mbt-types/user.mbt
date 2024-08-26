@@ -11,46 +11,35 @@ pub fn Address::new() -> Address {
   }
 }
 
-pub impl @jsonutil.ToJson for Address with to_json(self) {
-  let fields : Array[(String, @jsonutil.ToJson)] = [
-    ("street", self.street),
-  ]
-  @jsonutil.from_entries(fields)
+pub fn to_json(self : Address) -> Json {
+  let json : Map[String, Json] = {  }
+  json["street"] = self.street.to_json()
+  json.to_json()
 }
 
 /// `Address::from_json` transforms a `Json` to a value.
-pub fn Address::from_json(value : Json) -> Address? {
-  let value = value.as_object()?
-  let street = value.get("street")?.as_string()
-  match (
+pub impl @json.FromJson for Address with from_json(json, path) {
+  let json = match json.as_object() {
+    Some(json) => json
+    e =>
+      raise @json.JsonDecodeError(
+        (path, "Address::from_json: expected object, got \{e}"),
+      )
+  }
+  let street : String = match json.get("street") {
+    Some(String(street)) => street
+    _ =>
+      raise @json.JsonDecodeError(
+        (path, "Address::from_json:street: expected String"),
+      )
+  }
+  {
     street,
-  ) {
-      Some(street)
-    => Some({
-      street,
-    })
-    _ => None
   }
 }
 
-/// `Address::parse` parses a JSON string and returns the value.
-pub fn Address::parse(s : String) -> Address!String {
-  match @json.parse(s)!! {
-    Ok(jv) =>
-      match Address::from_json(jv) {
-        Some(value) => value
-        None => {
-          raise "unable to parse Address \{s}"
-        }
-      }
-    Err(e) => {
-      raise "unable to parse Address \{s}: \{e}"
-    }
-  }
-}
-
-/// `get_schema` returns an `XTPSchema` for the `Address`.
-pub fn get_schema(self : Address) -> XTPSchema {
+/// `Address::get_schema` returns an `XTPSchema` for the `Address`.
+pub fn Address::get_schema() -> XTPSchema {
   {
     "street": "string",
   }
@@ -74,75 +63,67 @@ pub fn User::new() -> User {
   }
 }
 
-pub impl @jsonutil.ToJson for User with to_json(self) {
-  let fields : Array[(String, @jsonutil.ToJson)] = [
-  ]
+pub fn to_json(self : User) -> Json {
+  let json : Map[String, Json] = {  }
   match self.age {
-    Some(value) => fields.append([("age", value)])
-    None => ()
+    Some(age) =>
+      json["age"] = age.to_json()
+    _ => ()
   }
   match self.email {
-    Some(value) => fields.append([("email", value)])
-    None => ()
+    Some(email) =>
+      json["email"] = email.to_json()
+    _ => ()
   }
   match self.address {
-    Some(value) => fields.append([("address", value)])
-    None => ()
+    Some(address) =>
+      json["address"] = address.to_json()
+    _ => ()
   }
-  @jsonutil.from_entries(fields)
+  json.to_json()
 }
 
 /// `User::from_json` transforms a `Json` to a value.
-pub fn User::from_json(value : Json) -> User? {
-  let value = value.as_object()?
-  let age = match value.get("age") {
-    Some(jv) => json_as_integer(jv)
-    None => None
+pub impl @json.FromJson for User with from_json(json, path) {
+  let json = match json.as_object() {
+    Some(json) => json
+    e =>
+      raise @json.JsonDecodeError(
+        (path, "User::from_json: expected object, got \{e}"),
+      )
   }
-  let email = match value.get("email") {
-    Some(jv) => jv.as_string()
-    None => None
+  let age : Int? = match json.get("age") {
+    Some(Number(age)) => Some(age.to_int())
+    Some(Null) | None => None
+    _ =>
+      raise @json.JsonDecodeError(
+        (path, "User::from_json:age: expected Int? or Null"),
+      )
   }
-  let address = match value.get("address") {
-    Some(jv) => Address::from_json(jv)
-    None => None
+  let email : String? = match json.get("email") {
+    Some(String(email)) => Some(email)
+    Some(Null) | None => None
+    _ =>
+      raise @json.JsonDecodeError(
+        (path, "User::from_json:email: expected String? or Null"),
+      )
   }
-  match (
+  let address : Address? = match json.get("address") {
+    Some(address) => @json.from_json!(address)
+    _ =>
+      raise @json.JsonDecodeError(
+        (path, "User::from_json:address: expected Address? or Null"),
+      )
+  }
+  {
     age,
     email,
     address,
-  ) {
-    (
-      age,
-      email,
-      address,
-    ) => Some({
-      age,
-      email,
-      address,
-    })
-    _ => None
   }
 }
 
-/// `User::parse` parses a JSON string and returns the value.
-pub fn User::parse(s : String) -> User!String {
-  match @json.parse(s)!! {
-    Ok(jv) =>
-      match User::from_json(jv) {
-        Some(value) => value
-        None => {
-          raise "unable to parse User \{s}"
-        }
-      }
-    Err(e) => {
-      raise "unable to parse User \{s}: \{e}"
-    }
-  }
-}
-
-/// `get_schema` returns an `XTPSchema` for the `User`.
-pub fn get_schema(self : User) -> XTPSchema {
+/// `User::get_schema` returns an `XTPSchema` for the `User`.
+pub fn User::get_schema() -> XTPSchema {
   {
     "age": "?integer",
     "email": "?string",

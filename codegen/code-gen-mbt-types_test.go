@@ -29,20 +29,20 @@ func TestGenMbtCustomTypes(t *testing.T) {
 			embedFS:     wantFruitMbtTypesFS,
 			genFunc:     func(c *Client) (GeneratedFiles, error) { return c.GenCustomTypes() },
 		},
-		// {
-		// 	name:    "user",
-		// 	lang:    "mbt",
-		// 	pkgName: "user",
-		// 	yamlStr: userYaml,
-		// 	files: []string{
-		// 		"user.mbt",
-		// 		"user_bbtest.mbt",
-		// 		"moon.pkg.json",
-		// 	},
-		// 	embedSubdir: "testdata/user/mbt-types",
-		// 	embedFS:     wantUserMbtTypesFS,
-		// 	genFunc:     func(c *Client) (GeneratedFiles, error) { return c.GenCustomTypes() },
-		// },
+		{
+			name:    "user",
+			lang:    "mbt",
+			pkgName: "user",
+			yamlStr: userYaml,
+			files: []string{
+				"user.mbt",
+				"user_bbtest.mbt",
+				"moon.pkg.json",
+			},
+			embedSubdir: "testdata/user/mbt-types",
+			embedFS:     wantUserMbtTypesFS,
+			genFunc:     func(c *Client) (GeneratedFiles, error) { return c.GenCustomTypes() },
+		},
 	}
 
 	runEmbedFSTest(t, tests)
