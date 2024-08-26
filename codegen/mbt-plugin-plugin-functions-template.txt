@@ -1,0 +1,30 @@
+{{range $index, $export := .Plugin.Exports }}{{ $name := .Name }}{{ if $index | lt 0 }}
+{{ end }}/// Exported: {{ $name }}
+pub fn exported_{{ $name | lowerSnakeCase }}() -> Int {
+{{ if . | inputIsVoidType }}  {{ $name | lowerSnakeCase }}(){{ end -}}
+{{ if . | inputIsPrimitiveType }}  let result = @json.parse?(@host.input_string())
+  let input = match result {
+    Ok(String(s)) => s
+    _ => {
+      @host.set_error(
+        "exported_primitive_type_func: unable to parse JSON input",
+      )
+      return 1 // failure
+    }
+  }
+  let output = {{ $name | lowerSnakeCase }}(input).to_json()
+  @host.output_json_value(output){{ end -}}
+{{ if . | inputIsReferenceType }}{{ "  " -}}
+  let input = @host.input_string()
+  let {{ inputReferenceTypeName . | lowerSnakeCase }} : {{ inputReferenceTypeName . }} = match @json.from_json?(input.to_json()) {
+    Ok({{ inputReferenceTypeName . | lowerSnakeCase }}) => {{ inputReferenceTypeName . | lowerSnakeCase }}
+    _ => {
+      @host.set_error("unable to parse input \{input}")
+      return 1 // failure
+    }
+  }
+  {{ $name | lowerSnakeCase }}({{ inputReferenceTypeName . | lowerSnakeCase }}).to_json() |> @host.output_json_value()
+{{- end }}
+  return 0 // success
+{{ "}" }}
+{{ end -}}

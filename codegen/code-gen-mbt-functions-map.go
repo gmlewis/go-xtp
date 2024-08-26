@@ -81,22 +81,41 @@ func defaultMbtValue(prop *schema.Property) string {
 	}
 }
 
-func getMbtType(prop *schema.Property) string {
-	if prop.Ref != "" {
-		parts := strings.Split(prop.Ref, "/")
+func getMbtType(item any) string {
+	var ref string
+	var isRequired bool
+	var itemType string
+	var refCustomType *schema.CustomType
+
+	switch t := item.(type) {
+	case *schema.Property:
+		ref = t.Ref
+		isRequired = t.IsRequired
+		itemType = t.Type
+		refCustomType = t.RefCustomType
+	case *schema.Output:
+		ref = t.Ref
+		itemType = t.Type
+		isRequired = true
+	default:
+		log.Fatalf("getMbtType: unsupported type: %T", t)
+	}
+
+	if ref != "" {
+		parts := strings.Split(ref, "/")
 		refName := parts[len(parts)-1]
-		if prop.RefCustomType != nil {
+		if refCustomType != nil {
 			return refName + "?"
 		}
 		return refName
 	}
 
 	var optional string
-	if !prop.IsRequired {
+	if !isRequired {
 		optional = "?"
 	}
 
-	switch prop.Type {
+	switch itemType {
 	case "integer":
 		return "Int" + optional
 	case "string":
@@ -112,8 +131,8 @@ func getMbtType(prop *schema.Property) string {
 	case "buffer":
 		return "Buffer" + optional // TODO - what should this be?
 	default:
-		log.Printf("WARNING: unknown property type %q", prop.Type)
-		return prop.Type + optional
+		log.Printf("WARNING: unknown property type %q", itemType)
+		return itemType + optional
 	}
 }
 
@@ -324,8 +343,8 @@ func mbtMultilineComment(s string) string {
 	return "/// " + strings.ReplaceAll(strings.TrimSpace(s), "\n", "\n  /// ")
 }
 
-func mbtTypeIs(prop *schema.Property, name string) bool {
-	mbtType := getMbtType(prop)
+func mbtTypeIs(item any, name string) bool {
+	mbtType := getMbtType(item)
 	return mbtType == name
 }
 

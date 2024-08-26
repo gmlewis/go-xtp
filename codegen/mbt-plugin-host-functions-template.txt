@@ -1,0 +1,18 @@
+{{range .Plugin.Imports }}{{ $name := .Name }}pub fn host_{{ $name | lowerSnakeCase }}(offset : Int64) -> Int64 = "extism:host/user" "{{ $name }}"
+
+type! {{ $name | uppercaseFirst }}Error String derive(Show)
+
+/// `{{ $name | lowerSnakeCase }}` - {{ .Description | mbtMultilineComment | stripLeadingSlashes | leftJustify }}
+pub fn {{ $name | lowerSnakeCase }}({{ .Input | inputToMbtType }}) -> {{ .Output | outputToMbtType }}!{{ $name | uppercaseFirst }}Error {
+  let json = input.to_json()
+  let mem = @host.Memory::allocate_json_value(json)
+  let ptr = host_eat_a_fruit(mem.offset)
+  let buf = @host.find_memory(ptr).to_string()
+{{- if mbtTypeIs .Output "Bool" }}
+  match @json.parse?(buf) {
+    Ok(True) => true
+    Ok(False) => false
+    e => raise {{ $name | uppercaseFirst }}Error("unable to parse \{buf}: \{e}")
+  }
+{{- end }}
+}{{ end }}

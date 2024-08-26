@@ -1,0 +1,11 @@
+{{range .Plugin.Exports }}{{ $name := .Name }}/// `{{ $name | lowerSnakeCase }}` - {{ .Description | mbtMultilineComment | stripLeadingSlashes | leftJustify }}{{ if exportHasInputOrOutputDescription . }}
+///
+{{ end }}{{ if exportHasInputDescription . }}/// `input` - {{ .Input.Description | mbtMultilineComment | stripLeadingSlashes | leftJustify }}{{ end }}{{ if exportHasOutputDescription . }}
+/// Returns {{ .Output.Description | mbtMultilineComment | stripLeadingSlashes | leftJustify }}{{ end }}
+pub fn {{ $name | lowerSnakeCase }}({{ .Input | inputToMbtType }}) -> {{ .Output | outputToMbtType }} {
+  // TODO: fill out your implementation here{{ .Output | outputToMbtExampleLiteral }}
+}
+
+{{ end }}fn main {
+
+}

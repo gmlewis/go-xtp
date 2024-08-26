@@ -1,0 +1,14 @@
+{
+  "is-main": true,
+  "import": [
+    "gmlewis/moonbit-pdk/pdk/host"
+  ],
+  "link": {
+    "wasm": {
+      "exports": [{{ $exportsLen := .Plugin.Exports | len }}{{range $index, $export := .Plugin.Exports }}{{ $name := .Name }}
+        "exported_{{ $name | lowerSnakeCase }}:{{ $name }}"{{ showJSONCommaForOptional $index $exportsLen }}{{ end }}
+{{ "      ]," }}
+      "export-memory-name": "memory"
+    }
+  }
+}

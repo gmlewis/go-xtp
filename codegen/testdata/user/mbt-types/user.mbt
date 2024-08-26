@@ -109,7 +109,7 @@ pub impl @json.FromJson for User with from_json(json, path) {
       )
   }
   let address : Address? = match json.get("address") {
-    Some(address) => @json.from_json!(address)
+    Some(address) => Some(@json.from_json!(address))
     _ =>
       raise @json.JsonDecodeError(
         (path, "User::from_json:address: expected Address? or Null"),

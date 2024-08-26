@@ -25,7 +25,6 @@ test "Address.to_json and .from_json work as expected on object only containing 
 test "Address.to_json and .from_json work as expected on object with optional fields" {
   let optional_fields : Address = {
     ..Address::new(),
-    an_optional_date: Some("anOptionalDate"),
   }
   let got = optional_fields.to_json() |> @json.stringify(escape_slash=false)
   let want =
@@ -65,11 +64,15 @@ test "User.to_json and .from_json work as expected on object only containing req
 test "User.to_json and .from_json work as expected on object with optional fields" {
   let optional_fields : User = {
     ..User::new(),
-    an_optional_date: Some("anOptionalDate"),
+    age: Some(42),
+    email: Some("email"),
+    address: Some({
+      street: "street",
+    }),
   }
   let got = optional_fields.to_json() |> @json.stringify(escape_slash=false)
   let want =
-    #|{"age":"age","email":"email","address":"address"}
+    #|{"age":42,"email":"email","address":"address"}
   assert_eq!(got, want)
   //
   let got_parse : User = @json.from_json!(@json.parse!(want))
