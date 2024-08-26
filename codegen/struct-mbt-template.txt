@@ -12,23 +12,35 @@ pub fn {{ $name }}::new() -> {{ $name }} {
 {{ "  }" }}
 }
 
-pub impl @jsonutil.ToJson for {{ $name }} with to_json(self) {
-  let fields : Array[(String, @jsonutil.ToJson)] = [
-{{range .Properties}}{{ if .IsRequired }}    ("{{ .Name }}", self.{{ .Name | lowerSnakeCase }}),
+pub fn to_json(self : {{ $name }}) -> Json {
+  let json : Map[String, Json] = {  }
+{{range .Properties}}{{ if .IsRequired }}  json["{{ .Name }}"] = self.{{ .Name | lowerSnakeCase }}.to_json()
 {{ end }}{{ end -}}
-{{ "  ]" }}
 {{range .Properties}}{{ if .IsRequired | not }}  match self.{{ .Name | lowerSnakeCase }} {
-    Some(value) => fields.append([("{{ .Name }}", value)])
-    None => ()
+    Some({{ .Name | lowerSnakeCase }}) =>
+      json["{{ .Name }}"] = {{ .Name | lowerSnakeCase }}.to_json()
+    _ => ()
   }
 {{ end }}{{ end -}}
-{{ "  @jsonutil.from_entries(fields)" }}
+{{ "  json.to_json()" }}
 }
 
 /// `{{ $name }}::from_json` transforms a `Json` to a value.
-pub fn {{ $name }}::from_json(value : Json) -> {{ $name }}? {
-  let value = value.as_object()?
-{{range .Properties}}  let {{ .Name | lowerSnakeCase }} = {{ mbtConvertFromJSONValue . }}
+pub impl @json.FromJson for {{ $name }} with from_json(json, path) {
+  let json = match json.as_object() {
+    Some(json) => json
+    e =>
+      raise @json.JsonDecodeError(
+        (path, "{{ $name }}::from_json: expected object, got \{e}"),
+      )
+  }
+{{range .Properties}}  let {{ .Name | lowerSnakeCase }} : {{ getMbtType . }} = match json.get("{{ .Name }}") {
+    Some({{ .Name | lowerSnakeCase }}) => @json.from_json!({{ .Name | lowerSnakeCase }})
+    _ =>
+      raise @json.JsonDecodeError(
+        (path, "{{ $name }}::from_json:{{ .Name | lowerSnakeCase }}: expected {{ getMbtType . }}"),
+      )
+  }
 {{ end -}}
 {{ "  match (" }}
 {{range .Properties}}    {{ .Name | lowerSnakeCase }},

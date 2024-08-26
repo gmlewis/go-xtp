@@ -41,7 +41,7 @@ pub impl @json.FromJson for Fruit with from_json(json, path) {
     String("strawberry") => Strawberry
     s =>
       raise @json.JsonDecodeError(
-        (path, "Fruit::from_json expected a Fruit, got \{s}"),
+        (path, "Fruit::from_json: expected a Fruit, got \{s}"),
       )
   }
 }
@@ -89,7 +89,7 @@ pub impl @json.FromJson for GhostGang with from_json(json, path) {
     String("clyde") => Clyde
     s =>
       raise @json.JsonDecodeError(
-        (path, "GhostGang::from_json expected a GhostGang, got \{s}"),
+        (path, "GhostGang::from_json: expected a GhostGang, got \{s}"),
       )
   }
 }
@@ -147,7 +147,7 @@ pub impl @json.FromJson for ComplexObject with from_json(json, path) {
     Some(ghost) => @json.from_json!(ghost)
     _ =>
       raise @json.JsonDecodeError(
-        (path, "ComplextObject::from_json:ghost: expected GhostGang"),
+        (path, "ComplexObject::from_json:ghost: expected GhostGang"),
       )
   }
   let a_boolean : Bool = match json.get("aBoolean") {
@@ -155,21 +155,21 @@ pub impl @json.FromJson for ComplexObject with from_json(json, path) {
     Some(False) => false
     _ =>
       raise @json.JsonDecodeError(
-        (path, "ComplextObject::from_json:a_boolean expected Bool"),
+        (path, "ComplexObject::from_json:a_boolean: expected Bool"),
       )
   }
   let a_string : String = match json.get("aString") {
     Some(String(a_string)) => a_string
     _ =>
       raise @json.JsonDecodeError(
-        (path, "ComplextObject::from_json:a_string: expected String"),
+        (path, "ComplexObject::from_json:a_string: expected String"),
       )
   }
   let an_int : Int = match json.get("anInt") {
     Some(Number(an_int)) => an_int.to_int()
     _ =>
       raise @json.JsonDecodeError(
-        (path, "ComplextObject::from_json:an_int expected Int"),
+        (path, "ComplexObject::from_json:an_int: expected Int"),
       )
   }
   let an_optional_date : String? = match json.get("anOptionalDate") {
@@ -178,7 +178,7 @@ pub impl @json.FromJson for ComplexObject with from_json(json, path) {
     _ =>
       raise @json.JsonDecodeError(
         (
-          path, "ComplextObject::from_json:an_optional_date expected String or Null",
+          path, "ComplexObject::from_json:an_optional_date: expected String or Null",
         ),
       )
   }
