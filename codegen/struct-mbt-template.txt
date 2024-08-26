@@ -35,47 +35,33 @@ pub impl @json.FromJson for {{ $name }} with from_json(json, path) {
       )
   }
 {{range .Properties}}  let {{ .Name | lowerSnakeCase }} : {{ getMbtType . }} = match json.get("{{ .Name }}") {
-    Some({{ .Name | lowerSnakeCase }}) => @json.from_json!({{ .Name | lowerSnakeCase }})
+{{ if mbtTypeIs . "Bool" }}    Some(True) => true
+    Some(False) => false
+{{- else if mbtTypeIs . "String"}}    Some(String({{ .Name | lowerSnakeCase }})) => {{ .Name | lowerSnakeCase }}
+{{- else if mbtTypeIs . "String?"}}    Some(String({{ .Name | lowerSnakeCase }})) => Some({{ .Name | lowerSnakeCase }})
+    Some(Null) | None => None
+{{- else if mbtTypeIs . "Int"}}    Some(Number({{ .Name | lowerSnakeCase }})) => {{ .Name | lowerSnakeCase }}.to_int()
+{{- else if mbtTypeIs . "Int?"}}    Some(Number({{ .Name | lowerSnakeCase }})) => Some({{ .Name | lowerSnakeCase }}.to_int())
+    Some(Null) | None => None
+{{- else if mbtTypeIs . "Int64"}}    Some(Number({{ .Name | lowerSnakeCase }})) => {{ .Name | lowerSnakeCase }}.to_int64()
+{{- else if mbtTypeIs . "Int64?"}}    Some(Number({{ .Name | lowerSnakeCase }})) => Some({{ .Name | lowerSnakeCase }}.to_int64())
+    Some(Null) | None => None
+{{- else }}    Some({{ .Name | lowerSnakeCase }}) => @json.from_json!({{ .Name | lowerSnakeCase }})
+{{- end }}
     _ =>
       raise @json.JsonDecodeError(
-        (path, "{{ $name }}::from_json:{{ .Name | lowerSnakeCase }}: expected {{ getMbtType . }}"),
+        (path, "{{ $name }}::from_json:{{ .Name | lowerSnakeCase }}: expected {{ getMbtType . }}{{ if mbtTypeIsOptional . }} or Null{{ end }}"),
       )
   }
 {{ end -}}
-{{ "  match (" }}
+{{ "  {" }}
 {{range .Properties}}    {{ .Name | lowerSnakeCase }},
 {{ end -}}
-{{ "  ) {" }}{{ if len .Properties | lt 1 }}
-    ({{ end }}
-{{range .Properties}}{{ if .IsRequired }}      Some({{ .Name | lowerSnakeCase }}){{ if len $top.Properties | lt 1 }}{{ "," }}{{ end }}
-{{ end }}{{ if .IsRequired | not }}      {{ .Name | lowerSnakeCase }}{{ if len $top.Properties | lt 1 }}{{ "," }}{{ end }}
-{{ end }}{{ end -}}
-{{ if len .Properties | lt 1 }}{{"    ) => Some({" }}{{ else }}{{"    => Some({" }}{{ end }}
-{{range .Properties}}      {{ .Name | lowerSnakeCase }},
-{{ end -}}
-{{ "    })" }}
-    _ => None
-  }
+{{ "  }" }}
 }
 
-/// `{{ $name }}::parse` parses a JSON string and returns the value.
-pub fn {{ $name }}::parse(s : String) -> {{ $name }}!String {
-  match @json.parse(s)!! {
-    Ok(jv) =>
-      match {{ $name }}::from_json(jv) {
-        Some(value) => value
-        None => {
-          raise "unable to parse {{ $name }} \{s}"
-        }
-      }
-    Err(e) => {
-      raise "unable to parse {{ $name }} \{s}: \{e}"
-    }
-  }
-}
-
-/// `get_schema` returns an `XTPSchema` for the `{{ $name }}`.
-pub fn get_schema(self : {{ $name }}) -> XTPSchema {
+/// `{{ $name }}::get_schema` returns an `XTPSchema` for the `{{ $name }}`.
+pub fn {{ $name }}::get_schema() -> XTPSchema {
   {
 {{range .Properties}}    "{{ .Name }}": "{{ getExtismType . $top }}",
 {{ end -}}

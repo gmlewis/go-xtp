@@ -324,6 +324,16 @@ func mbtMultilineComment(s string) string {
 	return "/// " + strings.ReplaceAll(strings.TrimSpace(s), "\n", "\n  /// ")
 }
 
+func mbtTypeIs(prop *schema.Property, name string) bool {
+	mbtType := getMbtType(prop)
+	return mbtType == name
+}
+
+func mbtTypeIsOptional(prop *schema.Property) bool {
+	mbtType := getMbtType(prop)
+	return strings.HasSuffix(mbtType, "?")
+}
+
 func optionalMbtJSONValue(prop *schema.Property, ct *schema.CustomType) string {
 	if !prop.IsRequired {
 		return fmt.Sprintf("%q", prop.Name)

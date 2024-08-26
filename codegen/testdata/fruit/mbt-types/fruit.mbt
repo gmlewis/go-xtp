@@ -177,12 +177,16 @@ pub impl @json.FromJson for ComplexObject with from_json(json, path) {
     Some(Null) | None => None
     _ =>
       raise @json.JsonDecodeError(
-        (
-          path, "ComplexObject::from_json:an_optional_date: expected String or Null",
-        ),
+        (path, "ComplexObject::from_json:an_optional_date: expected String? or Null"),
       )
   }
-  { ghost, a_boolean, a_string, an_int, an_optional_date }
+  {
+    ghost,
+    a_boolean,
+    a_string,
+    an_int,
+    an_optional_date,
+  }
 }
 
 /// `ComplexObject::get_schema` returns an `XTPSchema` for the `ComplexObject`.

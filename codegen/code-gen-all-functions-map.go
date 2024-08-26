@@ -92,6 +92,8 @@ var funcMap = map[string]any{
 	"mbtFromJSONMatchKey":               mbtFromJSONMatchKey,
 	"mbtFromJSONMatchValue":             mbtFromJSONMatchValue,
 	"mbtMultilineComment":               mbtMultilineComment,
+	"mbtTypeIs":                         mbtTypeIs,
+	"mbtTypeIsOptional":                 mbtTypeIsOptional,
 	"multilineComment":                  multilineComment,
 	"optionalGoMultilineComment":        optionalGoMultilineComment,
 	"optionalMbtJSONValue":              optionalMbtJSONValue,
